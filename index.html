@@ -715,8 +715,12 @@ function playoffFatigue(id, cups) {
   return v;
 }
 // Probabilidad de que "home" pase la llave a partido único (empate → penales 50/50).
+// A partido único las diferencias se achican (KO_SHRINK): más lugar para el batacazo.
+const KO_SHRINK = 0.75;
 function advanceProb(hId, aId, neutral, cups) {
-  const m = modelS(teamStr(hId) + koBonus(hId) - playoffFatigue(hId, cups), teamStr(aId) + koBonus(aId) - playoffFatigue(aId, cups), neutral);
+  const sh = teamStr(hId) + koBonus(hId) - playoffFatigue(hId, cups), sa = teamStr(aId) + koBonus(aId) - playoffFatigue(aId, cups);
+  const mid = (sh + sa) / 2, half = KO_SHRINK * (sh - sa) / 2;
+  const m = modelS(mid + half, mid - half, neutral);
   return m.ph + m.pd * 0.5;
 }
 // Llave de copa: ida y vuelta con resultado de ida (agg), o partido único neutral.
@@ -826,6 +830,8 @@ function cupos(anOrder, clausuraChamp, cups) {
 
 /* ===================== RENDER: PARTIDOS ===================== */
 const pct = x => Math.round(x * 100) + "%";
+// Para chances chicas: no redondear a 0% algo que puede pasar.
+const pctP = v => v <= 0 ? "0%" : v < 0.001 ? "<0,1%" : v < 0.095 ? (v * 100).toFixed(1).replace(".", ",") + "%" : Math.round(v * 100) + "%";
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 function renderChips() {
   const opts = [["all", "Todas"], ["13", "F13 pend."], ["14", "Fecha 14"], ["15", "Fecha 15"], ["16", "Fecha 16"]];
@@ -1092,7 +1098,7 @@ function renderProjection() {
   if (!projection) runProjection();
   const { acc, N } = projection;
   const rows = teams.slice().sort((a, b) => acc[b.id].pts - acc[a.id].pts || acc[b.id].lib - acc[a.id].lib);
-  const cell = (v, c) => `<td class="pct" style="--c:${c}"><i style="width:${Math.round(v * 100)}%"></i><span>${v < 0.005 && v > 0 ? "<1%" : Math.round(v * 100) + "%"}</span></td>`;
+  const cell = (v, c) => `<td class="pct" style="--c:${c}"><i style="width:${Math.round(v * 100)}%"></i><span>${pctP(v)}</span></td>`;
   el.innerHTML = `
     <div class="panel-h"><h2>Proyección</h2><span class="sub">${N.toLocaleString("es-AR")} simulaciones de los partidos sin resultado, los playoffs y las copas</span></div>
     <details class="explain" open><summary>Cómo calcula la IA</summary><ul>
@@ -1106,7 +1112,7 @@ function renderProjection() {
       <li><b>Jerarquía:</b> la historia ganando títulos pesa poco en la fase regular y bastante en playoffs y copas, donde los clubes acostumbrados a definir rinden más. Por eso un puntero sin tradición, como Instituto, no es tan candidato al título como su tabla sugiere.</li>
       <li><b>Localía:</b> el local espera 1,2 goles contra 0,9 del visitante a igual nivel. Copas: Estudiantes rinde más en la Libertadores que en la liga.</li>
     </ul></details>
-    <p class="rule">Los resultados y ganadores que elegiste quedan fijos. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana).</p>
+    <p class="rule">Las chances chicas se muestran con un decimal (por ejemplo 0,3%): 0% es imposible en las simulaciones. Los resultados y ganadores que elegiste quedan fijos. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana).</p>
     <div class="tbl-wrap"><table>
       <thead><tr><th class="l">Equipo</th><th>Zona</th><th>Pts Anual (prom.)</th><th>Playoffs</th><th>1° de zona</th><th>Campeón Clausura</th><th>Gana una copa</th><th>Libertadores</th><th>Sudamericana</th><th>Desc.</th></tr></thead>
       <tbody>${rows.map(t => `<tr><td class="l team">${tn(t.id)}</td><td>${t.z}</td><td>${acc[t.id].pts.toFixed(1)}</td>
@@ -1162,7 +1168,7 @@ function applyFocus(st) {
   let chances = "";
   if (projection) {
     const a = projection.acc[focusTeam];
-    chances = `<span>Playoffs <b>${pct(a.po)}</b></span><span>Campeón <b>${pct(a.champ)}</b></span><span>Libertadores <b>${pct(a.lib)}</b></span><span>Sudamericana <b>${pct(a.sud)}</b></span>`;
+    chances = `<span>Playoffs <b>${pctP(a.po)}</b></span><span>Campeón <b>${pctP(a.champ)}</b></span><span>Libertadores <b>${pctP(a.lib)}</b></span><span>Sudamericana <b>${pctP(a.sud)}</b></span>`;
   } else chances = `<button class="btn" type="button" id="btn-focus-proj" style="padding:4px 10px">Ver sus chances</button>`;
   info.innerHTML = `<span>${tn(focusTeam)}</span><span><b>${zp}°</b> Zona ${T(focusTeam).z} (${row.pts} pts${row.add ? `, <span class="delta" style="margin:0">+${row.add}</span>` : ""})</span>
     <span><b>${ar + 1}°</b> Anual (${an.pts} pts)</span><span>${done}/${ms.length} partidos cargados</span>${chances}
