@@ -149,7 +149,27 @@ td.l, th.l { text-align: left; }
 td.pos { width: 34px; font: 700 16px/1 var(--font-display); color: var(--muted); }
 td.pts { font: 700 17px/1 var(--font-display); }
 td.team { font-weight: 600; min-width: 140px; }
-.delta { font-size: 12px; color: var(--accent); font-weight: 600; margin-left: 4px; }
+.delta { font-size: 12px; color: var(--sud); font-weight: 700; margin-left: 4px; }
+.delta.zero { color: var(--muted); font-weight: 600; }
+
+/* Modo enfoque */
+.focus-bar { margin-top: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 14px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); }
+.focus-bar label { font: 700 15px/1 var(--font-display); text-transform: uppercase; letter-spacing: .06em; }
+.focus-bar select { font: inherit; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); max-width: 100%; }
+.focus-bar.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.focus-info { font-size: 13.5px; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.focus-info b { color: var(--ink); }
+@keyframes glow { 0%, 100% { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); } 50% { background: color-mix(in srgb, var(--accent) 30%, var(--surface)); } }
+@keyframes glowbox { 0%, 100% { box-shadow: 0 0 0 2px var(--accent), 0 0 6px 0 var(--accent); } 50% { box-shadow: 0 0 0 2px var(--accent), 0 0 16px 3px var(--accent); } }
+tr.focus td { animation: glow 1.8s ease-in-out infinite; font-weight: 700; }
+tr.focus td:first-child { box-shadow: inset 4px 0 0 var(--accent); }
+.tie button.focus, .sum-card li.focus, .cupo-box li.focus { animation: glowbox 1.8s ease-in-out infinite; border-radius: 5px; position: relative; z-index: 1; }
+.sum-card li.focus, .cupo-box li.focus { padding: 0 4px; }
+.match.focus-m { border-color: var(--accent); }
+@media (prefers-reduced-motion: reduce) {
+  tr.focus td { animation: none; background: color-mix(in srgb, var(--accent) 22%, var(--surface)); }
+  .tie button.focus, .sum-card li.focus, .cupo-box li.focus { animation: none; box-shadow: 0 0 0 2px var(--accent); }
+}
 .mv { font-size: 11px; font-weight: 700; margin-left: 4px; }
 .mv.up { color: var(--sud); } .mv.down { color: var(--danger); }
 tr.cut td { border-bottom: 2px solid var(--accent); }
@@ -307,6 +327,11 @@ tr.in td.pos { color: var(--accent); }
   </header>
 
   <div class="note" id="data-note"></div>
+  <div class="focus-bar" id="focus-bar">
+    <label for="focus-sel">Modo enfoque</label>
+    <select id="focus-sel" aria-label="Elegir un club para enfocar"></select>
+    <div class="focus-info" id="focus-info">Elegí un club para ver solo sus partidos y resaltarlo en todas las tablas.</div>
+  </div>
 
   <nav class="tabs" role="tablist" aria-label="Secciones">
     <button class="tab" role="tab" data-tab="resumen" id="tab-resumen">Resumen</button>
@@ -483,7 +508,7 @@ function crest(id) {
   return `<svg class="crest" viewBox="0 0 24 28" aria-hidden="true"><g clip-path="url(#crest-shield)">${fill}</g><path d="${SHIELD}" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width="1.2"/></svg>`;
 }
 // Nombre con escudo
-const tn = id => crest(id) + esc(T(id).n);
+const tn = id => `<span class="tn" data-t="${id}">${crest(id)}${esc(T(id).n)}</span>`;
 function h2h(h, a) {
   if (H2H[h + "|" + a]) { const [v, txt, der] = H2H[h + "|" + a]; return { v, txt, der }; }
   if (H2H[a + "|" + h]) { const [v, txt, der] = H2H[a + "|" + h]; return { v: -v, txt, der }; }
@@ -499,6 +524,7 @@ let poWinners = {}; // tieId -> teamId
 let cupPicks = {};  // tieId de copa -> teamId
 let aiCupPicks = {}; // llaves de copa que eligió la IA (se vuelven a pensar)
 let fechaFilter = "all";
+let focusTeam = "";
 let activeTab = "resumen";
 let projection = null;
 
@@ -509,10 +535,11 @@ function load() {
     if (s.teams && s.teams.length === BASE_TEAMS.length) teams = s.teams;
     results = s.results || {}; aiFilled = s.aiFilled || {}; poWinners = s.poWinners || {}; cupPicks = s.cupPicks || {}; aiCupPicks = s.aiCupPicks || {};
     if (s.activeTab) activeTab = s.activeTab;
+    if (s.focusTeam && BASE_TEAMS.some(t => t.id === s.focusTeam)) focusTeam = s.focusTeam;
   } catch (e) {}
 }
 function save() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify({ teams, results, aiFilled, poWinners, cupPicks, aiCupPicks, activeTab })); } catch (e) {}
+  try { localStorage.setItem(LS_KEY, JSON.stringify({ teams, results, aiFilled, poWinners, cupPicks, aiCupPicks, activeTab, focusTeam })); } catch (e) {}
 }
 const T = id => teams.find(t => t.id === id) || { id, n: EXT[id].n };
 const isLocal = id => teams.some(t => t.id === id);
@@ -834,7 +861,8 @@ function renderFixture() {
   const out = [];
   for (const f of FECHAS) {
     if (fechaFilter !== "all" && fechaFilter !== String(f)) continue;
-    const ms = MATCHES.filter(m => m.f === f);
+    const ms = MATCHES.filter(m => m.f === f && (!focusTeam || m.h === focusTeam || m.a === focusTeam));
+    if (!ms.length) continue;
     const done = ms.filter(m => results[m.id]).length;
     out.push(`<div class="fecha"><div class="fecha-h">Fecha ${f}${f === 13 ? " · pendientes (lunes 19/10)" : ""} <span class="sub" style="font:500 13px var(--font-body);color:var(--muted);text-transform:none;letter-spacing:0">${done}/${ms.length} cargados</span></div>`);
     for (const [g, l] of [["A", "Zona A"], ["B", "Zona B"], ["I", "Interzonal"]]) {
@@ -964,7 +992,7 @@ function renderSummary(st, br, cups) {
   const dg = v => (v > 0 ? "+" : "") + v;
   const zoneT = (rows, z) => `<div><h3>Zona ${z}</h3><div class="tbl-wrap"><table class="compact">
     <thead><tr><th>#</th><th class="l">Equipo</th><th>PJ</th><th>DG</th><th>Pts</th></tr></thead>
-    <tbody>${rows.map((r, i) => `<tr class="${i < 8 ? "in" : ""}${i === 7 ? " cut" : ""}"><td class="pos">${i + 1}</td><td class="l team">${tn(r.id)}</td><td>${r.pj}</td><td>${dg(r.dg)}</td><td class="pts">${r.pts}</td></tr>`).join("")}</tbody>
+    <tbody>${rows.map((r, i) => `<tr class="${i < 8 ? "in" : ""}${i === 7 ? " cut" : ""}"><td class="pos">${i + 1}</td><td class="l team">${tn(r.id)}</td><td>${r.pj}</td><td>${dg(r.dg)}</td><td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : (r.pj > T(r.id).cl[0] ? '<span class="delta zero">+0</span>' : "")}</td></tr>`).join("")}</tbody>
   </table></div></div>`;
   const tag = id => {
     if (c.champs.includes(id)) return '<span class="mini-tag champ">TÍTULO</span>';
@@ -976,7 +1004,7 @@ function renderSummary(st, br, cups) {
   const band = id => lib.has(id) ? "rowband-lib" : sud.has(id) ? "rowband-sud" : desc.has(id) ? "rowband-desc" : "";
   const anT = `<div><h3>Tabla Anual</h3><div class="tbl-wrap"><table class="compact">
     <thead><tr><th>#</th><th class="l">Equipo</th><th>DG</th><th>Pts</th><th></th></tr></thead>
-    <tbody>${st.AN.map((r, i) => `<tr class="${band(r.id)}"><td class="pos">${i + 1}</td><td class="l team">${tn(r.id)}</td><td>${dg(r.dg)}</td><td class="pts">${r.pts}</td><td>${tag(r.id)}</td></tr>`).join("")}</tbody>
+    <tbody>${st.AN.map((r, i) => `<tr class="${band(r.id)}"><td class="pos">${i + 1}</td><td class="l team">${tn(r.id)}</td><td>${dg(r.dg)}</td><td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : (r.pj > T(r.id).an[0] ? '<span class="delta zero">+0</span>' : "")}</td><td>${tag(r.id)}</td></tr>`).join("")}</tbody>
   </table></div></div>`;
   const li = (id, extra = "") => `<li>${tn(id)}${extra}</li>`;
   const champ = br.champ ? `<div class="big">${tn(br.champ)}</div>` : `<div class="cross">A definir en Playoffs</div>`;
@@ -1107,6 +1135,40 @@ function renderData() {
     </div>`;
 }
 
+/* ===================== MODO ENFOQUE ===================== */
+function renderFocusSelect() {
+  const sel = document.getElementById("focus-sel");
+  const grp = z => teams.filter(t => t.z === z).slice().sort((a, b) => a.n.localeCompare(b.n, "es"))
+    .map(t => `<option value="${t.id}"${t.id === focusTeam ? " selected" : ""}>${esc(t.n)}</option>`).join("");
+  sel.innerHTML = `<option value="">Todos los clubes</option><optgroup label="Zona A">${grp("A")}</optgroup><optgroup label="Zona B">${grp("B")}</optgroup>`;
+}
+function applyFocus(st) {
+  document.querySelectorAll(".focus").forEach(el => el.classList.remove("focus"));
+  document.querySelectorAll(".focus-m").forEach(el => el.classList.remove("focus-m"));
+  const bar = document.getElementById("focus-bar"), info = document.getElementById("focus-info");
+  bar.classList.toggle("on", !!focusTeam);
+  if (!focusTeam) { info.textContent = "Elegí un club para ver solo sus partidos y resaltarlo en todas las tablas."; return; }
+  document.querySelectorAll(`.tn[data-t="${focusTeam}"]`).forEach(el => {
+    const host = el.closest("tr, .tie button, li"); if (host) host.classList.add("focus");
+  });
+  document.querySelectorAll(".match").forEach(el => {
+    const m = MATCHES.find(x => x.id === el.dataset.m);
+    if (m && (m.h === focusTeam || m.a === focusTeam)) el.classList.add("focus-m");
+  });
+  st = st || standings(results);
+  const zr = (T(focusTeam).z === "A" ? st.A : st.B), zp = zr.findIndex(r => r.id === focusTeam) + 1;
+  const ar = st.AN.findIndex(r => r.id === focusTeam), row = zr[zp - 1], an = st.AN[ar];
+  const ms = MATCHES.filter(m => m.h === focusTeam || m.a === focusTeam), done = ms.filter(m => results[m.id]).length;
+  let chances = "";
+  if (projection) {
+    const a = projection.acc[focusTeam];
+    chances = `<span>Playoffs <b>${pct(a.po)}</b></span><span>Campeón <b>${pct(a.champ)}</b></span><span>Libertadores <b>${pct(a.lib)}</b></span><span>Sudamericana <b>${pct(a.sud)}</b></span>`;
+  } else chances = `<button class="btn" type="button" id="btn-focus-proj" style="padding:4px 10px">Ver sus chances</button>`;
+  info.innerHTML = `<span>${tn(focusTeam)}</span><span><b>${zp}°</b> Zona ${T(focusTeam).z} (${row.pts} pts${row.add ? `, <span class="delta" style="margin:0">+${row.add}</span>` : ""})</span>
+    <span><b>${ar + 1}°</b> Anual (${an.pts} pts)</span><span>${done}/${ms.length} partidos cargados</span>${chances}
+    <button class="btn ghost" type="button" id="btn-focus-off" style="padding:4px 10px">Quitar enfoque</button>`;
+}
+
 /* ===================== ORQUESTACIÓN ===================== */
 function renderTables() {
   const st = standings(results);
@@ -1117,9 +1179,10 @@ function renderTables() {
   for (const t of cups.ties) if (cupPicks[t.id] && cupPicks[t.id] !== t.h && cupPicks[t.id] !== t.a) delete cupPicks[t.id];
   renderZone("A", st); renderZone("B", st); renderAnnual(st, br, cups); renderPlayoffs(st, br, cups); renderCups(cups, st); renderSummary(st, br, cups);
   if (activeTab === "proyeccion") renderProjection();
+  applyFocus(st);
 }
 function renderAll() {
-  renderChips(); renderFixture(); renderTables(); renderData(); showTab(activeTab);
+  renderChips(); renderFocusSelect(); renderFixture(); renderTables(); renderData(); showTab(activeTab); applyFocus();
   const done = MATCHES.filter(m => results[m.id]).length;
   document.getElementById("data-note").innerHTML =
     `<b>Tablas de promiedos al ${DATA_DATE}</b>. Faltan 3 partidos de la fecha 13 que se juegan hoy (Sarmiento-Barracas, Newell's-Central Córdoba y Riestra-Unión): cargá el resultado real o simulalos. Correcciones en la pestaña <b>Datos</b>. Cargados: <b>${done}/${MATCHES.length}</b> partidos.`;
@@ -1132,7 +1195,7 @@ function showTab(tab) {
   document.querySelector(".layout").classList.toggle("full", tab === "resumen");
   document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
   document.querySelectorAll(".pane").forEach(p => p.hidden = p.dataset.pane !== tab);
-  if (tab === "proyeccion") renderProjection();
+  if (tab === "proyeccion") { renderProjection(); applyFocus(); }
   save();
 }
 /* Modo claro / oscuro: arranca en claro y se recuerda la elección en este navegador. */
@@ -1210,15 +1273,22 @@ document.addEventListener("click", e => {
     projection = null; save(); renderTables(); return;
   }
   if (e.target.closest("#btn-theme")) return toggleTheme();
+  if (e.target.closest("#btn-focus-off")) { focusTeam = ""; save(); renderFocusSelect(); renderFixture(); applyFocus(); return; }
+  if (e.target.closest("#btn-focus-proj")) { renderProjection(); applyFocus(); return; }
   if (e.target.closest("#btn-ia")) return fillAI();
   if (e.target.closest("#btn-rand")) return fillRandom();
   if (e.target.closest("#btn-clear")) {
     results = {}; aiFilled = {}; poWinners = {}; cupPicks = {}; aiCupPicks = {}; projection = null; save(); renderAll(); toast("Resultados borrados"); return;
   }
-  if (e.target.closest("#btn-proj")) { projection = null; renderProjection(); toast("Proyección actualizada"); return; }
+  if (e.target.closest("#btn-proj")) { projection = null; renderProjection(); applyFocus(); toast("Proyección actualizada"); return; }
   if (e.target.closest("#btn-reset-data")) {
     teams = structuredClone(BASE_TEAMS); invalidate(); save(); renderAll(); toast("Datos originales restablecidos"); return;
   }
+});
+document.addEventListener("change", e => {
+  if (e.target.id !== "focus-sel") return;
+  focusTeam = e.target.value; save(); renderFixture(); applyFocus();
+  if (focusTeam) toast(`Enfocado en ${T(focusTeam).n}`);
 });
 document.addEventListener("input", e => {
   const inp = e.target;
