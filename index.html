@@ -281,11 +281,6 @@ tr.in td.pos { color: var(--accent); }
 .cup-grid .info { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
 .cup .out { margin-top: 10px; font-size: 13.5px; }
 .cup .out b { color: var(--lib); }
-.explain { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 14px; margin-bottom: 14px; font-size: 13.5px; }
-.explain summary { cursor: pointer; font-weight: 600; }
-.explain ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); }
-.explain li { padding: 2px 0; }
-.explain li b { color: var(--ink); }
 
 /* Datos */
 .data-tbl input { width: 58px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface-2); text-align: right; }
@@ -1140,17 +1135,6 @@ function renderProjection() {
       <button class="chip" type="button" data-proj="compact" aria-pressed="${projCompact}">Resumida</button>
     </div>
     ${projCompact ? projTable() : ""}
-    <details class="explain"${projCompact ? "" : " open"}><summary>Cómo calcula la IA</summary><ul>
-      <li><b>Nivel y presente:</b> puntos por partido del Clausura (pesa más) y de la Anual, más la diferencia de gol.</li>
-      <li><b>Racha:</b> los últimos 4 partidos de promiedos (V/E/D) frente a su promedio del torneo.</li>
-      <li><b>Momento:</b> suma o resta según venga mejor o peor que en el Apertura.</li>
-      <li><b>Cansancio:</b> Estudiantes en la fecha 14 (Maracaná el jueves), Boca en la fecha 14 (Río el martes), Atl. Tucumán y Platense en la fecha 15 (Copa Argentina el miércoles). En playoffs resta a quien llegue a una final de copa.</li>
-      <li><b>Historial y clásicos:</b> Superclásico, Independiente-Boca, Clásico del Sur y clásico mendocino suben la chance de empate; River-Racing con ventaja histórica de River.</li>
-      <li><b>Lo que se juega:</b> suma a quien pelea playoffs, un cupo por la Anual o no terminar último; resta a quien no tiene nada en juego.</li>
-      <li><b>Completar con IA:</b> no pone siempre el resultado más probable. Reparte empates y batacazos en la cantidad que marcan las probabilidades (los batacazos caen más donde el chico tiene más chances) y elige marcadores verosímiles. Cada clic arma otra fecha posible; lo que cargaste a mano no se toca.</li>
-      <li><b>Jerarquía:</b> la historia ganando títulos pesa poco en la fase regular y bastante en playoffs y copas, donde los clubes acostumbrados a definir rinden más. Por eso un puntero sin tradición, como Instituto, no es tan candidato al título como su tabla sugiere.</li>
-      <li><b>Localía:</b> el local espera 1,2 goles contra 0,9 del visitante a igual nivel. Copas: Estudiantes rinde más en la Libertadores que en la liga.</li>
-    </ul></details>
     <p class="rule">Las chances chicas se muestran con un decimal (por ejemplo 0,3%): 0% es imposible en las simulaciones. Los resultados y ganadores que elegiste quedan fijos. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana).</p>
     ${projCompact ? "" : projTable()}
     <div style="margin-top:12px"><button class="btn" type="button" id="btn-proj">Volver a simular</button></div>`;
