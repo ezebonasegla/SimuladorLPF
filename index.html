@@ -894,22 +894,31 @@ function baseOrder(kind) {
 }
 
 /* ===================== PLAYOFFS =====================
-   Octavos: 1A-8B, 2A-7B, 3A-6B, 4A-5B, 1B-8A, 2B-7A, 3B-6A, 4B-5A (local el mejor ubicado).
+   Art. 14 del reglamento. Octavos: 1A-8B, 1B-8A, 2A-7B, 2B-7A, 3A-6B, 3B-6A, 4A-5B, 4B-5A (local el mejor ubicado).
+   Cuartos C1 = P1-P8, C2 = P2-P7, C3 = P3-P6, C4 = P4-P5; semis C1-C4 y C2-C3 (es el mismo cuadro que se arma abajo).
    Cuadro: [1A-8B / 4B-5A] [2B-7A / 3A-6B] | [1B-8A / 4A-5B] [2A-7B / 3B-6A]. Final en cancha neutral. */
 const R16 = [["A",1,"B",8],["B",4,"A",5],["B",2,"A",7],["A",3,"B",6],["B",1,"A",8],["A",4,"B",5],["A",2,"B",7],["B",3,"A",6]];
+// Art. 14.1.2: un equipo en zona de descenso no juega los playoffs; entra el siguiente de su zona.
+function poList(st, z) {
+  if (!st._po) { const rel = new Set(relegated(st)); st._po = { A: st.A.filter(r => !rel.has(r.id)), B: st.B.filter(r => !rel.has(r.id)) }; }
+  return st._po[z];
+}
 function seedInfo(st) {
   const s = {};
-  st.A.forEach((r, i) => s[r.id] = { z: "A", p: i + 1 });
-  st.B.forEach((r, i) => s[r.id] = { z: "B", p: i + 1 });
-  st.AN.forEach((r, i) => s[r.id].an = i + 1);
+  for (const z of ["A", "B"]) poList(st, z).forEach((r, i) => s[r.id] = { z, p: i + 1, pts: r.pts, dg: r.dg, gf: r.gf });
   return s;
 }
-const better = (s, x, y) => (s[x].p < s[y].p || (s[x].p === s[y].p && s[x].an < s[y].an)) ? [x, y] : [y, x];
+// Local: el mejor ubicado en su zona; si ocupan el mismo puesto, puntos, diferencia de gol y goles a favor (arts. 14 y 16).
+const better = (s, x, y) => {
+  const a = s[x], b = s[y];
+  const xFirst = a.p !== b.p ? a.p < b.p : a.pts !== b.pts ? a.pts > b.pts : a.dg !== b.dg ? a.dg > b.dg : a.gf >= b.gf;
+  return xFirst ? [x, y] : [y, x];
+};
 function bracket(st, pick) {
   const s = seedInfo(st);
   const ties = [];
   const r16 = R16.map(([z1, p1, z2, p2], i) => {
-    const x = (z1 === "A" ? st.A : st.B)[p1 - 1].id, y = (z2 === "A" ? st.A : st.B)[p2 - 1].id;
+    const x = poList(st, z1)[p1 - 1].id, y = poList(st, z2)[p2 - 1].id;
     const [h, a] = better(s, x, y);
     const t = { id: "o" + i, round: 0, h, a, neutral: false }; t.w = pick(t); ties.push(t); return t;
   });
@@ -1039,11 +1048,14 @@ function moveTag(id, newPos, order) {
 function renderZone(z, st) {
   const rows = z === "A" ? st.A : st.B, other = z === "A" ? "B" : "A";
   const order = baseOrder(z);
+  const pl = poList(st, z), po = poList(st, other);
   const html = rows.map((r, i) => {
-    const pos = i + 1, rival = pos <= 8 ? `${9 - pos}° ${other} (${esc((other === "A" ? st.A : st.B)[8 - pos].n)})` : "";
-    return `<tr class="${pos <= 8 ? "in" : ""}${pos === 8 ? " cut" : ""}">
+    const pos = i + 1, k = pl.findIndex(x => x.id === r.id), seed = k >= 0 && k < 8 ? k + 1 : 0;
+    const rival = seed ? `${9 - seed}° ${other} (${esc(po[8 - seed].n)})` : "";
+    const out = pos <= 8 && !seed; // art. 14.1.2: en zona de descenso no juega playoffs
+    return `<tr class="${seed ? "in" : ""}${pos === 8 ? " cut" : ""}">
       <td class="pos">${pos}</td>
-      <td class="l team">${tn(r.id)}${r.id === APERTURA_CHAMP ? '<span class="tag champ">Camp. Apertura</span>' : ""}${moveTag(r.id, pos, order)}</td>
+      <td class="l team">${tn(r.id)}${r.id === APERTURA_CHAMP ? '<span class="tag champ">Camp. Apertura</span>' : ""}${out ? '<span class="tag desc">No juega playoffs (descenso)</span>' : ""}${seed && seed !== pos ? `<span class="tag po">Entra ${seed}°</span>` : ""}${moveTag(r.id, pos, order)}</td>
       <td>${r.pj}</td><td>${r.gf}</td><td>${r.dg > 0 ? "+" : ""}${r.dg}</td>
       <td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
       <td class="l cross">${rival ? "vs " + rival : ""}</td>
@@ -1228,7 +1240,7 @@ function bracketDist(st, cups) {
     return out;
   };
   const leaf = id => new Map([[id, 1]]);
-  const r16 = R16.map(([z1, p1, z2, p2]) => merge(leaf((z1 === "A" ? st.A : st.B)[p1 - 1].id), leaf((z2 === "A" ? st.A : st.B)[p2 - 1].id), false));
+  const r16 = R16.map(([z1, p1, z2, p2]) => merge(leaf(poList(st, z1)[p1 - 1].id), leaf(poList(st, z2)[p2 - 1].id), false));
   const qf = [0, 1, 2, 3].map(i => merge(r16[2 * i], r16[2 * i + 1], false));
   const sf = [0, 1].map(i => merge(qf[2 * i], qf[2 * i + 1], false));
   return merge(sf[0], sf[1], true);
@@ -1253,7 +1265,7 @@ function projJob(N) {
     const res = Object.assign({}, fixed);
     for (const [m, mm] of pending) res[m.id] = sample(mm);
     const st = standings(res);
-    st.A.slice(0, 8).forEach(r => acc[r.id].po++); st.B.slice(0, 8).forEach(r => acc[r.id].po++);
+    poList(st, "A").slice(0, 8).forEach(r => acc[r.id].po++); poList(st, "B").slice(0, 8).forEach(r => acc[r.id].po++);
     acc[st.A[0].id].first++; acc[st.B[0].id].first++;
     const cups = randomCups();
     for (const k of ["lib", "sud", "ca"]) if (cups.champ[k] && acc[cups.champ[k]]) acc[cups.champ[k]][k + "T"] = (acc[cups.champ[k]][k + "T"] || 0) + 1;
@@ -1432,13 +1444,14 @@ function goalSim(team, goal, target) {
       const u = Math.random(); combo = combos.find(c => c.cum >= u) || combos[combos.length - 1];
       combos.own.forEach((x, i) => { const o = combo.outs[i], ho = x.home ? o : 2 - o; res[x.m.id] = scoreIn(x.mm, ho); });
     }
-    const st = standings(res), z = T(team).z, zr = z === "A" ? st.A : st.B, zpos = zr.findIndex(r => r.id === team) + 1;
+    const st = standings(res), z = T(team).z, zr = z === "A" ? st.A : st.B;
+    const pz = poList(st, z).findIndex(r => r.id === team), zpos = pz < 0 ? 99 : pz + 1; // puesto a efectos de playoffs (14.1.2)
     const an = st.AN.map(r => r.id), arank = an.indexOf(team);
     let w = 0;
     const routes = {};
     const rt = (k, v) => { routes[k] = (routes[k] || 0) + v; w += v; };
     if (goal === "po") { if (zpos <= 8) rt(`Terminar ${zpos}° de la Zona ${z}`, 1); }
-    else if (goal === "first") { if (zpos === 1) rt("Terminar 1° de la zona", 1); }
+    else if (goal === "first") { if (zr[0].id === team) rt("Terminar 1° de la zona", 1); }
     else if (goal === "safe") { if (!relegated(st).includes(team)) rt(`Terminar ${arank + 1}° en la Anual`, 1); }
     else {
       const cups = randomCups();
