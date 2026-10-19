@@ -1121,7 +1121,7 @@ function showTab(tab) {
   if (tab === "proyeccion") renderProjection();
   save();
 }
-/* Modo claro / oscuro: arranca con el del sistema y se recuerda en este navegador. */
+/* Modo claro / oscuro: arranca en claro y se recuerda la elección en este navegador. */
 const THEME_KEY = "simlpf-theme";
 const darkMQ = matchMedia("(prefers-color-scheme: dark)");
 function currentTheme() {
@@ -1135,8 +1135,7 @@ function applyTheme(t) {
 function initTheme() {
   let t = null;
   try { t = localStorage.getItem(THEME_KEY); } catch (e) {}
-  applyTheme(t === "dark" || t === "light" ? t : null);
-  darkMQ.addEventListener?.("change", () => applyTheme(null));
+  applyTheme(t === "dark" ? "dark" : "light");
 }
 function toggleTheme() {
   const t = currentTheme() === "dark" ? "light" : "dark";
