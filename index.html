@@ -216,6 +216,39 @@ tr.in td.pos { color: var(--accent); }
 .pct i { position: absolute; left: 0; top: 50%; height: 16px; transform: translateY(-50%); background: var(--c, var(--accent)); opacity: .18; border-radius: 3px; }
 .pct span { position: relative; }
 
+/* Escudos (dibujados con los colores de cada club) */
+.crest { width: 1.15em; height: 1.35em; flex: none; vertical-align: -0.28em; margin-right: 6px; }
+.team-n .crest { margin: 0 6px; }
+.tie .nm, .team-n { display: block; }
+
+/* Resumen */
+.layout.full { grid-template-columns: minmax(0, 1fr) !important; }
+.layout.full > #pane-partidos { display: none !important; }
+.sum-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (min-width: 760px) { .sum-grid.three { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .sum-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.sum-grid h3, .sum-sec h3 { margin: 0 0 6px; font: 700 17px/1 var(--font-display); text-transform: uppercase; letter-spacing: .05em; }
+.sum-sec { margin-top: 18px; }
+.compact { font-size: 13.5px; }
+.compact td { padding: 5px 7px; }
+.compact td.team { min-width: 0; max-width: 170px; overflow: hidden; text-overflow: ellipsis; }
+.compact td.pos { width: 26px; font-size: 14px; }
+.compact td.pts { font-size: 15px; }
+.mini-tag { font-size: 10px; font-weight: 700; letter-spacing: .05em; padding: 2px 5px; border-radius: 3px; }
+.mini-tag.lib { background: var(--lib-soft); color: var(--lib); }
+.mini-tag.sud { background: var(--sud-soft); color: var(--sud); }
+.mini-tag.champ { background: var(--lib); color: var(--surface); }
+.mini-tag.desc { background: var(--danger-soft); color: var(--danger); }
+.sum-head { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.sum-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 14px; }
+.sum-card .lbl { font-size: 11.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.sum-card .big { font: 700 22px/1.1 var(--font-display); text-transform: uppercase; display: flex; align-items: center; }
+.sum-card ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13.5px; }
+.sum-card li { display: flex; align-items: center; }
+.sum-card.lib { border-color: color-mix(in srgb, var(--lib) 50%, var(--line)); }
+.sum-card.sud { border-color: color-mix(in srgb, var(--sud) 50%, var(--line)); }
+.sum-card.desc { border-color: color-mix(in srgb, var(--danger) 45%, var(--line)); }
+
 /* Claves del partido */
 .keys { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 5px; }
 .k { font-size: 12px; line-height: 1.3; padding: 2px 7px; border-radius: 4px; background: var(--surface-2); color: var(--muted); box-shadow: inset 0 0 0 1px var(--line); }
@@ -283,6 +316,7 @@ tr.in td.pos { color: var(--accent); }
   <div class="note" id="data-note"></div>
 
   <nav class="tabs" role="tablist" aria-label="Secciones">
+    <button class="tab" role="tab" data-tab="resumen" id="tab-resumen">Resumen</button>
     <button class="tab" role="tab" data-tab="partidos" id="tab-partidos">Partidos</button>
     <button class="tab" role="tab" data-tab="zona-a" id="tab-zona-a">Zona A</button>
     <button class="tab" role="tab" data-tab="zona-b" id="tab-zona-b">Zona B</button>
@@ -302,6 +336,7 @@ tr.in td.pos { color: var(--accent); }
       <div id="fixture"></div>
     </section>
     <div>
+      <section class="pane" data-pane="resumen" id="pane-resumen"></section>
       <section class="pane" data-pane="zona-a" id="pane-zona-a"></section>
       <section class="pane" data-pane="zona-b" id="pane-zona-b"></section>
       <section class="pane" data-pane="anual" id="pane-anual"></section>
@@ -412,6 +447,36 @@ const H2H = {
   "lan|ban": [0, "Clásico del Sur", true],
   "gim|irv": [0, "clásico mendocino", true],
 };
+/* Escudos: no son los oficiales, son insignias con los colores y el diseño de cada camiseta.
+   p: s = lisa, v = bastones, h = franja horizontal, d = banda diagonal, m = mitades, c = V, r = rayas horizontales */
+const CREST = {
+  ins: ["v", "#d71920", "#ffffff"], boc: ["h", "#0a3a8c", "#f4c20d"], dyj: ["m", "#1c8f3a", "#f2d21b"], vel: ["c", "#ffffff", "#123c8c"],
+  lan: ["s", "#7a1630"], gim: ["v", "#111111", "#ffffff"], ind: ["s", "#d0121b"], new: ["m", "#d0121b", "#111111"],
+  slo: ["v", "#1b2f7a", "#d0121b"], est: ["v", "#d0121b", "#ffffff"], uni: ["v", "#d0121b", "#ffffff"], rie: ["s", "#111111", "#ffffff"],
+  pla: ["h", "#ffffff", "#6b3b1f"], cco: ["v", "#111111", "#ffffff"], tal: ["v", "#0d2a6b", "#ffffff"],
+  cen: ["v", "#0b2f7d", "#f4c20d"], arg: ["d", "#d0121b", "#ffffff"], bel: ["s", "#6cb4e4"], glp: ["h", "#ffffff", "#0b2a6b"],
+  riv: ["d", "#ffffff", "#d0121b"], sar: ["s", "#11843c"], hur: ["s", "#ffffff", "#d0121b"], irv: ["s", "#14286b"],
+  bar: ["v", "#d0121b", "#ffffff"], atu: ["v", "#7cc0ea", "#ffffff"], tig: ["h", "#13287a", "#d0121b"], ban: ["v", "#11843c", "#ffffff"],
+  rac: ["v", "#7cc0ea", "#ffffff"], erc: ["m", "#ffffff", "#1d3f8f"], ald: ["v", "#11843c", "#f2d21b"],
+  fla: ["r", "#c8102e", "#111111"], pal: ["s", "#0b6b3a"], flu: ["v", "#7a1630", "#0b6b3a"], vas: ["d", "#111111", "#ffffff"],
+  cam: ["v", "#111111", "#ffffff"], ctq: ["s", "#7cc0ea"],
+};
+const SHIELD = "M2 2h20v11.5c0 7-5 11.3-10 13.5C7 24.8 2 20.5 2 13.5z";
+function crest(id) {
+  const c = CREST[id]; if (!c) return "";
+  const [pt, a, b] = c, k = "cr-" + id;
+  let fill = `<rect width="24" height="28" fill="${a}"/>`;
+  if (pt === "v") for (let x = 0; x < 24; x += 6.6) fill += `<rect x="${x + 3.3}" width="3.3" height="28" fill="${b}"/>`;
+  if (pt === "r") for (let y = 2; y < 28; y += 5) fill += `<rect y="${y + 2.5}" width="24" height="2.5" fill="${b}"/>`;
+  if (pt === "h") fill += `<rect y="10" width="24" height="7" fill="${b}"/>`;
+  if (pt === "d") fill += `<path d="M-2 22 L22 -2 L28 4 L4 28z" fill="${b}"/>`;
+  if (pt === "m") fill += `<rect x="12" width="12" height="28" fill="${b}"/>`;
+  if (pt === "c") fill += `<path d="M2 3 L12 18 L22 3 L22 8 L12 23 L2 8z" fill="${b}"/>`;
+  if (pt === "s" && b) fill += `<rect x="5" y="9" width="14" height="3" fill="${b}"/>`;
+  return `<svg class="crest" viewBox="0 0 24 28" aria-hidden="true"><defs><clipPath id="${k}"><path d="${SHIELD}"/></clipPath></defs><g clip-path="url(#${k})">${fill}</g><path d="${SHIELD}" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width="1.2"/></svg>`;
+}
+// Nombre con escudo
+const tn = id => crest(id) + esc(T(id).n);
 function h2h(h, a) {
   if (H2H[h + "|" + a]) { const [v, txt, der] = H2H[h + "|" + a]; return { v, txt, der }; }
   if (H2H[a + "|" + h]) { const [v, txt, der] = H2H[a + "|" + h]; return { v: -v, txt, der }; }
@@ -427,7 +492,7 @@ let poWinners = {}; // tieId -> teamId
 let cupPicks = {};  // tieId de copa -> teamId
 let aiCupPicks = {}; // llaves de copa que eligió la IA (se vuelven a pensar)
 let fechaFilter = "all";
-let activeTab = "zona-a";
+let activeTab = "resumen";
 let projection = null;
 
 function load() {
@@ -735,13 +800,13 @@ function matchHTML(m) {
   const label = isClose(mm) ? `Partido parejo: <b>empate</b> probable` : `Favorito: <b>${esc(fav.n)}</b> (${pct(favP)})`;
   const cls = k => (k === top ? "top" : "");
   return `<div class="match${r ? " done" : ""}" data-m="${m.id}">
-    <div class="team-n home" title="${esc(H.n)}">${mm.ph > mm.pa ? '<span class="fav">●</span> ' : ""}${esc(H.n)}</div>
+    <div class="team-n home" title="${esc(H.n)}">${mm.ph > mm.pa ? '<span class="fav">●</span> ' : ""}${esc(H.n)}${crest(H.id)}</div>
     <div class="score">
       <input id="${m.id}-h" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(H.n)}" value="${r ? r[0] : ""}" class="${r && aiFilled[m.id] ? "ai" : ""}" data-side="0">
       <span>–</span>
       <input id="${m.id}-a" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(A.n)}" value="${r ? r[1] : ""}" class="${r && aiFilled[m.id] ? "ai" : ""}" data-side="1">
     </div>
-    <div class="team-n" title="${esc(A.n)}">${esc(A.n)}${mm.pa > mm.ph ? ' <span class="fav">●</span>' : ""}</div>
+    <div class="team-n" title="${esc(A.n)}">${crest(A.id)}${esc(A.n)}${mm.pa > mm.ph ? ' <span class="fav">●</span>' : ""}</div>
     <div class="probs">
       <div class="bar" role="img" aria-label="Local ${pct(mm.ph)}, empate ${pct(mm.pd)}, visitante ${pct(mm.pa)}">
         <i class="h" style="width:${mm.ph * 100}%"></i><i class="d" style="width:${mm.pd * 100}%"></i><i class="a" style="width:${mm.pa * 100}%"></i>
@@ -782,7 +847,7 @@ function renderZone(z, st) {
     const pos = i + 1, rival = pos <= 8 ? `${9 - pos}° ${other} (${esc((other === "A" ? st.A : st.B)[8 - pos].n)})` : "";
     return `<tr class="${pos <= 8 ? "in" : ""}${pos === 8 ? " cut" : ""}">
       <td class="pos">${pos}</td>
-      <td class="l team">${esc(r.n)}${r.id === APERTURA_CHAMP ? '<span class="tag champ">Camp. Apertura</span>' : ""}${moveTag(r.id, pos, order)}</td>
+      <td class="l team">${tn(r.id)}${r.id === APERTURA_CHAMP ? '<span class="tag champ">Camp. Apertura</span>' : ""}${moveTag(r.id, pos, order)}</td>
       <td>${r.pj}</td><td>${r.gf}</td><td>${r.dg > 0 ? "+" : ""}${r.dg}</td>
       <td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
       <td class="l cross">${rival ? "vs " + rival : ""}</td>
@@ -817,12 +882,12 @@ function renderAnnual(st, br, cups) {
     if (desc.has(r.id)) { tag += '<span class="tag desc">Desciende</span>'; band = "rowband-desc"; }
     return `<tr class="${band}">
       <td class="pos">${pos}</td>
-      <td class="l team">${esc(r.n)}${moveTag(r.id, pos, order)}${tag}</td>
+      <td class="l team">${tn(r.id)}${moveTag(r.id, pos, order)}${tag}</td>
       <td>${r.z}</td><td>${r.pj}</td><td>${r.dg > 0 ? "+" : ""}${r.dg}</td>
       <td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
     </tr>`;
   }).join("");
-  const nm = id => esc(T(id).n);
+  const nm = id => tn(id);
   const pos = id => an.indexOf(id) + 1;
   const seen = new Set();
   const holderLis = c.holders.map(([id, why]) => {
@@ -853,18 +918,20 @@ function renderAnnual(st, br, cups) {
     <div class="legend"><span style="--c:var(--lib)">Libertadores</span><span style="--c:var(--sud)">Sudamericana</span><span style="--c:var(--danger)">Zona de descenso (como marca promiedos)</span></div>`;
 }
 function renderPlayoffs(st, br, cups) {
-  const s = br.seeds;
-  const names = ["Octavos", "Cuartos", "Semifinales", "Final"];
-  const cols = [0, 1, 2, 3].map(round => {
-    const ts = br.ties.filter(t => t.round === round);
-    return `<div class="round"><h3>${names[round]}</h3><div class="ties">${ts.map(t => tieHTML(t, s, cups)).join("")}</div></div>`;
-  }).join("");
+  const cols = bracketCols(br, cups);
   const filled = MATCHES.filter(m => results[m.id]).length;
   document.getElementById("pane-playoffs").innerHTML = `
     <div class="panel-h"><h2>Playoffs Clausura</h2><span class="sub">${filled < MATCHES.length ? `Proyección con ${filled}/${MATCHES.length} resultados cargados` : "Con todos los resultados cargados"} · tocá un equipo para hacerlo avanzar</span></div>
     <p class="rule">Partido único, local el mejor ubicado. 1° vs 8° de la otra zona, 2° vs 7°, 3° vs 6°, 4° vs 5°. El % es la chance de pasar la llave (si empatan, penales 50/50). La final es en cancha neutral. Los equipos que llegan a una final de copa en noviembre o diciembre restan un poco por cansancio.</p>
     <div class="bracket">${cols}</div>
-    ${br.champ ? `<div class="champion"><div><div class="lbl">Campeón del Clausura</div><div class="big">${esc(T(br.champ).n)}</div></div><span class="cross">Clasifica a la Libertadores por título${br.champ === APERTURA_CHAMP ? " (ya lo tenía por el Apertura, así que no libera un cupo nuevo)" : ""}.</span></div>` : ""}`;
+    ${br.champ ? `<div class="champion"><div><div class="lbl">Campeón del Clausura</div><div class="big">${tn(br.champ)}</div></div><span class="cross">Clasifica a la Libertadores por título${br.champ === APERTURA_CHAMP ? " (ya lo tenía por el Apertura, así que no libera un cupo nuevo)" : ""}.</span></div>` : ""}`;
+}
+function bracketCols(br, cups) {
+  const names = ["Octavos", "Cuartos", "Semifinales", "Final"];
+  return [0, 1, 2, 3].map(round => {
+    const ts = br.ties.filter(t => t.round === round);
+    return `<div class="round"><h3>${names[round]}</h3><div class="ties">${ts.map(t => tieHTML(t, br.seeds, cups)).join("")}</div></div>`;
+  }).join("");
 }
 function tieHTML(t, s, cups) {
   const row = (id, other) => {
@@ -872,9 +939,47 @@ function tieHTML(t, s, cups) {
     const p = other ? (id === t.h ? advanceProb(t.h, t.a, t.neutral, cups) : 1 - advanceProb(t.h, t.a, t.neutral, cups)) : null;
     const cls = t.w ? (t.w === id ? "win" : "lose") : "";
     return `<button type="button" class="${cls}" data-tie="${t.id}" data-team="${id}" ${other ? "" : "disabled"}>
-      <span class="seed">${s[id].p}${s[id].z}</span><span class="nm">${esc(T(id).n)}</span><span class="pr">${p == null ? "" : pct(p)}</span></button>`;
+      <span class="seed">${s[id].p}${s[id].z}</span><span class="nm">${tn(id)}</span><span class="pr">${p == null ? "" : pct(p)}</span></button>`;
   };
   return `<div class="tie">${row(t.h, t.a)}${row(t.a, t.h)}</div>`;
+}
+
+/* ===================== RENDER: RESUMEN ===================== */
+function renderSummary(st, br, cups) {
+  const an = st.AN.map(r => r.id), c = cupos(an, br.champ, cups);
+  const lib = new Set([...c.champs, ...c.lib]), sud = new Set(c.sud), desc = new Set(an.slice(-2));
+  const dg = v => (v > 0 ? "+" : "") + v;
+  const zoneT = (rows, z) => `<div><h3>Zona ${z}</h3><div class="tbl-wrap"><table class="compact">
+    <thead><tr><th>#</th><th class="l">Equipo</th><th>PJ</th><th>DG</th><th>Pts</th></tr></thead>
+    <tbody>${rows.map((r, i) => `<tr class="${i < 8 ? "in" : ""}${i === 7 ? " cut" : ""}"><td class="pos">${i + 1}</td><td class="l team">${tn(r.id)}</td><td>${r.pj}</td><td>${dg(r.dg)}</td><td class="pts">${r.pts}</td></tr>`).join("")}</tbody>
+  </table></div></div>`;
+  const tag = id => {
+    if (c.champs.includes(id)) return '<span class="mini-tag champ">TÍTULO</span>';
+    if (lib.has(id)) return '<span class="mini-tag lib">LIB</span>';
+    if (sud.has(id)) return '<span class="mini-tag sud">SUD</span>';
+    if (desc.has(id)) return '<span class="mini-tag desc">DESC</span>';
+    return "";
+  };
+  const band = id => lib.has(id) ? "rowband-lib" : sud.has(id) ? "rowband-sud" : desc.has(id) ? "rowband-desc" : "";
+  const anT = `<div><h3>Tabla Anual</h3><div class="tbl-wrap"><table class="compact">
+    <thead><tr><th>#</th><th class="l">Equipo</th><th>DG</th><th>Pts</th><th></th></tr></thead>
+    <tbody>${st.AN.map((r, i) => `<tr class="${band(r.id)}"><td class="pos">${i + 1}</td><td class="l team">${tn(r.id)}</td><td>${dg(r.dg)}</td><td class="pts">${r.pts}</td><td>${tag(r.id)}</td></tr>`).join("")}</tbody>
+  </table></div></div>`;
+  const li = (id, extra = "") => `<li>${tn(id)}${extra}</li>`;
+  const champ = br.champ ? `<div class="big">${tn(br.champ)}</div>` : `<div class="cross">A definir en Playoffs</div>`;
+  const cupChamps = [["ca", "Copa Argentina"], ["lib", "Libertadores"], ["sud", "Sudamericana"]]
+    .map(([k, n]) => cups.champ[k] ? `<li>${tn(cups.champ[k])}<small style="color:var(--muted)">&nbsp;· ${n}</small></li>` : "").join("");
+  const filled = MATCHES.filter(m => results[m.id]).length;
+  document.getElementById("pane-resumen").innerHTML = `
+    <div class="panel-h"><h2>Resumen</h2><span class="sub">${filled}/${MATCHES.length} partidos cargados${filled < MATCHES.length ? " · el resto todavía no suma" : ""}</span></div>
+    <div class="sum-head">
+      <div class="sum-card"><div class="lbl">Campeón Clausura</div>${champ}${cupChamps ? `<div class="lbl" style="margin-top:10px">Campeones de copa</div><ul>${cupChamps}</ul>` : ""}</div>
+      <div class="sum-card lib"><div class="lbl">Copa Libertadores 2027</div><ul>${c.holders.filter((h, i, a) => a.findIndex(x => x[0] === h[0]) === i).map(h => li(h[0], '&nbsp;<span class="mini-tag champ">TÍTULO</span>')).join("")}${c.lib.map(id => li(id)).join("")}</ul></div>
+      <div class="sum-card sud"><div class="lbl">Copa Sudamericana 2027</div><ul>${c.sud.map(id => li(id)).join("")}</ul></div>
+      <div class="sum-card desc"><div class="lbl">Zona de descenso</div><ul>${an.slice(-2).map(id => li(id)).join("")}</ul></div>
+    </div>
+    <div class="sum-grid three">${zoneT(st.A, "A")}${zoneT(st.B, "B")}${anT}</div>
+    <div class="sum-sec"><h3>Playoffs</h3><div class="bracket">${bracketCols(br, cups)}</div></div>`;
 }
 
 /* ===================== RENDER: COPAS ===================== */
@@ -885,7 +990,7 @@ function renderCups(cups) {
       const p = other ? (id === t.h ? cupTieProb(t, t.h, t.a) : 1 - cupTieProb(t, t.h, t.a)) : null;
       const cls = t.w ? (t.w === id ? "win" : "lose") : "";
       return `<button type="button" class="${cls}" data-cuptie="${t.id}" data-team="${id}" ${other ? "" : "disabled"}>
-        <span class="seed">${isLocal(id) ? "ARG" : ""}</span><span class="nm">${esc(T(id).n)}</span><span class="pr">${p == null ? "" : pct(p)}</span></button>`;
+        <span class="seed">${isLocal(id) ? "ARG" : ""}</span><span class="nm">${tn(id)}</span><span class="pr">${p == null ? "" : pct(p)}</span></button>`;
     };
     return `<div class="tie">${row(t.h, t.a)}${row(t.a, t.h)}</div>`;
   };
@@ -962,7 +1067,7 @@ function renderProjection() {
     <p class="rule">Los resultados y ganadores que elegiste quedan fijos. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana).</p>
     <div class="tbl-wrap"><table>
       <thead><tr><th class="l">Equipo</th><th>Zona</th><th>Pts Anual (prom.)</th><th>Playoffs</th><th>1° de zona</th><th>Campeón Clausura</th><th>Gana una copa</th><th>Libertadores</th><th>Sudamericana</th><th>Desc.</th></tr></thead>
-      <tbody>${rows.map(t => `<tr><td class="l team">${esc(t.n)}</td><td>${t.z}</td><td>${acc[t.id].pts.toFixed(1)}</td>
+      <tbody>${rows.map(t => `<tr><td class="l team">${tn(t.id)}</td><td>${t.z}</td><td>${acc[t.id].pts.toFixed(1)}</td>
         ${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].first, "var(--accent)")}${cell(acc[t.id].champ, "var(--lib)")}${acc[t.id].cupT ? cell(acc[t.id].cupT, "var(--lib)") : "<td>–</td>"}
         ${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].desc, "var(--danger)")}</tr>`).join("")}</tbody>
     </table></div>
@@ -972,7 +1077,7 @@ function renderProjection() {
 /* ===================== RENDER: DATOS ===================== */
 function renderData() {
   const rows = teams.map((t, i) => `<tr>
-    <td class="l team">${esc(t.n)}</td><td>${t.z}</td>
+    <td class="l team">${tn(t.id)}</td><td>${t.z}</td>
     ${[0, 1, 2, 3].map(k => `<td><input id="d-${t.id}-cl${k}" data-i="${i}" data-k="cl" data-j="${k}" inputmode="numeric" value="${t.cl[k]}"></td>`).join("")}
     ${[0, 1, 2, 3].map(k => `<td><input id="d-${t.id}-an${k}" data-i="${i}" data-k="an" data-j="${k}" inputmode="numeric" value="${t.an[k]}"></td>`).join("")}
     <td><input id="d-${t.id}-f" data-i="${i}" data-k="f" maxlength="5" value="${esc(t.f || "")}" style="width:64px;text-align:left"></td>
@@ -996,7 +1101,7 @@ function renderTables() {
   // Limpia ganadores que ya no corresponden a la llave
   for (const t of br.ties) if (poWinners[t.id] && poWinners[t.id] !== t.h && poWinners[t.id] !== t.a) delete poWinners[t.id];
   for (const t of cups.ties) if (cupPicks[t.id] && cupPicks[t.id] !== t.h && cupPicks[t.id] !== t.a) delete cupPicks[t.id];
-  renderZone("A", st); renderZone("B", st); renderAnnual(st, br, cups); renderPlayoffs(st, br, cups); renderCups(cups, st);
+  renderZone("A", st); renderZone("B", st); renderAnnual(st, br, cups); renderPlayoffs(st, br, cups); renderCups(cups, st); renderSummary(st, br, cups);
   if (activeTab === "proyeccion") renderProjection();
 }
 function renderAll() {
@@ -1008,8 +1113,9 @@ function renderAll() {
 function invalidate() { projection = null; cache.clear(); mcache.clear(); stakesCache = null; }
 const wide = matchMedia("(min-width: 1100px)");
 function showTab(tab) {
-  if (wide.matches && tab === "partidos") tab = "zona-a";
+  if (wide.matches && tab === "partidos") tab = "resumen";
   activeTab = tab;
+  document.querySelector(".layout").classList.toggle("full", tab === "resumen");
   document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
   document.querySelectorAll(".pane").forEach(p => p.hidden = p.dataset.pane !== tab);
   if (tab === "proyeccion") renderProjection();
