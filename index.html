@@ -425,6 +425,7 @@ let results = {};   // matchId -> [gl, gv]
 let aiFilled = {};  // matchId -> true si lo puso la IA
 let poWinners = {}; // tieId -> teamId
 let cupPicks = {};  // tieId de copa -> teamId
+let aiCupPicks = {}; // llaves de copa que eligió la IA (se vuelven a pensar)
 let fechaFilter = "all";
 let activeTab = "zona-a";
 let projection = null;
@@ -434,12 +435,12 @@ function load() {
     const s = JSON.parse(localStorage.getItem(LS_KEY) || "null");
     if (!s) return;
     if (s.teams && s.teams.length === BASE_TEAMS.length) teams = s.teams;
-    results = s.results || {}; aiFilled = s.aiFilled || {}; poWinners = s.poWinners || {}; cupPicks = s.cupPicks || {};
+    results = s.results || {}; aiFilled = s.aiFilled || {}; poWinners = s.poWinners || {}; cupPicks = s.cupPicks || {}; aiCupPicks = s.aiCupPicks || {};
     if (s.activeTab) activeTab = s.activeTab;
   } catch (e) {}
 }
 function save() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify({ teams, results, aiFilled, poWinners, cupPicks, activeTab })); } catch (e) {}
+  try { localStorage.setItem(LS_KEY, JSON.stringify({ teams, results, aiFilled, poWinners, cupPicks, aiCupPicks, activeTab })); } catch (e) {}
 }
 const T = id => teams.find(t => t.id === id) || { id, n: EXT[id].n };
 const isLocal = id => teams.some(t => t.id === id);
@@ -556,6 +557,43 @@ function sample(mm) {
 }
 // Pronóstico "por lógica": si el partido está parejo, empate; si no, el favorito con su marcador más probable.
 const isClose = mm => Math.abs(mm.ph - mm.pa) < 0.09 && mm.pd >= 0.26;
+/* IA "realista" para completar la fecha: en vez de poner siempre el resultado más probable
+   (que casi siempre es 1-0 o 1-1), reparte empates y batacazos en la cantidad que esperan las
+   probabilidades y después elige un marcador verosímil dentro de cada resultado. */
+const weightedKey = w => Math.pow(Math.random(), 1 / Math.max(w, 1e-6)); // muestreo sin reemplazo
+function scoreFor(mm, outcome) {
+  // Marcador dentro del resultado elegido, ponderado por su probabilidad (sin los muy raros).
+  const opts = mm.cum.filter(([i, j, p]) => (i > j ? "h" : i === j ? "d" : "a") === outcome && p > 0.01);
+  const w = opts.map(o => o[2]), tot = w.reduce((a, b) => a + b, 0);
+  let u = Math.random() * tot;
+  for (let k = 0; k < opts.length; k++) { u -= w[k]; if (u <= 0) return [opts[k][0], opts[k][1]]; }
+  return [opts[0][0], opts[0][1]];
+}
+function aiSmartFill(list) {
+  const items = list.map(m => {
+    const mm = matchModel(m), favH = mm.ph >= mm.pa;
+    return { m, mm, pFav: favH ? mm.ph : mm.pa, pDog: favH ? mm.pa : mm.ph, favH };
+  });
+  const nUpsets = Math.round(items.reduce((a, x) => a + x.pDog, 0));
+  const nDraws = Math.round(items.reduce((a, x) => a + x.mm.pd, 0));
+  // Batacazos: más chance en los partidos donde el "chico" tiene más probabilidades.
+  const byUpset = items.map(x => [weightedKey(x.pDog * x.pDog), x]).sort((a, b) => b[0] - a[0]);
+  byUpset.slice(0, nUpsets).forEach(([, x]) => x.out = x.favH ? "a" : "h");
+  // Empates: entre los que quedan, sobre todo los partidos parejos y los clásicos.
+  const rest = items.filter(x => !x.out).map(x => [weightedKey(x.mm.pd * x.mm.pd / Math.max(0.05, x.pFav - x.pDog + 0.15)), x]).sort((a, b) => b[0] - a[0]);
+  rest.slice(0, nDraws).forEach(([, x]) => x.out = "d");
+  items.forEach(x => { if (!x.out) x.out = x.favH ? "h" : "a"; });
+  const upsets = items.filter(x => x.out !== "d" && x.out !== (x.favH ? "h" : "a")).length;
+  return { items: items.map(x => [x.m, scoreFor(x.mm, x.out)]), draws: items.filter(x => x.out === "d").length, upsets };
+}
+// Batacazo: gana el que tenía menos de 30% de chances.
+function isUpset(mm, r) {
+  if (!r || r[0] === r[1]) return false;
+  const p = r[0] > r[1] ? mm.ph : mm.pa;
+  return p < 0.30 && p < (r[0] > r[1] ? mm.pa : mm.ph);
+}
+// Llaves: casi siempre pasa el favorito, pero con lugar para sorpresas.
+const sharpen = p => { const a = Math.pow(p, 2.2), b = Math.pow(1 - p, 2.2); return a / (a + b); };
 function aiPick(mm) {
   const outcome = isClose(mm) ? "d" : mm.ph >= mm.pa ? "h" : "a";
   let best = null;
@@ -710,7 +748,7 @@ function matchHTML(m) {
       </div>
       <div class="plabels"><span class="${cls(mm.ph)}">L <b>${pct(mm.ph)}</b></span><span class="${cls(mm.pd)}">E <b>${pct(mm.pd)}</b></span><span class="${cls(mm.pa)}">V <b>${pct(mm.pa)}</b></span></div>
     </div>
-    <div class="verdict">${label} · IA: <b>${pick[0]}-${pick[1]}</b> · goles esperados ${mm.lh.toFixed(1)}–${mm.la.toFixed(1)}</div>
+    <div class="verdict">${label} · más probable: <b>${pick[0]}-${pick[1]}</b> · goles esperados ${mm.lh.toFixed(1)}–${mm.la.toFixed(1)}${isUpset(mm, r) ? ' · <span class="k neg"><b>Batacazo</b></span>' : ""}</div>
     ${mm.keys.length ? `<div class="keys">${mm.keys.map(k => `<span class="k ${k.c}">${k.t}</span>`).join("")}</div>` : ""}
   </div>`;
 }
@@ -918,6 +956,7 @@ function renderProjection() {
       <li><b>Cansancio:</b> Estudiantes en la fecha 14 (Maracaná el jueves), Boca en la fecha 14 (Río el martes), Atl. Tucumán y Platense en la fecha 15 (Copa Argentina el miércoles). En playoffs resta a quien llegue a una final de copa.</li>
       <li><b>Historial y clásicos:</b> Superclásico, Independiente-Boca, Clásico del Sur y clásico mendocino suben la chance de empate; River-Racing con ventaja histórica de River.</li>
       <li><b>Lo que se juega:</b> suma a quien pelea playoffs, un cupo por la Anual o no terminar último; resta a quien no tiene nada en juego.</li>
+      <li><b>Completar con IA:</b> no pone siempre el resultado más probable. Reparte empates y batacazos en la cantidad que marcan las probabilidades (los batacazos caen más donde el chico tiene más chances) y elige marcadores verosímiles. Cada clic arma otra fecha posible; lo que cargaste a mano no se toca.</li>
       <li><b>Localía:</b> el local espera 1,2 goles contra 0,9 del visitante a igual nivel. Copas: Estudiantes rinde más en la Libertadores que en la liga.</li>
     </ul></details>
     <p class="rule">Los resultados y ganadores que elegiste quedan fijos. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana).</p>
@@ -1005,23 +1044,30 @@ function toast(msg) {
 }
 
 function fillAI() {
-  let n = 0;
-  for (const m of MATCHES) if (!results[m.id]) { results[m.id] = aiPick(matchModel(m)); aiFilled[m.id] = true; n++; }
-  // Copas y playoffs: avanza el favorito de cada llave
-  const cups = resolveCups((t, h, a) => (cupPicks[t.id] === h || cupPicks[t.id] === a) ? cupPicks[t.id] : (cupTieProb(t, h, a) >= 0.5 ? h : a));
-  for (const t of cups.ties) if (t.w) cupPicks[t.id] = t.w;
+  // Respeta lo que cargaste a mano; lo que puso la IA antes se vuelve a pensar en cada clic.
+  const list = MATCHES.filter(m => !results[m.id] || aiFilled[m.id]);
+  const plan = aiSmartFill(list);
+  for (const [m, r] of plan.items) { results[m.id] = r; aiFilled[m.id] = true; }
+  for (const id of Object.keys(aiCupPicks)) delete cupPicks[id];
+  aiCupPicks = {};
+  let surprises = 0;
+  const pickTie = (p, h, a) => { const w = Math.random() < sharpen(p) ? h : a; if ((p >= 0.5) !== (w === h)) surprises++; return w; };
+  const cups = resolveCups((t, h, a) => (cupPicks[t.id] === h || cupPicks[t.id] === a) ? cupPicks[t.id] : pickTie(cupTieProb(t, h, a), h, a));
+  for (const t of cups.ties) if (t.w && !cupPicks[t.id]) { cupPicks[t.id] = t.w; aiCupPicks[t.id] = true; }
   poWinners = {};
   const st = standings(results);
-  const br = bracket(st, t => advanceProb(t.h, t.a, t.neutral, cups) >= 0.5 ? t.h : t.a);
+  const br = bracket(st, t => pickTie(advanceProb(t.h, t.a, t.neutral, cups), t.h, t.a));
   for (const t of br.ties) if (t.w) poWinners[t.id] = t.w;
   projection = null; save(); renderAll();
-  toast(n ? `IA completó ${n} partidos, los playoffs y las copas` : "Playoffs y copas completados con el favorito de cada llave");
+  const bata = plan.items.filter(([m, r]) => isUpset(matchModel(m), r)).length;
+  toast(`IA: ${plan.items.length} partidos, ${plan.draws} empates, ${plan.upsets} triunfos del no favorito (${bata} batacazos) y ${surprises} sorpresas en llaves`);
 }
 function fillRandom() {
   for (const m of MATCHES) if (!results[m.id] || aiFilled[m.id]) { results[m.id] = sample(matchModel(m)); aiFilled[m.id] = true; }
-  cupPicks = {};
+  for (const id of Object.keys(aiCupPicks)) delete cupPicks[id];
+  aiCupPicks = {};
   const cups = randomCups();
-  for (const t of cups.ties) if (t.w) cupPicks[t.id] = t.w;
+  for (const t of cups.ties) if (t.w && !cupPicks[t.id]) { cupPicks[t.id] = t.w; aiCupPicks[t.id] = true; }
   poWinners = {};
   const st = standings(results);
   const br = bracket(st, t => Math.random() < advanceProb(t.h, t.a, t.neutral, cups) ? t.h : t.a);
@@ -1037,6 +1083,7 @@ document.addEventListener("click", e => {
   if (cupBtn) {
     const id = cupBtn.dataset.cuptie;
     if (cupPicks[id] === cupBtn.dataset.team) delete cupPicks[id]; else cupPicks[id] = cupBtn.dataset.team;
+    delete aiCupPicks[id];
     projection = null; save(); renderTables(); return;
   }
   const tieBtn = e.target.closest("button[data-tie]");
@@ -1050,7 +1097,7 @@ document.addEventListener("click", e => {
   if (e.target.closest("#btn-ia")) return fillAI();
   if (e.target.closest("#btn-rand")) return fillRandom();
   if (e.target.closest("#btn-clear")) {
-    results = {}; aiFilled = {}; poWinners = {}; cupPicks = {}; projection = null; save(); renderAll(); toast("Resultados borrados"); return;
+    results = {}; aiFilled = {}; poWinners = {}; cupPicks = {}; aiCupPicks = {}; projection = null; save(); renderAll(); toast("Resultados borrados"); return;
   }
   if (e.target.closest("#btn-proj")) { projection = null; renderProjection(); toast("Proyección actualizada"); return; }
   if (e.target.closest("#btn-reset-data")) {
