@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulador LPF Clausura 2026</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: planilla de cancha. Fixture fijo a la izquierda, tablas en pestañas a la derecha; en celular, todo en pestañas. */
+:root {
+  --bg: #eef2f0;
+  --surface: #ffffff;
+  --surface-2: #f6f8f7;
+  --ink: #15211c;
+  --muted: #5b6a63;
+  --line: #d6dfda;
+  --accent: #1d6a86;
+  --accent-ink: #ffffff;
+  --accent-soft: #dcebf1;
+  --lib: #a77a06;
+  --lib-soft: #f6ecd0;
+  --sud: #2b7a4b;
+  --sud-soft: #dcefe3;
+  --po: #1d6a86;
+  --danger: #ad3434;
+  --danger-soft: #f6dddd;
+  --draw: #8a8f8c;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif;
+  --font-body: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --r: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1412; --surface: #151e1b; --surface-2: #1a2521; --ink: #e4ece8; --muted: #94a49d; --line: #283530;
+    --accent: #5db1cf; --accent-ink: #0b1a20; --accent-soft: #19323b; --lib: #e2b84d; --lib-soft: #3a3016;
+    --sud: #62c48c; --sud-soft: #17352a; --po: #5db1cf; --danger: #e07070; --danger-soft: #3d1d1d; --draw: #9aa29e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1412; --surface: #151e1b; --surface-2: #1a2521; --ink: #e4ece8; --muted: #94a49d; --line: #283530;
+  --accent: #5db1cf; --accent-ink: #0b1a20; --accent-soft: #19323b; --lib: #e2b84d; --lib-soft: #3a3016;
+  --sud: #62c48c; --sud-soft: #17352a; --po: #5db1cf; --danger: #e07070; --danger-soft: #3d1d1d; --draw: #9aa29e;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 15px/1.45 var(--font-body);
+  font-variant-numeric: tabular-nums;
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.wrap {
+  max-width: 1360px; margin: 0 auto;
+  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.brand h1 {
+  font: 700 clamp(28px, 4vw, 40px)/1 var(--font-display); letter-spacing: .01em; margin: 0; text-transform: uppercase;
+  text-wrap: balance;
+}
+.brand p { margin: 6px 0 0; color: var(--muted); max-width: 62ch; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn {
+  border: 1px solid var(--line); background: var(--surface); padding: 9px 14px; border-radius: var(--r);
+  font-weight: 600; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.ghost { background: transparent; }
+.btn svg { width: 16px; height: 16px; }
+
+.note {
+  margin-top: 16px; padding: 10px 14px; border-radius: var(--r); background: var(--surface-2);
+  border: 1px dashed var(--line); color: var(--muted); font-size: 13.5px;
+}
+.note b { color: var(--ink); font-weight: 600; }
+
+.tabs { display: flex; gap: 2px; margin: 20px 0 14px; overflow-x: auto; border-bottom: 1px solid var(--line); }
+.tab {
+  background: none; border: 0; padding: 10px 14px; font: 600 16px/1 var(--font-display); text-transform: uppercase;
+  letter-spacing: .06em; color: var(--muted); border-bottom: 3px solid transparent; white-space: nowrap;
+}
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (min-width: 1100px) {
+  .layout { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
+  .layout > #pane-partidos { display: block !important; position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; padding-right: 4px; }
+  .tab[data-tab="partidos"] { display: none; }
+}
+
+.panel-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.panel-h h2 { font: 700 22px/1.1 var(--font-display); text-transform: uppercase; letter-spacing: .03em; margin: 0; }
+.panel-h .sub { color: var(--muted); font-size: 13px; }
+
+.chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  border: 1px solid var(--line); background: var(--surface); padding: 5px 11px; border-radius: 999px; font-size: 13px; font-weight: 600;
+}
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+.fecha { margin-bottom: 18px; }
+.fecha-h {
+  display: flex; align-items: center; gap: 10px; font: 700 18px/1 var(--font-display); text-transform: uppercase; letter-spacing: .05em;
+  margin: 6px 0 8px;
+}
+.fecha-h::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.group-l { font-size: 11.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 10px 0 4px; }
+
+.match {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 8px 10px; margin-bottom: 6px;
+}
+.match.done { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.team-n { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.team-n.home { text-align: right; }
+.team-n .fav { color: var(--accent); }
+.score { display: flex; align-items: center; gap: 4px; }
+.score input {
+  width: 38px; height: 34px; text-align: center; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2);
+  font: 700 18px/1 var(--font-display);
+  -moz-appearance: textfield; appearance: textfield;
+}
+.score input::-webkit-outer-spin-button, .score input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.score input.ai { border-color: var(--accent); background: var(--accent-soft); }
+.score span { color: var(--muted); font-weight: 700; }
+.probs { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; }
+.bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--line); }
+.bar i { display: block; height: 100%; }
+.bar .h { background: var(--accent); }
+.bar .d { background: var(--draw); opacity: .55; }
+.bar .a { background: var(--lib); }
+.plabels { display: flex; gap: 10px; font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+.plabels b { color: var(--ink); font-weight: 600; }
+.plabels .top { color: var(--ink); background: var(--surface-2); border-radius: 4px; padding: 0 4px; box-shadow: inset 0 0 0 1px var(--line); }
+.verdict { grid-column: 1 / -1; font-size: 12.5px; color: var(--muted); }
+.verdict b { color: var(--ink); }
+
+.tbl-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { padding: 7px 8px; text-align: right; white-space: nowrap; }
+th { font: 600 12px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); background: var(--surface-2); position: sticky; top: 0; }
+td { border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+td.l, th.l { text-align: left; }
+td.pos { width: 34px; font: 700 16px/1 var(--font-display); color: var(--muted); }
+td.pts { font: 700 17px/1 var(--font-display); }
+td.team { font-weight: 600; min-width: 140px; }
+.delta { font-size: 12px; color: var(--accent); font-weight: 600; margin-left: 4px; }
+.mv { font-size: 11px; font-weight: 700; margin-left: 4px; }
+.mv.up { color: var(--sud); } .mv.down { color: var(--danger); }
+tr.cut td { border-bottom: 2px solid var(--accent); }
+tr.in td.pos { color: var(--accent); }
+.tag {
+  display: inline-block; font: 700 11px/1 var(--font-body); letter-spacing: .06em; text-transform: uppercase; padding: 3px 6px; border-radius: 4px; margin-left: 6px; vertical-align: 1px;
+}
+.tag.lib { background: var(--lib-soft); color: var(--lib); }
+.tag.sud { background: var(--sud-soft); color: var(--sud); }
+.tag.champ { background: var(--lib); color: var(--surface); }
+.tag.desc { background: var(--danger-soft); color: var(--danger); }
+.tag.po { background: var(--accent-soft); color: var(--accent); }
+.rowband-lib td:first-child { box-shadow: inset 4px 0 0 var(--lib); }
+.rowband-sud td:first-child { box-shadow: inset 4px 0 0 var(--sud); }
+.rowband-desc td:first-child { box-shadow: inset 4px 0 0 var(--danger); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+.cross { font-size: 12.5px; color: var(--muted); }
+
+.cupos { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.cupo-box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; }
+.cupo-box h3 { margin: 0 0 6px; font: 700 16px/1 var(--font-display); text-transform: uppercase; letter-spacing: .05em; }
+.cupo-box.lib h3 { color: var(--lib); } .cupo-box.sud h3 { color: var(--sud); }
+.cupo-box ol { margin: 0; padding-left: 20px; }
+.cupo-box li { padding: 2px 0; }
+.cupo-box small { color: var(--muted); }
+.rule { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+
+/* Playoffs */
+.bracket { display: grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: 14px; overflow-x: auto; padding-bottom: 6px; }
+.round h3 { font: 700 15px/1 var(--font-display); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 8px; }
+.round { display: flex; flex-direction: column; }
+.round .ties { flex: 1; display: flex; flex-direction: column; justify-content: space-around; gap: 10px; }
+.tie { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.tie button {
+  display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 6px; align-items: center; width: 100%; text-align: left;
+  background: none; border: 0; padding: 7px 9px; border-bottom: 1px solid var(--line);
+}
+.tie button:last-child { border-bottom: 0; }
+.tie button:hover:not(:disabled) { background: var(--surface-2); }
+.tie button:disabled { cursor: default; color: var(--muted); }
+.tie .seed { font: 700 13px/1 var(--font-display); color: var(--muted); }
+.tie .nm { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tie .pr { font-size: 12px; color: var(--muted); }
+.tie button.win { background: var(--accent-soft); }
+.tie button.win .nm { color: var(--accent); }
+.tie button.lose .nm { color: var(--muted); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent); }
+.champion {
+  margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--lib);
+  border-radius: var(--r); padding: 12px 16px;
+}
+.champion .big { font: 700 26px/1 var(--font-display); text-transform: uppercase; }
+.champion .lbl { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--lib); }
+
+/* Proyección */
+.pct { position: relative; min-width: 76px; }
+.pct i { position: absolute; left: 0; top: 50%; height: 16px; transform: translateY(-50%); background: var(--c, var(--accent)); opacity: .18; border-radius: 3px; }
+.pct span { position: relative; }
+
+/* Datos */
+.data-tbl input { width: 58px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface-2); text-align: right; }
+.data-tbl td { padding: 4px 6px; }
+
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: var(--r); font-weight: 600; font-size: 14px;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
+.toast.show { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+@media (max-width: 520px) {
+  .plabels { font-size: 12px; gap: 7px; }
+  .probs { grid-template-columns: minmax(0, 1fr); }
+  .score input { width: 34px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Simulador LPF · Clausura 2026</h1>
+      <p>Fechas 14, 15 y 16 de la fase regular. Completá resultados y mirá cómo quedan la Zona A, la Zona B, los cruces de playoffs y la Tabla Anual con sus cupos a Libertadores y Sudamericana.</p>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="btn-ia" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2-2.2-.8 2.2-.8z"/></svg>
+        Completar todo con IA
+      </button>
+      <button class="btn" id="btn-rand" type="button">Simular al azar</button>
+      <button class="btn ghost" id="btn-clear" type="button">Limpiar resultados</button>
+    </div>
+  </header>
+
+  <div class="note" id="data-note"></div>
+
+  <nav class="tabs" role="tablist" aria-label="Secciones">
+    <button class="tab" role="tab" data-tab="partidos" id="tab-partidos">Partidos</button>
+    <button class="tab" role="tab" data-tab="zona-a" id="tab-zona-a">Zona A</button>
+    <button class="tab" role="tab" data-tab="zona-b" id="tab-zona-b">Zona B</button>
+    <button class="tab" role="tab" data-tab="anual" id="tab-anual">Tabla Anual</button>
+    <button class="tab" role="tab" data-tab="playoffs" id="tab-playoffs">Playoffs</button>
+    <button class="tab" role="tab" data-tab="proyeccion" id="tab-proyeccion">Proyección</button>
+    <button class="tab" role="tab" data-tab="datos" id="tab-datos">Datos</button>
+  </nav>
+
+  <div class="layout">
+    <section id="pane-partidos" class="pane" data-pane="partidos">
+      <div class="panel-h">
+        <h2>Partidos</h2>
+        <div class="chips" id="fecha-chips"></div>
+      </div>
+      <div id="fixture"></div>
+    </section>
+    <div>
+      <section class="pane" data-pane="zona-a" id="pane-zona-a"></section>
+      <section class="pane" data-pane="zona-b" id="pane-zona-b"></section>
+      <section class="pane" data-pane="anual" id="pane-anual"></section>
+      <section class="pane" data-pane="playoffs" id="pane-playoffs"></section>
+      <section class="pane" data-pane="proyeccion" id="pane-proyeccion"></section>
+      <section class="pane" data-pane="datos" id="pane-datos"></section>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===================== DATOS BASE (al 19/10/2026, tras la fecha 13) =====================
+   cl: Clausura  [PJ, Pts, DG, GF]   an: Tabla Anual (Apertura + Clausura) [PJ, Pts, DG]
+   Editables desde la pestaña "Datos". */
+const DATA_DATE = "19/10/2026";
+const BASE_TEAMS = [
+  // Zona A
+  { id: "ins", n: "Instituto",          z: "A", cl: [13, 29,  9, 19], an: [29, 50,  10] },
+  { id: "boc", n: "Boca Juniors",       z: "A", cl: [13, 24,  7, 17], an: [29, 54,  20] },
+  { id: "dyj", n: "Defensa y Justicia", z: "A", cl: [13, 24,  6, 18], an: [29, 43,   6] },
+  { id: "vel", n: "Vélez",              z: "A", cl: [13, 24,  5, 16], an: [29, 52,  14] },
+  { id: "lan", n: "Lanús",              z: "A", cl: [13, 23,  5, 17], an: [29, 41,   6] },
+  { id: "gim", n: "Gimnasia (M)",       z: "A", cl: [13, 20,  1, 14], an: [29, 36,  -1] },
+  { id: "ind", n: "Independiente",      z: "A", cl: [13, 19,  2, 15], an: [29, 42,   4] },
+  { id: "new", n: "Newell's",           z: "A", cl: [13, 17,  0, 13], an: [29, 32,  -6] },
+  { id: "slo", n: "San Lorenzo",        z: "A", cl: [13, 17, -1, 12], an: [29, 36,  -3] },
+  { id: "est", n: "Estudiantes (LP)",   z: "A", cl: [13, 14, -1, 13], an: [29, 45,  11] },
+  { id: "uni", n: "Unión",              z: "A", cl: [13, 13, -4, 12], an: [29, 34,  -5] },
+  { id: "pla", n: "Platense",           z: "A", cl: [13, 11, -6,  9], an: [29, 27, -10] },
+  { id: "rie", n: "Dep. Riestra",       z: "A", cl: [13, 11, -7,  8], an: [29, 22, -14] },
+  { id: "cco", n: "Central Córdoba",    z: "A", cl: [13, 10, -8,  9], an: [29, 26, -12] },
+  { id: "tal", n: "Talleres",           z: "A", cl: [13,  9, -8,  9], an: [29, 35,  -2] },
+  // Zona B
+  { id: "cen", n: "Rosario Central",    z: "B", cl: [13, 25,  9, 20], an: [29, 53,  16] },
+  { id: "arg", n: "Argentinos",         z: "B", cl: [13, 25,  6, 18], an: [29, 54,  17] },
+  { id: "bel", n: "Belgrano",           z: "B", cl: [13, 22,  4, 15], an: [29, 48,   9] },
+  { id: "glp", n: "Gimnasia (LP)",      z: "B", cl: [13, 22,  1, 14], an: [29, 45,   5] },
+  { id: "riv", n: "River Plate",        z: "B", cl: [13, 20,  5, 18], an: [29, 49,  13] },
+  { id: "sar", n: "Sarmiento",          z: "B", cl: [13, 20,  2, 13], an: [29, 38,   0] },
+  { id: "hur", n: "Huracán",            z: "B", cl: [13, 19,  1, 14], an: [29, 41,   3] },
+  { id: "irv", n: "Ind. Rivadavia",     z: "B", cl: [13, 19,  1, 16], an: [29, 53,  15] },
+  { id: "bar", n: "Barracas Central",   z: "B", cl: [13, 18,  0, 13], an: [29, 39,   1] },
+  { id: "rac", n: "Racing",             z: "B", cl: [13, 15, -1, 14], an: [29, 32,  -2] },
+  { id: "atu", n: "Atl. Tucumán",       z: "B", cl: [13, 14, -3, 12], an: [29, 28,  -8] },
+  { id: "ban", n: "Banfield",           z: "B", cl: [13, 13, -4, 11], an: [29, 31,  -7] },
+  { id: "tig", n: "Tigre",              z: "B", cl: [13, 13, -5, 12], an: [29, 32,  -6] },
+  { id: "ald", n: "Aldosivi",           z: "B", cl: [13,  8,-11,  7], an: [29, 16, -24] },
+  { id: "erc", n: "Estudiantes (RC)",   z: "B", cl: [13,  6,-14,  6], an: [29, 15, -27] },
+];
+const APERTURA_CHAMP = "bel"; // Belgrano, campeón del Apertura 2026
+
+// Fixture de las 3 fechas que quedan. [local, visitante]
+const FIXTURE = {
+  14: { A: [["gim","pla"],["cco","vel"],["slo","new"],["uni","est"],["ins","rie"],["tal","dyj"],["ind","boc"]],
+        B: [["arg","irv"],["tig","atu"],["cen","hur"],["glp","sar"],["bar","erc"],["ald","bel"],["riv","rac"]],
+        I: [["lan","ban"]] },
+  15: { A: [["dyj","ind"],["rie","tal"],["est","ins"],["new","uni"],["vel","slo"],["pla","cco"],["lan","gim"]],
+        B: [["hur","tig"],["sar","cen"],["rac","ald"],["glp","erc"],["bel","bar"],["atu","arg"],["irv","ban"]],
+        I: [["boc","riv"]] },
+  16: { A: [["boc","dyj"],["cco","lan"],["slo","pla"],["uni","vel"],["ins","new"],["tal","est"],["ind","rie"]],
+        B: [["ban","atu"],["arg","hur"],["tig","sar"],["cen","erc"],["glp","bel"],["bar","rac"],["ald","riv"]],
+        I: [["gim","irv"]] },
+};
+const MATCHES = [];
+for (const f of [14, 15, 16]) for (const g of ["A", "B", "I"]) FIXTURE[f][g].forEach(([h, a], i) => MATCHES.push({ id: `f${f}${g}${i}`, f, g, h, a }));
+
+/* ===================== ESTADO ===================== */
+const LS_KEY = "simlpf-clausura-2026-v1";
+let teams = structuredClone(BASE_TEAMS);
+let results = {};   // matchId -> [gl, gv]
+let aiFilled = {};  // matchId -> true si lo puso la IA
+let poWinners = {}; // tieId -> teamId
+let fechaFilter = "all";
+let activeTab = "zona-a";
+let projection = null;
+
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(LS_KEY) || "null");
+    if (!s) return;
+    if (s.teams && s.teams.length === BASE_TEAMS.length) teams = s.teams;
+    results = s.results || {}; aiFilled = s.aiFilled || {}; poWinners = s.poWinners || {};
+    if (s.activeTab) activeTab = s.activeTab;
+  } catch (e) {}
+}
+function save() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify({ teams, results, aiFilled, poWinners, activeTab })); } catch (e) {}
+}
+const T = id => teams.find(t => t.id === id);
+
+/* ===================== MODELO DE PROBABILIDADES =====================
+   Poisson bivariado con corrección Dixon-Coles (más empates 0-0 y 1-1, típico de la LPF).
+   Fuerza = mezcla de puntos por partido del Clausura (forma) y de la Tabla Anual (nivel),
+   más diferencia de gol por partido. Ventaja de local incluida. */
+const HOME_G = 1.20, AWAY_G = 0.90, NEUTRAL_G = 1.05, K = 0.48, RHO = -0.10, MAXG = 8;
+function strength(t) {
+  const clp = t.cl[1] / Math.max(1, t.cl[0]), anp = t.an[1] / Math.max(1, t.an[0]);
+  const cld = t.cl[2] / Math.max(1, t.cl[0]), and = t.an[2] / Math.max(1, t.an[0]);
+  return 0.55 * clp + 0.45 * anp + 0.35 * (0.55 * cld + 0.45 * and);
+}
+const pois = (l, k) => { let p = Math.exp(-l); for (let i = 1; i <= k; i++) p *= l / i; return p; };
+const cache = new Map();
+function model(hId, aId, neutral = false) {
+  const key = hId + aId + (neutral ? "n" : "");
+  if (cache.has(key)) return cache.get(key);
+  const d = strength(T(hId)) - strength(T(aId));
+  const lh = (neutral ? NEUTRAL_G : HOME_G) * Math.exp(K * d);
+  const la = (neutral ? NEUTRAL_G : AWAY_G) * Math.exp(-K * d);
+  const m = []; let tot = 0;
+  for (let i = 0; i <= MAXG; i++) for (let j = 0; j <= MAXG; j++) {
+    let p = pois(lh, i) * pois(la, j);
+    if (i === 0 && j === 0) p *= 1 - lh * la * RHO;
+    else if (i === 0 && j === 1) p *= 1 + lh * RHO;
+    else if (i === 1 && j === 0) p *= 1 + la * RHO;
+    else if (i === 1 && j === 1) p *= 1 - RHO;
+    m.push([i, j, p]); tot += p;
+  }
+  let ph = 0, pd = 0, pa = 0, acc = 0;
+  const cum = m.map(([i, j, p]) => { p /= tot; if (i > j) ph += p; else if (i === j) pd += p; else pa += p; acc += p; return [i, j, p, acc]; });
+  const r = { ph, pd, pa, lh, la, cum };
+  cache.set(key, r);
+  return r;
+}
+function sample(mm) {
+  const u = Math.random(), c = mm.cum;
+  let lo = 0, hi = c.length - 1;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (c[mid][3] < u) lo = mid + 1; else hi = mid; }
+  return [c[lo][0], c[lo][1]];
+}
+// Pronóstico "por lógica": si el partido está parejo, empate; si no, el favorito con su marcador más probable.
+function aiPick(mm) {
+  let outcome;
+  if (Math.abs(mm.ph - mm.pa) < 0.09 && mm.pd >= 0.26) outcome = "d";
+  else outcome = mm.ph >= mm.pa ? "h" : "a";
+  let best = null;
+  for (const [i, j, p] of mm.cum) {
+    const o = i > j ? "h" : i === j ? "d" : "a";
+    if (o === outcome && (!best || p > best[2])) best = [i, j, p];
+  }
+  return [best[0], best[1]];
+}
+// Probabilidad de que "home" pase la llave a partido único (empate → penales 50/50).
+function advanceProb(hId, aId, neutral) { const m = model(hId, aId, neutral); return m.ph + m.pd * 0.5; }
+
+/* ===================== TABLAS ===================== */
+function emptyRow(t, kind) {
+  const b = kind === "an" ? t.an : t.cl;
+  return { id: t.id, n: t.n, z: t.z, pj: b[0], pts: b[1], dg: b[2], gf: kind === "an" ? 0 : (b[3] || 0), add: 0 };
+}
+function applyResult(row, gf, gc) {
+  row.pj++; row.dg += gf - gc; row.gf += gf;
+  const p = gf > gc ? 3 : gf === gc ? 1 : 0; row.pts += p; row.add += p;
+}
+const cmp = (a, b) => b.pts - a.pts || b.dg - a.dg || b.gf - a.gf || a.n.localeCompare(b.n, "es");
+function standings(res) {
+  const zone = {}, annual = {};
+  for (const t of teams) { zone[t.id] = emptyRow(t, "cl"); annual[t.id] = emptyRow(t, "an"); }
+  for (const m of MATCHES) {
+    const r = res[m.id]; if (!r) continue;
+    applyResult(zone[m.h], r[0], r[1]); applyResult(zone[m.a], r[1], r[0]);
+    applyResult(annual[m.h], r[0], r[1]); applyResult(annual[m.a], r[1], r[0]);
+  }
+  const A = Object.values(zone).filter(r => r.z === "A").sort(cmp);
+  const B = Object.values(zone).filter(r => r.z === "B").sort(cmp);
+  const AN = Object.values(annual).sort(cmp);
+  return { A, B, AN };
+}
+function baseOrder(kind) {
+  const rows = teams.map(t => emptyRow(t, kind === "an" ? "an" : "cl"));
+  if (kind === "an") return rows.sort(cmp).map(r => r.id);
+  return rows.filter(r => r.z === kind).sort(cmp).map(r => r.id);
+}
+
+/* ===================== PLAYOFFS =====================
+   Octavos: 1A-8B, 2A-7B, 3A-6B, 4A-5B, 1B-8A, 2B-7A, 3B-6A, 4B-5A (local el mejor ubicado).
+   Cuadro: [1A-8B / 4B-5A] [2B-7A / 3A-6B] | [1B-8A / 4A-5B] [2A-7B / 3B-6A]. Final en cancha neutral. */
+const R16 = [["A",1,"B",8],["B",4,"A",5],["B",2,"A",7],["A",3,"B",6],["B",1,"A",8],["A",4,"B",5],["A",2,"B",7],["B",3,"A",6]];
+function seedInfo(st) {
+  const s = {};
+  st.A.forEach((r, i) => s[r.id] = { z: "A", p: i + 1 });
+  st.B.forEach((r, i) => s[r.id] = { z: "B", p: i + 1 });
+  st.AN.forEach((r, i) => s[r.id].an = i + 1);
+  return s;
+}
+const better = (s, x, y) => (s[x].p < s[y].p || (s[x].p === s[y].p && s[x].an < s[y].an)) ? [x, y] : [y, x];
+function bracket(st, pick) {
+  const s = seedInfo(st);
+  const ties = [];
+  const r16 = R16.map(([z1, p1, z2, p2], i) => {
+    const x = (z1 === "A" ? st.A : st.B)[p1 - 1].id, y = (z2 === "A" ? st.A : st.B)[p2 - 1].id;
+    const [h, a] = better(s, x, y);
+    const t = { id: "o" + i, round: 0, h, a, neutral: false }; t.w = pick(t); ties.push(t); return t;
+  });
+  const mk = (id, round, t1, t2, neutral) => {
+    if (!t1.w || !t2.w) { const t = { id, round, h: t1.w || null, a: t2.w || null, neutral }; ties.push(t); return t; }
+    const [h, a] = neutral ? [t1.w, t2.w] : better(s, t1.w, t2.w);
+    const t = { id, round, h, a, neutral }; t.w = pick(t); ties.push(t); return t;
+  };
+  const qf = [0, 1, 2, 3].map(i => mk("q" + i, 1, r16[2 * i], r16[2 * i + 1], false));
+  const sf = [0, 1].map(i => mk("s" + i, 2, qf[2 * i], qf[2 * i + 1], false));
+  const fin = mk("f", 3, sf[0], sf[1], true);
+  return { ties, champ: fin.w || null, seeds: s };
+}
+
+/* ===================== CUPOS INTERNACIONALES =====================
+   1°-3° de la Anual → Libertadores; 4°-9° → Sudamericana.
+   Belgrano (campeón Apertura) y el campeón del Clausura ya tienen Libertadores por título:
+   se los saca de la Anual y los cupos corren al siguiente (si estaban en el top 9). */
+function cupos(anOrder, clausuraChamp) {
+  const champs = new Set([APERTURA_CHAMP, clausuraChamp].filter(Boolean));
+  const pool = anOrder.filter(id => !champs.has(id));
+  return { champs: [...champs], lib: pool.slice(0, 3), sud: pool.slice(3, 9) };
+}
+
+/* ===================== RENDER: PARTIDOS ===================== */
+const pct = x => Math.round(x * 100) + "%";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function renderChips() {
+  const opts = [["all", "Todas"], ["14", "Fecha 14"], ["15", "Fecha 15"], ["16", "Fecha 16"]];
+  document.getElementById("fecha-chips").innerHTML = opts.map(([v, l]) =>
+    `<button class="chip" type="button" data-f="${v}" aria-pressed="${fechaFilter === v}">${l}</button>`).join("");
+}
+function matchHTML(m) {
+  const mm = model(m.h, m.a), r = results[m.id], H = T(m.h), A = T(m.a);
+  const top = Math.max(mm.ph, mm.pd, mm.pa);
+  const fav = mm.ph >= mm.pa ? H : A, favP = Math.max(mm.ph, mm.pa);
+  const pick = aiPick(mm);
+  const label = (Math.abs(mm.ph - mm.pa) < 0.09 && mm.pd >= 0.26) ? `Partido parejo: <b>empate</b> probable` : `Favorito: <b>${esc(fav.n)}</b> (${pct(favP)})`;
+  const cls = k => (k === top ? "top" : "");
+  return `<div class="match${r ? " done" : ""}" data-m="${m.id}">
+    <div class="team-n home" title="${esc(H.n)}">${mm.ph > mm.pa ? '<span class="fav">●</span> ' : ""}${esc(H.n)}</div>
+    <div class="score">
+      <input id="${m.id}-h" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(H.n)}" value="${r ? r[0] : ""}" class="${r && aiFilled[m.id] ? "ai" : ""}" data-side="0">
+      <span>–</span>
+      <input id="${m.id}-a" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(A.n)}" value="${r ? r[1] : ""}" class="${r && aiFilled[m.id] ? "ai" : ""}" data-side="1">
+    </div>
+    <div class="team-n" title="${esc(A.n)}">${esc(A.n)}${mm.pa > mm.ph ? ' <span class="fav">●</span>' : ""}</div>
+    <div class="probs">
+      <div class="bar" role="img" aria-label="Local ${pct(mm.ph)}, empate ${pct(mm.pd)}, visitante ${pct(mm.pa)}">
+        <i class="h" style="width:${mm.ph * 100}%"></i><i class="d" style="width:${mm.pd * 100}%"></i><i class="a" style="width:${mm.pa * 100}%"></i>
+      </div>
+      <div class="plabels"><span class="${cls(mm.ph)}">L <b>${pct(mm.ph)}</b></span><span class="${cls(mm.pd)}">E <b>${pct(mm.pd)}</b></span><span class="${cls(mm.pa)}">V <b>${pct(mm.pa)}</b></span></div>
+    </div>
+    <div class="verdict">${label} · IA: <b>${pick[0]}-${pick[1]}</b> · goles esperados ${mm.lh.toFixed(1)}–${mm.la.toFixed(1)}</div>
+  </div>`;
+}
+function renderFixture() {
+  const out = [];
+  for (const f of [14, 15, 16]) {
+    if (fechaFilter !== "all" && fechaFilter !== String(f)) continue;
+    const ms = MATCHES.filter(m => m.f === f);
+    const done = ms.filter(m => results[m.id]).length;
+    out.push(`<div class="fecha"><div class="fecha-h">Fecha ${f} <span class="sub" style="font:500 13px var(--font-body);color:var(--muted);text-transform:none;letter-spacing:0">${done}/${ms.length} cargados</span></div>`);
+    for (const [g, l] of [["A", "Zona A"], ["B", "Zona B"], ["I", "Interzonal"]]) {
+      out.push(`<div class="group-l">${l}</div>`);
+      ms.filter(m => m.g === g).forEach(m => out.push(matchHTML(m)));
+    }
+    out.push(`</div>`);
+  }
+  document.getElementById("fixture").innerHTML = out.join("");
+}
+
+/* ===================== RENDER: TABLAS ===================== */
+function moveTag(id, newPos, order) {
+  const old = order.indexOf(id) + 1; const d = old - newPos;
+  if (!d) return "";
+  return `<span class="mv ${d > 0 ? "up" : "down"}">${d > 0 ? "▲" : "▼"}${Math.abs(d)}</span>`;
+}
+function renderZone(z, st) {
+  const rows = z === "A" ? st.A : st.B, other = z === "A" ? "B" : "A";
+  const order = baseOrder(z);
+  const html = rows.map((r, i) => {
+    const pos = i + 1, rival = pos <= 8 ? `${9 - pos}° ${other} (${esc((other === "A" ? st.A : st.B)[8 - pos].n)})` : "";
+    return `<tr class="${pos <= 8 ? "in" : ""}${pos === 8 ? " cut" : ""}">
+      <td class="pos">${pos}</td>
+      <td class="l team">${esc(r.n)}${r.id === APERTURA_CHAMP ? '<span class="tag champ">Camp. Apertura</span>' : ""}${moveTag(r.id, pos, order)}</td>
+      <td>${r.pj}</td><td>${r.gf}</td><td>${r.dg > 0 ? "+" : ""}${r.dg}</td>
+      <td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
+      <td class="l cross">${rival ? "vs " + rival : ""}</td>
+    </tr>`;
+  }).join("");
+  document.getElementById("pane-zona-" + z.toLowerCase()).innerHTML = `
+    <div class="panel-h"><h2>Clausura · Zona ${z}</h2><span class="sub">Los 8 primeros van a octavos · cruce con la Zona ${other}</span></div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>#</th><th class="l">Equipo</th><th>PJ</th><th>GF</th><th>DG</th><th>Pts</th><th class="l">Octavos</th></tr></thead>
+      <tbody>${html}</tbody></table></div>
+    <div class="legend"><span style="--c:var(--accent)">Clasifica a playoffs (1° a 8°)</span><span>▲▼ cambio respecto a la tabla actual</span><span>+N puntos sumados en fechas 14-16</span></div>`;
+}
+function currentBracket(st) {
+  return bracket(st, t => {
+    const w = poWinners[t.id];
+    return (w === t.h || w === t.a) ? w : null;
+  });
+}
+function renderAnnual(st, br) {
+  const order = baseOrder("an");
+  const an = st.AN.map(r => r.id);
+  const c = cupos(an, br.champ);
+  const lib = new Set(c.lib), sud = new Set(c.sud), champs = new Set(c.champs);
+  const last = an[an.length - 1];
+  const rows = st.AN.map((r, i) => {
+    const pos = i + 1;
+    let tag = "", band = "";
+    if (r.id === APERTURA_CHAMP) { tag += '<span class="tag champ">Camp. Apertura · Lib.</span>'; band = "rowband-lib"; }
+    if (r.id === br.champ && r.id !== APERTURA_CHAMP) { tag += '<span class="tag champ">Camp. Clausura · Lib.</span>'; band = "rowband-lib"; }
+    if (lib.has(r.id)) { tag += '<span class="tag lib">Libertadores</span>'; band = "rowband-lib"; }
+    if (sud.has(r.id)) { tag += '<span class="tag sud">Sudamericana</span>'; band = "rowband-sud"; }
+    if (r.id === last) { tag += '<span class="tag desc">Desciende</span>'; band = "rowband-desc"; }
+    return `<tr class="${band}">
+      <td class="pos">${pos}</td>
+      <td class="l team">${esc(r.n)}${moveTag(r.id, pos, order)}${tag}</td>
+      <td>${r.z}</td><td>${r.pj}</td><td>${r.dg > 0 ? "+" : ""}${r.dg}</td>
+      <td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
+    </tr>`;
+  }).join("");
+  const nm = id => esc(T(id).n);
+  const pos = id => an.indexOf(id) + 1;
+  const champTxt = br.champ ? `${nm(br.champ)} (${pos(br.champ)}° en la Anual)` : "a definir: elegí los ganadores en Playoffs o usá «Completar todo con IA»";
+  document.getElementById("pane-anual").innerHTML = `
+    <div class="panel-h"><h2>Tabla Anual 2026</h2><span class="sub">Apertura + Clausura · solo suman las fechas 14-16, no los playoffs</span></div>
+    <p class="rule">Del 1° al 3° van a Libertadores y del 4° al 9° a Sudamericana. Belgrano (campeón del Apertura) y el campeón del Clausura ya tienen Libertadores: si están en el top 9 liberan su lugar y el cupo corre al siguiente (4° a Libertadores y/o 10° a Sudamericana).</p>
+    <div class="cupos">
+      <div class="cupo-box lib"><h3>Copa Libertadores</h3><ol>
+        <li>${nm(APERTURA_CHAMP)} <small>· campeón Apertura (${pos(APERTURA_CHAMP)}°)</small></li>
+        ${br.champ && br.champ !== APERTURA_CHAMP ? `<li>${nm(br.champ)} <small>· campeón Clausura (${pos(br.champ)}°)</small></li>` : br.champ ? "" : `<li><small>Campeón Clausura: ${champTxt}</small></li>`}
+        ${c.lib.map(id => `<li>${nm(id)} <small>· ${pos(id)}° Anual</small></li>`).join("")}
+      </ol></div>
+      <div class="cupo-box sud"><h3>Copa Sudamericana</h3><ol>
+        ${c.sud.map(id => `<li>${nm(id)} <small>· ${pos(id)}° Anual</small></li>`).join("")}
+      </ol></div>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>#</th><th class="l">Equipo</th><th>Zona</th><th>PJ</th><th>DG</th><th>Pts</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    <div class="legend"><span style="--c:var(--lib)">Libertadores</span><span style="--c:var(--sud)">Sudamericana</span><span style="--c:var(--danger)">Descenso (último de la Anual)</span></div>`;
+}
+function renderPlayoffs(st, br) {
+  const s = br.seeds;
+  const names = ["Octavos", "Cuartos", "Semifinales", "Final"];
+  const cols = [0, 1, 2, 3].map(round => {
+    const ts = br.ties.filter(t => t.round === round);
+    return `<div class="round"><h3>${names[round]}</h3><div class="ties">${ts.map(t => tieHTML(t, s)).join("")}</div></div>`;
+  }).join("");
+  const filled = MATCHES.filter(m => results[m.id]).length;
+  document.getElementById("pane-playoffs").innerHTML = `
+    <div class="panel-h"><h2>Playoffs Clausura</h2><span class="sub">${filled < MATCHES.length ? `Proyección con ${filled}/${MATCHES.length} resultados cargados` : "Con todos los resultados cargados"} · tocá un equipo para hacerlo avanzar</span></div>
+    <p class="rule">Partido único, local el mejor ubicado. 1° vs 8° de la otra zona, 2° vs 7°, 3° vs 6°, 4° vs 5°. El % es la chance de pasar la llave (si empatan, penales 50/50). La final es en cancha neutral.</p>
+    <div class="bracket">${cols}</div>
+    ${br.champ ? `<div class="champion"><div><div class="lbl">Campeón del Clausura</div><div class="big">${esc(T(br.champ).n)}</div></div><span class="cross">Clasifica a la Libertadores por título${br.champ === APERTURA_CHAMP ? " (ya lo tenía por el Apertura, así que no libera un cupo nuevo)" : ""}.</span></div>` : ""}`;
+}
+function tieHTML(t, s) {
+  const row = (id, other) => {
+    if (!id) return `<button type="button" disabled><span class="seed"></span><span class="nm">A definir</span><span class="pr"></span></button>`;
+    const p = other ? (id === t.h ? advanceProb(t.h, t.a, t.neutral) : 1 - advanceProb(t.h, t.a, t.neutral)) : null;
+    const cls = t.w ? (t.w === id ? "win" : "lose") : "";
+    return `<button type="button" class="${cls}" data-tie="${t.id}" data-team="${id}" ${other ? "" : "disabled"}>
+      <span class="seed">${s[id].p}${s[id].z}</span><span class="nm">${esc(T(id).n)}</span><span class="pr">${p == null ? "" : pct(p)}</span></button>`;
+  };
+  return `<div class="tie">${row(t.h, t.a)}${row(t.a, t.h)}</div>`;
+}
+
+/* ===================== PROYECCIÓN (Monte Carlo) ===================== */
+function runProjection(N = 10000) {
+  const ids = teams.map(t => t.id);
+  const acc = Object.fromEntries(ids.map(id => [id, { po: 0, first: 0, lib: 0, sud: 0, champ: 0, desc: 0, pts: 0 }]));
+  const pending = MATCHES.filter(m => !results[m.id]).map(m => [m, model(m.h, m.a)]);
+  const fixed = {};
+  for (const m of MATCHES) if (results[m.id]) fixed[m.id] = results[m.id];
+  for (let n = 0; n < N; n++) {
+    const res = Object.assign({}, fixed);
+    for (const [m, mm] of pending) res[m.id] = sample(mm);
+    const st = standings(res);
+    st.A.slice(0, 8).forEach(r => acc[r.id].po++); st.B.slice(0, 8).forEach(r => acc[r.id].po++);
+    acc[st.A[0].id].first++; acc[st.B[0].id].first++;
+    const br = bracket(st, t => Math.random() < advanceProb(t.h, t.a, t.neutral) ? t.h : t.a);
+    acc[br.champ].champ++;
+    const an = st.AN.map(r => r.id);
+    const c = cupos(an, br.champ);
+    for (const id of c.champs) acc[id].lib++;
+    c.lib.forEach(id => acc[id].lib++); c.sud.forEach(id => acc[id].sud++);
+    acc[an[an.length - 1]].desc++;
+    st.AN.forEach(r => acc[r.id].pts += r.pts);
+  }
+  for (const id of ids) for (const k in acc[id]) acc[id][k] /= N;
+  projection = { acc, N, at: new Date() };
+}
+function renderProjection() {
+  const el = document.getElementById("pane-proyeccion");
+  if (!projection) runProjection();
+  const { acc, N } = projection;
+  const rows = teams.slice().sort((a, b) => acc[b.id].pts - acc[a.id].pts || acc[b.id].lib - acc[a.id].lib);
+  const cell = (v, c) => `<td class="pct" style="--c:${c}"><i style="width:${Math.round(v * 100)}%"></i><span>${v < 0.005 && v > 0 ? "<1%" : Math.round(v * 100) + "%"}</span></td>`;
+  el.innerHTML = `
+    <div class="panel-h"><h2>Proyección</h2><span class="sub">${N.toLocaleString("es-AR")} simulaciones de los partidos sin resultado y de los playoffs</span></div>
+    <p class="rule">Chances de cada equipo según el modelo de probabilidades. Los resultados que cargaste quedan fijos. Libertadores incluye los cupos por título (Belgrano y campeón del Clausura).</p>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th class="l">Equipo</th><th>Zona</th><th>Pts Anual (prom.)</th><th>Playoffs</th><th>1° de zona</th><th>Campeón</th><th>Libertadores</th><th>Sudamericana</th><th>Desc.</th></tr></thead>
+      <tbody>${rows.map(t => `<tr><td class="l team">${esc(t.n)}</td><td>${t.z}</td><td>${acc[t.id].pts.toFixed(1)}</td>
+        ${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].first, "var(--accent)")}${cell(acc[t.id].champ, "var(--lib)")}
+        ${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].desc, "var(--danger)")}</tr>`).join("")}</tbody>
+    </table></div>
+    <div style="margin-top:12px"><button class="btn" type="button" id="btn-proj">Volver a simular</button></div>`;
+}
+
+/* ===================== RENDER: DATOS ===================== */
+function renderData() {
+  const rows = teams.map((t, i) => `<tr>
+    <td class="l team">${esc(t.n)}</td><td>${t.z}</td>
+    ${[0, 1, 2, 3].map(k => `<td><input id="d-${t.id}-cl${k}" data-i="${i}" data-k="cl" data-j="${k}" inputmode="numeric" value="${t.cl[k]}"></td>`).join("")}
+    ${[0, 1, 2].map(k => `<td><input id="d-${t.id}-an${k}" data-i="${i}" data-k="an" data-j="${k}" inputmode="numeric" value="${t.an[k]}"></td>`).join("")}
+  </tr>`).join("");
+  document.getElementById("pane-datos").innerHTML = `
+    <div class="panel-h"><h2>Datos de partida</h2><span class="sub">Tablas antes de la fecha 14 · los cambios recalculan todo</span></div>
+    <p class="rule">Si promiedos muestra otro número (por ejemplo, un partido pendiente de la fecha 13), corregilo acá. Los cambios quedan guardados en este navegador.</p>
+    <div class="tbl-wrap data-tbl"><table>
+      <thead><tr><th class="l">Equipo</th><th>Zona</th><th>Cl. PJ</th><th>Cl. Pts</th><th>Cl. DG</th><th>Cl. GF</th><th>An. PJ</th><th>An. Pts</th><th>An. DG</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" type="button" id="btn-reset-data">Restablecer datos originales</button>
+    </div>`;
+}
+
+/* ===================== ORQUESTACIÓN ===================== */
+function renderTables() {
+  const st = standings(results);
+  const br = currentBracket(st);
+  // Limpia ganadores que ya no corresponden a la llave
+  for (const t of br.ties) if (poWinners[t.id] && poWinners[t.id] !== t.h && poWinners[t.id] !== t.a) delete poWinners[t.id];
+  renderZone("A", st); renderZone("B", st); renderAnnual(st, br); renderPlayoffs(st, br);
+  if (activeTab === "proyeccion") renderProjection();
+}
+function renderAll() {
+  renderChips(); renderFixture(); renderTables(); renderData(); showTab(activeTab);
+  const done = MATCHES.filter(m => results[m.id]).length;
+  document.getElementById("data-note").innerHTML =
+    `<b>Datos al ${DATA_DATE}</b>, después de la fecha 13 (puede quedar algún partido pendiente de esa fecha). Puntos verificados en medios; algunas diferencias de gol son aproximadas. Si algo no coincide con promiedos, corregilo en la pestaña <b>Datos</b>. Cargados: <b>${done}/${MATCHES.length}</b> partidos.`;
+}
+function invalidate() { projection = null; cache.clear(); }
+const wide = matchMedia("(min-width: 1100px)");
+function showTab(tab) {
+  if (wide.matches && tab === "partidos") tab = "zona-a";
+  activeTab = tab;
+  document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
+  document.querySelectorAll(".pane").forEach(p => p.hidden = p.dataset.pane !== tab);
+  if (tab === "proyeccion") renderProjection();
+  save();
+}
+let toastT;
+function toast(msg) {
+  const el = document.getElementById("toast"); el.textContent = msg; el.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove("show"), 2200);
+}
+
+function fillAI() {
+  let n = 0;
+  for (const m of MATCHES) if (!results[m.id]) { results[m.id] = aiPick(model(m.h, m.a)); aiFilled[m.id] = true; n++; }
+  // Playoffs: avanza el favorito de cada llave
+  poWinners = {};
+  const st = standings(results);
+  const br = bracket(st, t => advanceProb(t.h, t.a, t.neutral) >= 0.5 ? t.h : t.a);
+  for (const t of br.ties) if (t.w) poWinners[t.id] = t.w;
+  projection = null; save(); renderAll();
+  toast(n ? `IA completó ${n} partidos y los playoffs` : "Playoffs completados con el favorito de cada llave");
+}
+function fillRandom() {
+  for (const m of MATCHES) if (!results[m.id] || aiFilled[m.id]) { results[m.id] = sample(model(m.h, m.a)); aiFilled[m.id] = true; }
+  poWinners = {};
+  const st = standings(results);
+  const br = bracket(st, t => Math.random() < advanceProb(t.h, t.a, t.neutral) ? t.h : t.a);
+  for (const t of br.ties) if (t.w) poWinners[t.id] = t.w;
+  projection = null; save(); renderAll();
+  toast("Simulación al azar según las probabilidades");
+}
+
+document.addEventListener("click", e => {
+  const tab = e.target.closest(".tab"); if (tab) return showTab(tab.dataset.tab);
+  const chip = e.target.closest(".chip"); if (chip) { fechaFilter = chip.dataset.f; renderChips(); renderFixture(); return; }
+  const tieBtn = e.target.closest("button[data-tie]");
+  if (tieBtn) {
+    const id = tieBtn.dataset.tie;
+    poWinners[id] = poWinners[id] === tieBtn.dataset.team ? undefined : tieBtn.dataset.team;
+    if (!poWinners[id]) delete poWinners[id];
+    projection = null; save(); renderTables(); return;
+  }
+  if (e.target.closest("#btn-ia")) return fillAI();
+  if (e.target.closest("#btn-rand")) return fillRandom();
+  if (e.target.closest("#btn-clear")) {
+    results = {}; aiFilled = {}; poWinners = {}; projection = null; save(); renderAll(); toast("Resultados borrados"); return;
+  }
+  if (e.target.closest("#btn-proj")) { projection = null; renderProjection(); toast("Proyección actualizada"); return; }
+  if (e.target.closest("#btn-reset-data")) {
+    teams = structuredClone(BASE_TEAMS); invalidate(); save(); renderAll(); toast("Datos originales restablecidos"); return;
+  }
+});
+document.addEventListener("input", e => {
+  const inp = e.target;
+  if (inp.matches(".score input")) {
+    inp.value = inp.value.replace(/\D/g, "").slice(0, 2);
+    const box = inp.closest(".match"), id = box.dataset.m;
+    const [h, a] = box.querySelectorAll("input");
+    delete aiFilled[id]; h.classList.remove("ai"); a.classList.remove("ai");
+    if (h.value !== "" && a.value !== "") { results[id] = [+h.value, +a.value]; box.classList.add("done"); }
+    else { delete results[id]; box.classList.remove("done"); }
+    projection = null; save(); renderTables();
+    const done = MATCHES.filter(m => results[m.id]).length;
+    document.querySelector("#data-note b:last-child").textContent = `${done}/${MATCHES.length}`;
+    if (inp.dataset.side === "0" && inp.value !== "") a.focus(), a.select();
+  } else if (inp.matches(".data-tbl input")) {
+    const v = parseInt(inp.value, 10);
+    if (Number.isNaN(v)) return;
+    teams[+inp.dataset.i][inp.dataset.k][+inp.dataset.j] = v;
+    invalidate(); save(); renderFixture(); renderTables();
+  }
+});
+
+load();
+renderAll();
+</script>
+</body>
+</html>
