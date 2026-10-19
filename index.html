@@ -312,6 +312,10 @@ tr.in td.pos { color: var(--accent); }
 .proj-split .pc .meter { width: 52px; }
 .proj-split .ptable td.team { min-width: 150px; }
 .proj-split .ptable td { padding: 7px 8px; }
+.proj-split table.fixed { table-layout: fixed; min-width: 620px; }
+.proj-split col.c-rk { width: 36px; }
+.proj-split col.c-pc { width: 14%; }
+.proj-split .ptable td.team { overflow: hidden; text-overflow: ellipsis; }
 @media (min-width: 1400px) {
   .proj.compact-w { max-width: 1560px; }
   .proj-split { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
@@ -1329,7 +1333,9 @@ function projTable() {
   if (projCompact) {
     const order = teams.slice().sort((a, b) => acc[b.id].champ + acc[b.id].liga - acc[a.id].champ - acc[a.id].liga || acc[b.id].lib - acc[a.id].lib || acc[b.id].po - acc[a.id].po);
     // En pantallas anchas va en dos columnas de 15; en el celular, una debajo de la otra.
-    const half = (from, to) => `<div class="tbl-wrap ptable"><table>
+    // Mismos anchos de columna en las dos mitades para que queden alineadas cuando van una debajo de la otra.
+    const cols = `<colgroup><col class="c-rk"><col class="c-team">${"<col class=\"c-pc\">".repeat(5)}</colgroup>`;
+    const half = (from, to) => `<div class="tbl-wrap ptable"><table class="fixed">${cols}
       <thead><tr><th></th><th class="l">Equipo</th><th>Playoffs</th><th>Sudamericana</th><th>Libertadores</th><th>Campeón Clausura</th><th>Campeón de Liga</th></tr></thead>
       <tbody>${order.slice(from, to).map((t, i) => `<tr>${team(t, from + i)}${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].champ, "var(--lib)")}${cell(acc[t.id].liga, "var(--lib)")}</tr>`).join("")}</tbody>
     </table></div>`;
