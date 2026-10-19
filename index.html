@@ -470,6 +470,7 @@ tr.in td.pos { color: var(--accent); }
     <button class="tab" role="tab" data-tab="zona-a" id="tab-zona-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Zona A</button>
     <button class="tab" role="tab" data-tab="zona-b" id="tab-zona-b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Zona B</button>
     <button class="tab" role="tab" data-tab="anual" id="tab-anual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Tabla Anual</button>
+    <button class="tab" role="tab" data-tab="promedios" id="tab-promedios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Promedios</button>
     <button class="tab" role="tab" data-tab="playoffs" id="tab-playoffs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h5v6H3M3 13h5v6H3M8 8h4v8H8M12 12h5M17 9h4v6h-4z"/></svg>Playoffs</button>
     <button class="tab" role="tab" data-tab="copas" id="tab-copas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 21h8"/></svg>Copas</button>
     <button class="tab" role="tab" data-tab="proyeccion" id="tab-proyeccion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></svg>Probabilidades</button>
@@ -489,6 +490,7 @@ tr.in td.pos { color: var(--accent); }
       <section class="pane" data-pane="zona-a" id="pane-zona-a"></section>
       <section class="pane" data-pane="zona-b" id="pane-zona-b"></section>
       <section class="pane" data-pane="anual" id="pane-anual"></section>
+      <section class="pane" data-pane="promedios" id="pane-promedios"></section>
       <section class="pane" data-pane="playoffs" id="pane-playoffs"></section>
       <section class="pane" data-pane="copas" id="pane-copas"></section>
       <section class="pane" data-pane="proyeccion" id="pane-proyeccion"></section>
@@ -504,43 +506,43 @@ tr.in td.pos { color: var(--accent); }
 /* ===================== DATOS BASE (al 19/10/2026, tras la fecha 13) =====================
    Fuente: promiedos.com.ar (19/10, antes de los 3 partidos pendientes de la fecha 13).
    cl: Clausura [PJ, Pts, DG, GF]   an: Tabla Anual [PJ, Pts, DG, GF]   f: últimos 4 (más reciente primero)
-   pr: promedios, puntos y partidos de 2024 y 2025 [Pts, PJ] (el promedio suma los de 2026)
+   pr: promedios, puntos y partidos de 2024 y 2025 [Pts, PJ] (el promedio suma los de 2026) · py: puntos 2024 y 2025 por separado
    Editables desde la pestaña "Datos". */
 const DATA_DATE = "19/10/2026";
 const DATA_SRC = "promiedos";
 const BASE_TEAMS = [
   // Zona A
-  { id: "ins", n: "Instituto", z: "A", cl: [13, 29, 10, 20], an: [29, 50, 10, 37], f: "VEVV", pr: [87, 73] },
-  { id: "boc", n: "Boca Juniors", z: "A", cl: [13, 24, 7, 21], an: [29, 54, 20, 43], f: "VEVV", pr: [129, 73] },
-  { id: "dyj", n: "Defensa y Justicia", z: "A", cl: [13, 24, 6, 18], an: [29, 43, 3, 36], f: "DVVE", pr: [96, 73] },
-  { id: "vel", n: "Vélez", z: "A", cl: [13, 24, 5, 18], an: [29, 52, 11, 36], f: "VDEV", pr: [116, 73] },
-  { id: "lan", n: "Lanús", z: "A", cl: [13, 23, 7, 16], an: [29, 47, 10, 34], f: "VVEV", pr: [109, 73] },
-  { id: "gim", n: "Gimnasia (M)", z: "A", cl: [13, 20, 2, 15], an: [29, 39, -6, 29], f: "DVDE", pr: [0, 0] },
-  { id: "ind", n: "Independiente", z: "A", cl: [13, 19, -1, 12], an: [29, 43, 3, 36], f: "EEDV", pr: [110, 73] },
-  { id: "new", n: "Newell's", z: "A", cl: [12, 17, 2, 11], an: [28, 32, -10, 26], f: "DEVE", pr: [82, 73] },
-  { id: "slo", n: "San Lorenzo", z: "A", cl: [13, 17, -5, 7], an: [29, 39, -5, 21], f: "VVDD", pr: [96, 73] },
-  { id: "est", n: "Estudiantes (LP)", z: "A", cl: [13, 14, 1, 16], an: [29, 45, 13, 35], f: "DEVD", pr: [105, 73] },
-  { id: "uni", n: "Unión", z: "A", cl: [12, 13, -4, 17], an: [28, 34, 0, 41], f: "DDDD", pr: [99, 73] },
-  { id: "rie", n: "Dep. Riestra", z: "A", cl: [12, 11, -3, 9], an: [28, 22, -10, 14], f: "DEED", pr: [100, 73] },
-  { id: "pla", n: "Platense", z: "A", cl: [13, 11, -7, 12], an: [29, 27, -12, 22], f: "DEED", pr: [92, 73] },
-  { id: "cco", n: "Central Córdoba", z: "A", cl: [12, 10, -6, 10], an: [28, 26, -16, 21], f: "EEED", pr: [84, 73] },
-  { id: "tal", n: "Talleres", z: "A", cl: [13, 9, -8, 12], an: [29, 35, -4, 29], f: "DEDD", pr: [106, 73] },
+  { id: "ins", n: "Instituto", z: "A", cl: [13, 29, 10, 20], an: [29, 50, 10, 37], f: "VEVV", pr: [87, 73], py: [53, 34] },
+  { id: "boc", n: "Boca Juniors", z: "A", cl: [13, 24, 7, 21], an: [29, 54, 20, 43], f: "VEVV", pr: [129, 73], py: [67, 62] },
+  { id: "dyj", n: "Defensa y Justicia", z: "A", cl: [13, 24, 6, 18], an: [29, 43, 3, 36], f: "DVVE", pr: [96, 73], py: [58, 38] },
+  { id: "vel", n: "Vélez", z: "A", cl: [13, 24, 5, 18], an: [29, 52, 11, 36], f: "VDEV", pr: [116, 73], py: [76, 40] },
+  { id: "lan", n: "Lanús", z: "A", cl: [13, 23, 7, 16], an: [29, 47, 10, 34], f: "VVEV", pr: [109, 73], py: [59, 50] },
+  { id: "gim", n: "Gimnasia (M)", z: "A", cl: [13, 20, 2, 15], an: [29, 39, -6, 29], f: "DVDE", pr: [0, 0], py: [0, 0] },
+  { id: "ind", n: "Independiente", z: "A", cl: [13, 19, -1, 12], an: [29, 43, 3, 36], f: "EEDV", pr: [110, 73], py: [63, 47] },
+  { id: "new", n: "Newell's", z: "A", cl: [12, 17, 2, 11], an: [28, 32, -10, 26], f: "DEVE", pr: [82, 73], py: [49, 33] },
+  { id: "slo", n: "San Lorenzo", z: "A", cl: [13, 17, -5, 7], an: [29, 39, -5, 21], f: "VVDD", pr: [96, 73], py: [45, 51] },
+  { id: "est", n: "Estudiantes (LP)", z: "A", cl: [13, 14, 1, 16], an: [29, 45, 13, 35], f: "DEVD", pr: [105, 73], py: [63, 42] },
+  { id: "uni", n: "Unión", z: "A", cl: [12, 13, -4, 17], an: [28, 34, 0, 41], f: "DDDD", pr: [99, 73], py: [60, 39] },
+  { id: "rie", n: "Dep. Riestra", z: "A", cl: [12, 11, -3, 9], an: [28, 22, -10, 14], f: "DEED", pr: [100, 73], py: [48, 52] },
+  { id: "pla", n: "Platense", z: "A", cl: [13, 11, -7, 12], an: [29, 27, -12, 22], f: "DEED", pr: [92, 73], py: [57, 35] },
+  { id: "cco", n: "Central Córdoba", z: "A", cl: [12, 10, -6, 10], an: [28, 26, -16, 21], f: "EEED", pr: [84, 73], py: [42, 42] },
+  { id: "tal", n: "Talleres", z: "A", cl: [13, 9, -8, 12], an: [29, 35, -4, 29], f: "DEDD", pr: [106, 73], py: [72, 34] },
   // Zona B
-  { id: "cen", n: "Rosario Central", z: "B", cl: [13, 25, 9, 20], an: [29, 53, 13, 40], f: "VVEV", pr: [113, 73] },
-  { id: "arg", n: "Argentinos", z: "B", cl: [13, 25, 6, 17], an: [29, 54, 10, 34], f: "VEVD", pr: [113, 73] },
-  { id: "bel", n: "Belgrano", z: "B", cl: [13, 22, 4, 14], an: [29, 48, 8, 31], f: "DVVV", pr: [86, 73] },
-  { id: "glp", n: "Gimnasia (LP)", z: "B", cl: [13, 22, 1, 19], an: [29, 48, 1, 38], f: "VEEE", pr: [86, 73] },
-  { id: "riv", n: "River Plate", z: "B", cl: [13, 20, 5, 18], an: [29, 49, 15, 40], f: "VEVD", pr: [123, 73] },
-  { id: "sar", n: "Sarmiento", z: "B", cl: [12, 20, 3, 21], an: [28, 39, -4, 34], f: "EVDE", pr: [70, 73] },
-  { id: "hur", n: "Huracán", z: "B", cl: [13, 19, 0, 12], an: [29, 41, 4, 29], f: "DDVV", pr: [109, 73] },
-  { id: "irv", n: "Ind. Rivadavia", z: "B", cl: [13, 19, -4, 17], an: [29, 53, 10, 46], f: "EDEV", pr: [89, 73] },
-  { id: "bar", n: "Barracas Central", z: "B", cl: [12, 18, 1, 10], an: [28, 39, 1, 25], f: "VVDE", pr: [98, 73] },
-  { id: "atu", n: "Atl. Tucumán", z: "B", cl: [13, 14, -1, 12], an: [29, 28, -6, 27], f: "DEDD", pr: [84, 73] },
-  { id: "tig", n: "Tigre", z: "B", cl: [13, 13, -2, 13], an: [29, 33, 1, 31], f: "EDDD", pr: [88, 73] },
-  { id: "ban", n: "Banfield", z: "B", cl: [13, 13, -5, 14], an: [29, 31, -7, 31], f: "DVEE", pr: [76, 73] },
-  { id: "rac", n: "Racing", z: "B", cl: [13, 12, -6, 14], an: [29, 33, -4, 31], f: "EDVV", pr: [123, 73] },
-  { id: "erc", n: "Estudiantes (RC)", z: "B", cl: [13, 9, -9, 8], an: [29, 14, -28, 13], f: "VDDD", pr: [0, 0] },
-  { id: "ald", n: "Aldosivi", z: "B", cl: [13, 8, -8, 14], an: [29, 16, -21, 20], f: "DDDV", pr: [33, 32] },
+  { id: "cen", n: "Rosario Central", z: "B", cl: [13, 25, 9, 20], an: [29, 53, 13, 40], f: "VVEV", pr: [113, 73], py: [47, 66] },
+  { id: "arg", n: "Argentinos", z: "B", cl: [13, 25, 6, 17], an: [29, 54, 10, 34], f: "VEVD", pr: [113, 73], py: [56, 57] },
+  { id: "bel", n: "Belgrano", z: "B", cl: [13, 22, 4, 14], an: [29, 48, 8, 31], f: "DVVV", pr: [86, 73], py: [49, 37] },
+  { id: "glp", n: "Gimnasia (LP)", z: "B", cl: [13, 22, 1, 19], an: [29, 48, 1, 38], f: "VEEE", pr: [86, 73], py: [48, 38] },
+  { id: "riv", n: "River Plate", z: "B", cl: [13, 20, 5, 18], an: [29, 49, 15, 40], f: "VEVD", pr: [123, 73], py: [70, 53] },
+  { id: "sar", n: "Sarmiento", z: "B", cl: [12, 20, 3, 21], an: [28, 39, -4, 34], f: "EVDE", pr: [70, 73], py: [35, 35] },
+  { id: "hur", n: "Huracán", z: "B", cl: [13, 19, 0, 12], an: [29, 41, 4, 29], f: "DDVV", pr: [109, 73], py: [62, 47] },
+  { id: "irv", n: "Ind. Rivadavia", z: "B", cl: [13, 19, -4, 17], an: [29, 53, 10, 46], f: "EDEV", pr: [89, 73], py: [46, 43] },
+  { id: "bar", n: "Barracas Central", z: "B", cl: [12, 18, 1, 10], an: [28, 39, 1, 25], f: "VVDE", pr: [98, 73], py: [49, 49] },
+  { id: "atu", n: "Atl. Tucumán", z: "B", cl: [13, 14, -1, 12], an: [29, 28, -6, 27], f: "DEDD", pr: [84, 73], py: [50, 34] },
+  { id: "tig", n: "Tigre", z: "B", cl: [13, 13, -2, 13], an: [29, 33, 1, 31], f: "EDDD", pr: [88, 73], py: [39, 49] },
+  { id: "ban", n: "Banfield", z: "B", cl: [13, 13, -5, 14], an: [29, 31, -7, 31], f: "DVEE", pr: [76, 73], py: [41, 35] },
+  { id: "rac", n: "Racing", z: "B", cl: [13, 12, -6, 14], an: [29, 33, -4, 31], f: "EDVV", pr: [123, 73], py: [70, 53] },
+  { id: "erc", n: "Estudiantes (RC)", z: "B", cl: [13, 9, -9, 8], an: [29, 14, -28, 13], f: "VDDD", pr: [0, 0], py: [0, 0] },
+  { id: "ald", n: "Aldosivi", z: "B", cl: [13, 8, -8, 14], an: [29, 16, -21, 20], f: "DDDV", pr: [33, 32], py: [0, 33] },
 ];
 const APERTURA_CHAMP = "bel"; // Belgrano, campeón del Apertura 2026
 
@@ -1158,6 +1160,36 @@ function renderAnnual(st, br, cups) {
       <tbody>${rows}</tbody></table></div>
     <div class="legend"><span style="--c:var(--lib)">Libertadores</span><span style="--c:var(--sud)">Sudamericana</span><span style="--c:var(--danger)">Descenso: último de la Anual y peor promedio (si es el mismo, el anteúltimo de la Anual)</span></div>`;
 }
+function renderPromedios(st) {
+  const rel = new Set(relegated(st)), last = st.AN[st.AN.length - 1].id;
+  const rows = st.AN.slice().sort((a, b) => promedio(b) - promedio(a) || b.pts - a.pts);
+  const worst = rows[rows.length - 1].id, base = baseOrderProm();
+  const html = rows.map((r, i) => {
+    const t = T(r.id), pr = t.pr || [0, 0], py = t.py || ["–", "–"], pos = i + 1;
+    let tag = "";
+    if (r.id === worst) tag = `<span class="tag desc">${r.id === last ? "Peor promedio y último de la Anual" : "Desciende por promedio"}</span>`;
+    else if (rel.has(r.id)) tag = `<span class="tag desc">Desciende por Tabla Anual</span>`;
+    return `<tr class="${rel.has(r.id) ? "rowband-desc" : ""}">
+      <td class="pos">${pos}</td>
+      <td class="l team">${tn(r.id)}${moveTag(r.id, pos, base)}${tag}</td>
+      <td class="pts">${promedio(r).toFixed(3).replace(".", ",")}</td>
+      <td>${pr[0] + r.pts}</td><td>${pr[1] + r.pj}</td>
+      <td class="num">${py[0]}</td><td class="num">${py[1]}</td>
+      <td>${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
+    </tr>`;
+  }).join("");
+  document.getElementById("pane-promedios").innerHTML = `
+    <div class="panel-h"><h2>Promedios</h2><span class="sub">Temporadas 2024, 2025 y 2026 · puntos ÷ partidos jugados</span></div>
+    <p class="rule">Desciende el peor promedio y el último de la Tabla Anual. Si son el mismo equipo, desciende también el anteúltimo de la Anual. Los puntos de 2026 suman lo que cargues o simules.</p>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>#</th><th class="l">Equipo</th><th>Prom.</th><th>Pts</th><th>PJ</th><th>2024</th><th>2025</th><th>2026</th></tr></thead>
+      <tbody>${html}</tbody></table></div>
+    <div class="legend"><span style="--c:var(--danger)">Desciende</span><span>▲▼ cambio respecto a los promedios actuales</span><span>+N puntos sumados en lo que falta</span></div>`;
+}
+function baseOrderProm() {
+  const rows = teams.map(t => emptyRow(t, "an"));
+  return rows.sort((a, b) => promedio(b) - promedio(a) || b.pts - a.pts).map(r => r.id);
+}
 function renderPlayoffs(st, br, cups) {
   const cols = bracketCols(br, cups);
   const filled = MATCHES.filter(m => results[m.id]).length;
@@ -1768,7 +1800,7 @@ function renderTables() {
   // Limpia ganadores que ya no corresponden a la llave
   for (const t of br.ties) if (poWinners[t.id] && poWinners[t.id] !== t.h && poWinners[t.id] !== t.a) delete poWinners[t.id];
   for (const t of cups.ties) if (cupPicks[t.id] && cupPicks[t.id] !== t.h && cupPicks[t.id] !== t.a) delete cupPicks[t.id];
-  renderZone("A", st); renderZone("B", st); renderAnnual(st, br, cups); renderPlayoffs(st, br, cups); renderCups(cups, st); renderSummary(st, br, cups);
+  renderZone("A", st); renderZone("B", st); renderAnnual(st, br, cups); renderPlayoffs(st, br, cups); renderCups(cups, st); renderSummary(st, br, cups); renderPromedios(st);
   if (activeTab === "proyeccion") renderProjection();
   applyFocus(st);
   if (!projection) scheduleProjection();
