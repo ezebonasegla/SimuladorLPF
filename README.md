@@ -7,6 +7,10 @@ Simulador de las últimas 3 fechas (14, 15 y 16) del Torneo Clausura 2026 de la 
   Belgrano (campeón Apertura) y el campeón del Clausura liberan su cupo si están en el top 9.
 - Probabilidades L/E/V de cada partido (Poisson + Dixon-Coles), botón "Completar todo con IA",
   simulación al azar y proyección Monte Carlo (10.000 simulaciones).
+- Copas: semifinales de Libertadores (Estudiantes), Sudamericana (Boca) y Copa Argentina; sus campeones
+  argentinos también liberan cupo de la Anual.
+- Modelo con contexto: momento (Clausura vs Apertura), cansancio por copas, historial y clásicos,
+  lo que se juega cada equipo y localía.
 - Pestaña "Datos" para corregir las tablas de partida.
 
 Abrí `index.html` en el navegador. No necesita build.
