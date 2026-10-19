@@ -472,42 +472,43 @@ tr.in td.pos { color: var(--accent); }
 /* ===================== DATOS BASE (al 19/10/2026, tras la fecha 13) =====================
    Fuente: promiedos.com.ar (19/10, antes de los 3 partidos pendientes de la fecha 13).
    cl: Clausura [PJ, Pts, DG, GF]   an: Tabla Anual [PJ, Pts, DG, GF]   f: últimos 4 (más reciente primero)
+   pr: promedios, puntos y partidos de 2024 y 2025 [Pts, PJ] (el promedio suma los de 2026)
    Editables desde la pestaña "Datos". */
 const DATA_DATE = "19/10/2026";
 const DATA_SRC = "promiedos";
 const BASE_TEAMS = [
   // Zona A
-  { id: "ins", n: "Instituto", z: "A", cl: [13, 29, 10, 20], an: [29, 50, 10, 37], f: "VEVV" },
-  { id: "boc", n: "Boca Juniors", z: "A", cl: [13, 24, 7, 21], an: [29, 54, 20, 43], f: "VEVV" },
-  { id: "dyj", n: "Defensa y Justicia", z: "A", cl: [13, 24, 6, 18], an: [29, 43, 3, 36], f: "DVVE" },
-  { id: "vel", n: "Vélez", z: "A", cl: [13, 24, 5, 18], an: [29, 52, 11, 36], f: "VDEV" },
-  { id: "lan", n: "Lanús", z: "A", cl: [13, 23, 7, 16], an: [29, 47, 10, 34], f: "VVEV" },
-  { id: "gim", n: "Gimnasia (M)", z: "A", cl: [13, 20, 2, 15], an: [29, 39, -6, 29], f: "DVDE" },
-  { id: "ind", n: "Independiente", z: "A", cl: [13, 19, -1, 12], an: [29, 43, 3, 36], f: "EEDV" },
-  { id: "new", n: "Newell's", z: "A", cl: [12, 17, 2, 11], an: [28, 32, -10, 26], f: "DEVE" },
-  { id: "slo", n: "San Lorenzo", z: "A", cl: [13, 17, -5, 7], an: [29, 39, -5, 21], f: "VVDD" },
-  { id: "est", n: "Estudiantes (LP)", z: "A", cl: [13, 14, 1, 16], an: [29, 45, 13, 35], f: "DEVD" },
-  { id: "uni", n: "Unión", z: "A", cl: [12, 13, -4, 17], an: [28, 34, 0, 41], f: "DDDD" },
-  { id: "rie", n: "Dep. Riestra", z: "A", cl: [12, 11, -3, 9], an: [28, 22, -10, 14], f: "DEED" },
-  { id: "pla", n: "Platense", z: "A", cl: [13, 11, -7, 12], an: [29, 27, -12, 22], f: "DEED" },
-  { id: "cco", n: "Central Córdoba", z: "A", cl: [12, 10, -6, 10], an: [28, 26, -16, 21], f: "EEED" },
-  { id: "tal", n: "Talleres", z: "A", cl: [13, 9, -8, 12], an: [29, 35, -4, 29], f: "DEDD" },
+  { id: "ins", n: "Instituto", z: "A", cl: [13, 29, 10, 20], an: [29, 50, 10, 37], f: "VEVV", pr: [87, 73] },
+  { id: "boc", n: "Boca Juniors", z: "A", cl: [13, 24, 7, 21], an: [29, 54, 20, 43], f: "VEVV", pr: [129, 73] },
+  { id: "dyj", n: "Defensa y Justicia", z: "A", cl: [13, 24, 6, 18], an: [29, 43, 3, 36], f: "DVVE", pr: [96, 73] },
+  { id: "vel", n: "Vélez", z: "A", cl: [13, 24, 5, 18], an: [29, 52, 11, 36], f: "VDEV", pr: [116, 73] },
+  { id: "lan", n: "Lanús", z: "A", cl: [13, 23, 7, 16], an: [29, 47, 10, 34], f: "VVEV", pr: [109, 73] },
+  { id: "gim", n: "Gimnasia (M)", z: "A", cl: [13, 20, 2, 15], an: [29, 39, -6, 29], f: "DVDE", pr: [0, 0] },
+  { id: "ind", n: "Independiente", z: "A", cl: [13, 19, -1, 12], an: [29, 43, 3, 36], f: "EEDV", pr: [110, 73] },
+  { id: "new", n: "Newell's", z: "A", cl: [12, 17, 2, 11], an: [28, 32, -10, 26], f: "DEVE", pr: [82, 73] },
+  { id: "slo", n: "San Lorenzo", z: "A", cl: [13, 17, -5, 7], an: [29, 39, -5, 21], f: "VVDD", pr: [96, 73] },
+  { id: "est", n: "Estudiantes (LP)", z: "A", cl: [13, 14, 1, 16], an: [29, 45, 13, 35], f: "DEVD", pr: [105, 73] },
+  { id: "uni", n: "Unión", z: "A", cl: [12, 13, -4, 17], an: [28, 34, 0, 41], f: "DDDD", pr: [99, 73] },
+  { id: "rie", n: "Dep. Riestra", z: "A", cl: [12, 11, -3, 9], an: [28, 22, -10, 14], f: "DEED", pr: [100, 73] },
+  { id: "pla", n: "Platense", z: "A", cl: [13, 11, -7, 12], an: [29, 27, -12, 22], f: "DEED", pr: [92, 73] },
+  { id: "cco", n: "Central Córdoba", z: "A", cl: [12, 10, -6, 10], an: [28, 26, -16, 21], f: "EEED", pr: [84, 73] },
+  { id: "tal", n: "Talleres", z: "A", cl: [13, 9, -8, 12], an: [29, 35, -4, 29], f: "DEDD", pr: [106, 73] },
   // Zona B
-  { id: "cen", n: "Rosario Central", z: "B", cl: [13, 25, 9, 20], an: [29, 53, 13, 40], f: "VVEV" },
-  { id: "arg", n: "Argentinos", z: "B", cl: [13, 25, 6, 17], an: [29, 54, 10, 34], f: "VEVD" },
-  { id: "bel", n: "Belgrano", z: "B", cl: [13, 22, 4, 14], an: [29, 48, 8, 31], f: "DVVV" },
-  { id: "glp", n: "Gimnasia (LP)", z: "B", cl: [13, 22, 1, 19], an: [29, 48, 1, 38], f: "VEEE" },
-  { id: "riv", n: "River Plate", z: "B", cl: [13, 20, 5, 18], an: [29, 49, 15, 40], f: "VEVD" },
-  { id: "sar", n: "Sarmiento", z: "B", cl: [12, 20, 3, 21], an: [28, 39, -4, 34], f: "EVDE" },
-  { id: "hur", n: "Huracán", z: "B", cl: [13, 19, 0, 12], an: [29, 41, 4, 29], f: "DDVV" },
-  { id: "irv", n: "Ind. Rivadavia", z: "B", cl: [13, 19, -4, 17], an: [29, 53, 10, 46], f: "EDEV" },
-  { id: "bar", n: "Barracas Central", z: "B", cl: [12, 18, 1, 10], an: [28, 39, 1, 25], f: "VVDE" },
-  { id: "atu", n: "Atl. Tucumán", z: "B", cl: [13, 14, -1, 12], an: [29, 28, -6, 27], f: "DEDD" },
-  { id: "tig", n: "Tigre", z: "B", cl: [13, 13, -2, 13], an: [29, 33, 1, 31], f: "EDDD" },
-  { id: "ban", n: "Banfield", z: "B", cl: [13, 13, -5, 14], an: [29, 31, -7, 31], f: "DVEE" },
-  { id: "rac", n: "Racing", z: "B", cl: [13, 12, -6, 14], an: [29, 33, -4, 31], f: "EDVV" },
-  { id: "erc", n: "Estudiantes (RC)", z: "B", cl: [13, 9, -9, 8], an: [29, 14, -28, 13], f: "VDDD" },
-  { id: "ald", n: "Aldosivi", z: "B", cl: [13, 8, -8, 14], an: [29, 16, -21, 20], f: "DDDV" },
+  { id: "cen", n: "Rosario Central", z: "B", cl: [13, 25, 9, 20], an: [29, 53, 13, 40], f: "VVEV", pr: [113, 73] },
+  { id: "arg", n: "Argentinos", z: "B", cl: [13, 25, 6, 17], an: [29, 54, 10, 34], f: "VEVD", pr: [113, 73] },
+  { id: "bel", n: "Belgrano", z: "B", cl: [13, 22, 4, 14], an: [29, 48, 8, 31], f: "DVVV", pr: [86, 73] },
+  { id: "glp", n: "Gimnasia (LP)", z: "B", cl: [13, 22, 1, 19], an: [29, 48, 1, 38], f: "VEEE", pr: [86, 73] },
+  { id: "riv", n: "River Plate", z: "B", cl: [13, 20, 5, 18], an: [29, 49, 15, 40], f: "VEVD", pr: [123, 73] },
+  { id: "sar", n: "Sarmiento", z: "B", cl: [12, 20, 3, 21], an: [28, 39, -4, 34], f: "EVDE", pr: [70, 73] },
+  { id: "hur", n: "Huracán", z: "B", cl: [13, 19, 0, 12], an: [29, 41, 4, 29], f: "DDVV", pr: [109, 73] },
+  { id: "irv", n: "Ind. Rivadavia", z: "B", cl: [13, 19, -4, 17], an: [29, 53, 10, 46], f: "EDEV", pr: [89, 73] },
+  { id: "bar", n: "Barracas Central", z: "B", cl: [12, 18, 1, 10], an: [28, 39, 1, 25], f: "VVDE", pr: [98, 73] },
+  { id: "atu", n: "Atl. Tucumán", z: "B", cl: [13, 14, -1, 12], an: [29, 28, -6, 27], f: "DEDD", pr: [84, 73] },
+  { id: "tig", n: "Tigre", z: "B", cl: [13, 13, -2, 13], an: [29, 33, 1, 31], f: "EDDD", pr: [88, 73] },
+  { id: "ban", n: "Banfield", z: "B", cl: [13, 13, -5, 14], an: [29, 31, -7, 31], f: "DVEE", pr: [76, 73] },
+  { id: "rac", n: "Racing", z: "B", cl: [13, 12, -6, 14], an: [29, 33, -4, 31], f: "EDVV", pr: [123, 73] },
+  { id: "erc", n: "Estudiantes (RC)", z: "B", cl: [13, 9, -9, 8], an: [29, 14, -28, 13], f: "VDDD", pr: [0, 0] },
+  { id: "ald", n: "Aldosivi", z: "B", cl: [13, 8, -8, 14], an: [29, 16, -21, 20], f: "DDDV", pr: [33, 32] },
 ];
 const APERTURA_CHAMP = "bel"; // Belgrano, campeón del Apertura 2026
 
@@ -633,7 +634,10 @@ function load() {
   try {
     const s = JSON.parse(localStorage.getItem(LS_KEY) || "null");
     if (!s) return;
-    if (s.teams && s.teams.length === BASE_TEAMS.length) teams = s.teams;
+    if (s.teams && s.teams.length === BASE_TEAMS.length) {
+      teams = s.teams;
+      teams.forEach(t => { if (!t.pr) t.pr = BASE_TEAMS.find(b => b.id === t.id).pr.slice(); }); // datos guardados antes de sumar promedios
+    }
     results = s.results || {}; aiFilled = s.aiFilled || {}; poWinners = s.poWinners || {}; cupPicks = s.cupPicks || {}; aiCupPicks = s.aiCupPicks || {};
     if (s.activeTab) activeTab = s.activeTab;
     projCompact = !!s.projCompact;
@@ -920,6 +924,16 @@ function bracket(st, pick) {
   return { ties, champ: fin.w || null, seeds: s };
 }
 
+/* ===================== DESCENSOS =====================
+   Desciende el último de la Tabla Anual y el peor promedio (2024-2026). Si son el mismo equipo,
+   desciende también el anteúltimo de la Tabla Anual. */
+function promedio(row) { const t = T(row.id), pr = t.pr || [0, 0]; return (pr[0] + row.pts) / Math.max(1, pr[1] + row.pj); }
+function relegated(st) {
+  const AN = st.AN, last = AN[AN.length - 1].id;
+  const worst = AN.slice().sort((a, b) => promedio(a) - promedio(b) || AN.indexOf(b) - AN.indexOf(a))[0].id;
+  return worst !== last ? [last, worst] : [last, AN[AN.length - 2].id];
+}
+
 /* ===================== CUPOS INTERNACIONALES (reglamento LPF 2026) =====================
    Libertadores 2027:
    - ARG 1 campeón Apertura (Belgrano) · ARG 2 campeón Clausura · ARG 3 campeón Copa Argentina (inalterable).
@@ -1054,19 +1068,19 @@ function renderAnnual(st, br, cups) {
   const c = cupos(an, br.champ, cups);
   const lib = new Set(c.lib), sud = new Set(c.sud);
   const titles = {}; for (const [id, why] of c.holders) (titles[id] = titles[id] || []).push(why.replace(/ \(1° de la Anual\)/, ""));
-  const desc = new Set(an.slice(-2));
+  const rel = relegated(st), desc = new Set(rel), worstProm = rel[1];
   const rows = st.AN.map((r, i) => {
     const pos = i + 1;
     let tag = "", band = "";
     if (titles[r.id]) { tag += `<span class="tag champ">${titles[r.id].map(w => w.replace("campeón ", "Camp. ")).join(" + ")} · Lib.</span>`; band = "rowband-lib"; }
     if (lib.has(r.id)) { tag += '<span class="tag lib">Libertadores</span>'; band = "rowband-lib"; }
     if (sud.has(r.id)) { tag += '<span class="tag sud">Sudamericana</span>'; band = "rowband-sud"; }
-    if (desc.has(r.id)) { tag += '<span class="tag desc">Desciende</span>'; band = "rowband-desc"; }
+    if (desc.has(r.id)) { tag += `<span class="tag desc">${r.id === an[an.length - 1] ? "Desciende (último)" : r.id === worstProm && promedio(r) <= Math.min(...st.AN.map(promedio)) ? "Desciende (promedio)" : "Desciende"}</span>`; band = "rowband-desc"; }
     if (i === 0) tag = '<span class="tag po">Campeón de Liga</span>' + tag;
     return `<tr class="${band}">
       <td class="pos">${pos}</td>
       <td class="l team">${tn(r.id)}${moveTag(r.id, pos, order)}${tag}</td>
-      <td>${r.z}</td><td>${r.pj}</td><td>${r.dg > 0 ? "+" : ""}${r.dg}</td>
+      <td>${r.z}</td><td>${r.pj}</td><td>${r.dg > 0 ? "+" : ""}${r.dg}</td><td class="num">${promedio(r).toFixed(3).replace(".", ",")}</td>
       <td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
     </tr>`;
   }).join("");
@@ -1094,9 +1108,9 @@ function renderAnnual(st, br, cups) {
     </div>
     ${pending.length ? `<p class="rule">Falta definir: ${pending.join(", ")}. Elegilos en Playoffs y Copas, o usá «Completar todo con IA».</p>` : ""}
     <div class="tbl-wrap"><table>
-      <thead><tr><th>#</th><th class="l">Equipo</th><th>Zona</th><th>PJ</th><th>DG</th><th>Pts</th></tr></thead>
+      <thead><tr><th>#</th><th class="l">Equipo</th><th>Zona</th><th>PJ</th><th>DG</th><th>Prom.</th><th>Pts</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
-    <div class="legend"><span style="--c:var(--lib)">Libertadores</span><span style="--c:var(--sud)">Sudamericana</span><span style="--c:var(--danger)">Zona de descenso (como marca promiedos)</span></div>`;
+    <div class="legend"><span style="--c:var(--lib)">Libertadores</span><span style="--c:var(--sud)">Sudamericana</span><span style="--c:var(--danger)">Descenso: último de la Anual y peor promedio (si es el mismo, el anteúltimo de la Anual)</span></div>`;
 }
 function renderPlayoffs(st, br, cups) {
   const cols = bracketCols(br, cups);
@@ -1128,7 +1142,7 @@ function tieHTML(t, s, cups) {
 /* ===================== RENDER: RESUMEN ===================== */
 function renderSummary(st, br, cups) {
   const an = st.AN.map(r => r.id), c = cupos(an, br.champ, cups);
-  const lib = new Set([...c.champs, ...c.lib]), sud = new Set(c.sud), desc = new Set(an.slice(-2));
+  const lib = new Set([...c.champs, ...c.lib]), sud = new Set(c.sud), desc = new Set(relegated(st));
   const dg = v => (v > 0 ? "+" : "") + v;
   const zoneT = (rows, z) => `<div><h3>Zona ${z}</h3><div class="tbl-wrap"><table class="compact">
     <thead><tr><th>#</th><th class="l">Equipo</th><th>PJ</th><th>DG</th><th>Pts</th></tr></thead>
@@ -1157,7 +1171,7 @@ function renderSummary(st, br, cups) {
       <div class="sum-card"><div class="lbl">Campeón Clausura</div>${champ}${cupChamps ? `<div class="lbl" style="margin-top:10px">Campeones de copa</div><ul>${cupChamps}</ul>` : ""}</div>
       <div class="sum-card lib"><div class="lbl">Copa Libertadores 2027</div><ul>${c.holders.filter(h => !h[2]).map(h => li(h[0], `&nbsp;<span class="mini-tag champ">${h[1].startsWith("subcampeón") ? "SUBCAMP. CA" : h[1].startsWith("semifinalista") ? "SEMIS CA" : "TÍTULO"}</span>`)).join("")}${c.lib.map(id => li(id)).join("")}</ul></div>
       <div class="sum-card sud"><div class="lbl">Copa Sudamericana 2027</div><ul>${c.sud.map(id => li(id)).join("")}</ul></div>
-      <div class="sum-card desc"><div class="lbl">Zona de descenso</div><ul>${an.slice(-2).map(id => li(id)).join("")}</ul></div>
+      <div class="sum-card desc"><div class="lbl">Descienden</div><ul>${relegated(st).map(id => li(id)).join("")}</ul></div>
     </div>
     <div class="sum-grid three">${zoneT(st.A, "A")}${zoneT(st.B, "B")}${anT}</div>
     <div class="sum-sec"><h3>Playoffs</h3><div class="bracket">${bracketCols(br, cups)}</div></div>`;
@@ -1250,7 +1264,7 @@ function projJob(N) {
       const c = cupos(an, champ, cups);
       c.champs.forEach(id => acc[id].lib += pc); c.lib.forEach(id => acc[id].lib += pc); c.sud.forEach(id => acc[id].sud += pc);
     }
-    an.slice(-2).forEach(id => acc[id].desc++);
+    relegated(st).forEach(id => acc[id].desc++);
     st.AN.forEach(r => acc[r.id].pts += r.pts);
   }
   return { step, finish };
@@ -1337,13 +1351,14 @@ function renderData() {
     <td class="l team">${tn(t.id)}</td><td>${t.z}</td>
     ${[0, 1, 2, 3].map(k => `<td><input id="d-${t.id}-cl${k}" data-i="${i}" data-k="cl" data-j="${k}" inputmode="numeric" value="${t.cl[k]}"></td>`).join("")}
     ${[0, 1, 2, 3].map(k => `<td><input id="d-${t.id}-an${k}" data-i="${i}" data-k="an" data-j="${k}" inputmode="numeric" value="${t.an[k]}"></td>`).join("")}
+    ${[0, 1].map(k => `<td><input id="d-${t.id}-pr${k}" data-i="${i}" data-k="pr" data-j="${k}" inputmode="numeric" value="${(t.pr || [0, 0])[k]}"></td>`).join("")}
     <td><input id="d-${t.id}-f" data-i="${i}" data-k="f" maxlength="5" value="${esc(t.f || "")}" style="width:64px;text-align:left"></td>
   </tr>`).join("");
   document.getElementById("pane-datos").innerHTML = `
     <div class="panel-h"><h2>Datos de partida</h2><span class="sub">Tablas antes de la fecha 14 · los cambios recalculan todo</span></div>
     <p class="rule">Cargado desde promiedos el 19/10. Si algo cambia, corregilo acá. «Últimos 4» va del más reciente al más viejo (V, E, D). Los cambios quedan guardados en este navegador.</p>
     <div class="tbl-wrap data-tbl"><table>
-      <thead><tr><th class="l">Equipo</th><th>Zona</th><th>Cl. PJ</th><th>Cl. Pts</th><th>Cl. DG</th><th>Cl. GF</th><th>An. PJ</th><th>An. Pts</th><th>An. DG</th><th>An. GF</th><th class="l">Últimos 4</th></tr></thead>
+      <thead><tr><th class="l">Equipo</th><th>Zona</th><th>Cl. PJ</th><th>Cl. Pts</th><th>Cl. DG</th><th>Cl. GF</th><th>An. PJ</th><th>An. Pts</th><th>An. DG</th><th>An. GF</th><th>Prom. Pts 24-25</th><th>Prom. PJ 24-25</th><th class="l">Últimos 4</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
     <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn" type="button" id="btn-reset-data">Restablecer datos originales</button>
@@ -1356,7 +1371,7 @@ function renderData() {
    camino llega (Anual, cupos liberados, título). */
 const GOALS = [
   ["po", "Clasificar a playoffs"], ["first", "Terminar 1° de su zona"], ["lib", "Clasificar a Libertadores"],
-  ["sud", "Clasificar a Sudamericana"], ["champ", "Salir campeón del Clausura"], ["safe", "No terminar en zona de descenso"],
+  ["sud", "Clasificar a Sudamericana"], ["champ", "Salir campeón del Clausura"], ["safe", "No descender"],
 ];
 let goalTeam = "riv", goalKind = "lib", goalRes = null, goalRun = 0;
 let goalPts = "max"; // "max" = lo máximo que puede sumar, "any" = sin filtro, o un número
@@ -1424,7 +1439,7 @@ function goalSim(team, goal, target) {
     const rt = (k, v) => { routes[k] = (routes[k] || 0) + v; w += v; };
     if (goal === "po") { if (zpos <= 8) rt(`Terminar ${zpos}° de la Zona ${z}`, 1); }
     else if (goal === "first") { if (zpos === 1) rt("Terminar 1° de la zona", 1); }
-    else if (goal === "safe") { if (arank < an.length - 2) rt(`Terminar ${arank + 1}° en la Anual`, 1); }
+    else if (goal === "safe") { if (!relegated(st).includes(team)) rt(`Terminar ${arank + 1}° en la Anual`, 1); }
     else {
       const cups = randomCups();
       if (goal === "champ") { if (zpos <= 8) { const p = bracketDist(st, cups).get(team) || 0; if (p) rt(`Entrando ${zpos}° de la Zona ${z}`, p); } }
