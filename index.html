@@ -1262,7 +1262,8 @@ const wide = matchMedia("(min-width: 1100px)");
 function showTab(tab) {
   if (wide.matches && tab === "partidos") tab = "resumen";
   activeTab = tab;
-  document.querySelector(".layout").classList.toggle("full", tab === "resumen");
+  // Resumen y Probabilidades ocupan todo el ancho, sin la columna de partidos.
+  document.querySelector(".layout").classList.toggle("full", tab === "resumen" || tab === "proyeccion");
   document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
   document.querySelectorAll(".pane").forEach(p => p.hidden = p.dataset.pane !== tab);
   if (tab === "proyeccion") { renderProjection(); applyFocus(); }
