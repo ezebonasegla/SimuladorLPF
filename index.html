@@ -1323,9 +1323,49 @@ const GOALS = [
   ["sud", "Clasificar a Sudamericana"], ["champ", "Salir campeón del Clausura"], ["safe", "No terminar en zona de descenso"],
 ];
 let goalTeam = "riv", goalKind = "lib", goalRes = null, goalRun = 0;
+let goalPts = "max"; // "max" = lo máximo que puede sumar, "any" = sin filtro, o un número
+// Puntos que todavía puede sumar el equipo y combinaciones posibles de sus partidos pendientes.
+function ownPending(team) { return MATCHES.filter(m => (m.h === team || m.a === team) && !results[m.id]); }
+function ownFixedPts(team) {
+  let p = 0;
+  for (const m of MATCHES) if ((m.h === team || m.a === team) && results[m.id]) {
+    const r = results[m.id], gf = m.h === team ? r[0] : r[1], gc = m.h === team ? r[1] : r[0];
+    p += gf > gc ? 3 : gf === gc ? 1 : 0;
+  }
+  return p;
+}
+function reachablePts(team) {
+  const k = ownPending(team).length, base = ownFixedPts(team), out = new Set();
+  for (let w = 0; w <= k; w++) for (let d = 0; d + w <= k; d++) out.add(base + 3 * w + d);
+  return [...out].sort((a, b) => a - b);
+}
+const goalTarget = team => goalPts === "any" ? null : goalPts === "max" ? Math.max(...reachablePts(team)) : +goalPts;
 const GOAL_N = 6000;
-function goalSim(team, goal) {
-  const pending = MATCHES.filter(m => !results[m.id]).map(m => [m, matchModel(m)]);
+function goalSim(team, goal, target) {
+  const ownIds = new Set(ownPending(team).map(m => m.id));
+  const pending = MATCHES.filter(m => !results[m.id] && !(target != null && ownIds.has(m.id))).map(m => [m, matchModel(m)]);
+  // Con puntos elegidos: se sortean solo combinaciones de sus partidos que den exactamente esos puntos.
+  let combos = null;
+  if (target != null) {
+    const own = ownPending(team).map(m => { const mm = matchModel(m); const home = m.h === team;
+      return { m, mm, p: home ? [mm.ph, mm.pd, mm.pa] : [mm.pa, mm.pd, mm.ph], home }; });
+    const need = target - ownFixedPts(team);
+    combos = [];
+    const walk = (i, acc, pr, pts) => {
+      if (i === own.length) { if (pts === need) combos.push({ outs: acc.slice(), pr }); return; }
+      for (let o = 0; o < 3; o++) { acc.push(o); walk(i + 1, acc, pr * own[i].p[o], pts + (o === 0 ? 3 : o === 1 ? 1 : 0)); acc.pop(); }
+    };
+    walk(0, [], 1, 0);
+    const tot = combos.reduce((a, c) => a + c.pr, 0);
+    let c = 0; combos.forEach(x => { x.pr /= tot || 1; c += x.pr; x.cum = c; x.n = 0; x.w = 0; });
+    combos.own = own;
+  }
+  const scoreIn = (mm, outcome) => { // marcador al azar dentro del resultado elegido (gana local / empate / gana visitante)
+    const opts = mm.cum.filter(([i, j]) => (i > j ? 0 : i === j ? 1 : 2) === outcome);
+    let u = Math.random() * opts.reduce((a, o) => a + o[2], 0);
+    for (const o of opts) { u -= o[2]; if (u <= 0) return [o[0], o[1]]; }
+    return [opts[0][0], opts[0][1]];
+  };
   const fixed = {}; for (const m of MATCHES) if (results[m.id]) fixed[m.id] = results[m.id];
   const mine = MATCHES.filter(m => m.h === team || m.a === team);
   const agg = { n: 0, w: 0, routes: {}, pts: {}, rec: {}, match: {} };
@@ -1335,6 +1375,12 @@ function goalSim(team, goal) {
   function once() {
     const res = Object.assign({}, fixed), outc = {};
     for (const [m, mm] of pending) { const r = sample(mm); res[m.id] = r; outc[m.id] = r[0] > r[1] ? 0 : r[0] === r[1] ? 1 : 2; }
+    let combo = null;
+    if (combos) {
+      if (!combos.length) return;
+      const u = Math.random(); combo = combos.find(c => c.cum >= u) || combos[combos.length - 1];
+      combos.own.forEach((x, i) => { const o = combo.outs[i], ho = x.home ? o : 2 - o; res[x.m.id] = scoreIn(x.mm, ho); });
+    }
     const st = standings(res), z = T(team).z, zr = z === "A" ? st.A : st.B, zpos = zr.findIndex(r => r.id === team) + 1;
     const an = st.AN.map(r => r.id), arank = an.indexOf(team);
     let w = 0;
@@ -1369,22 +1415,30 @@ function goalSim(team, goal) {
       if (gf > gc) { pts += 3; W++; } else if (gf === gc) { pts += 1; D++; } else L++;
     }
     add(agg.pts, pts, w); add(agg.rec, `${W}-${D}-${L}`, w);
+    if (combo) { combo.n++; combo.w += w; }
     for (const [m] of pending) { const x = agg.match[m.id][outc[m.id]]; x[0]++; x[1] += w; }
   }
-  return { once, agg, mine };
+  return { once, agg, mine, combos };
 }
 function renderGoalForm() {
   const grp = z => teams.filter(t => t.z === z).slice().sort((a, b) => a.n.localeCompare(b.n, "es"))
     .map(t => `<option value="${t.id}"${t.id === goalTeam ? " selected" : ""}>${esc(t.n)}</option>`).join("");
   return `<div class="goal-form">
     <div class="row"><span class="lbl">Equipo</span><select id="goal-team" aria-label="Equipo"><optgroup label="Zona A">${grp("A")}</optgroup><optgroup label="Zona B">${grp("B")}</optgroup></select></div>
+    <div class="row"><span class="lbl">Puntos</span>${(() => {
+      const opts = reachablePts(goalTeam), mx = Math.max(...opts), cur = goalTarget(goalTeam);
+      return `<select id="goal-pts" aria-label="Puntos que suma">
+        <option value="any"${goalPts === "any" ? " selected" : ""}>Cualquier cantidad</option>
+        ${opts.slice().reverse().map(v => `<option value="${v === mx ? "max" : v}"${cur === v && goalPts !== "any" ? " selected" : ""}>Suma ${v} ${v === 1 ? "punto" : "puntos"}${v === mx ? " (todo)" : ""}</option>`).join("")}
+      </select><span class="proj-sub" style="margin:0">Le quedan ${ownPending(goalTeam).length} partidos: puede sumar hasta ${mx} puntos.</span>`; })()}</div>
     <div class="row"><span class="lbl">Objetivo</span><div class="goal-opts" role="group" aria-label="Objetivo">${GOALS.map(([k, l]) => `<button type="button" data-goal="${k}" aria-pressed="${k === goalKind}">${l}</button>`).join("")}</div></div>
   </div>`;
 }
 function renderGoal() {
   const el = document.getElementById("pane-objetivo");
   const head = `<div class="goal"><div class="proj-head"><div><h2>¿Qué tiene que pasar?</h2><p class="proj-sub">Elegí un equipo y lo que quiere lograr. Se simulan ${GOAL_N.toLocaleString("es-AR")} finales posibles y se muestran los caminos.</p></div></div>${renderGoalForm()}`;
-  if (!goalRes || goalRes.team !== goalTeam || goalRes.goal !== goalKind || goalRes.stamp !== resultsStamp()) {
+  const target = goalTarget(goalTeam);
+  if (!goalRes || goalRes.team !== goalTeam || goalRes.goal !== goalKind || goalRes.target !== target || goalRes.stamp !== resultsStamp()) {
     el.innerHTML = head + `<div class="goal-wait">Analizando ${GOAL_N.toLocaleString("es-AR")} escenarios…</div></div>`;
     runGoal(); return;
   }
@@ -1393,21 +1447,22 @@ function renderGoal() {
 }
 const resultsStamp = () => JSON.stringify(results) + JSON.stringify(cupPicks) + JSON.stringify(teams.map(t => t.cl[1] + t.an[1]));
 function runGoal() {
-  const run = ++goalRun, team = goalTeam, goal = goalKind, stamp = resultsStamp();
-  const job = goalSim(team, goal);
+  const run = ++goalRun, team = goalTeam, goal = goalKind, stamp = resultsStamp(), target = goalTarget(team);
+  const job = goalSim(team, goal, target);
   let done = 0;
   const tick = () => {
     if (run !== goalRun) return;
     const end = Math.min(GOAL_N, done + 500);
     for (; done < end; done++) job.once();
     if (done < GOAL_N) return setTimeout(tick, 0);
-    goalRes = { team, goal, stamp, agg: job.agg, mine: job.mine };
+    goalRes = { team, goal, stamp, target, agg: job.agg, mine: job.mine, combos: job.combos };
     if (activeTab === "objetivo") renderGoal();
   };
   setTimeout(tick, 30);
 }
 function goalHTML(G) {
-  const { agg, mine, team, goal } = G, t = T(team), gname = GOALS.find(g => g[0] === goal)[1].toLowerCase();
+  const { agg, mine, team, goal, target, combos } = G, t = T(team), gname = GOALS.find(g => g[0] === goal)[1].toLowerCase();
+  if (target != null) return goalHTMLPts(G);
   const P = agg.w / agg.n;
   const cls = v => v >= 0.7 ? "ok" : v >= 0.25 ? "mid" : "bad";
   // Puntos
@@ -1469,6 +1524,47 @@ function goalHTML(G) {
       <div class="opts"><span class="opt best">${esc(lab(m, best))}: ${pctP(pr[best])}</span><span class="opt worst">${esc(lab(m, worst))}: ${pctP(pr[worst])}</span></div></div>`).join("")
       : '<p class="hint">Ningún otro resultado cambia mucho sus chances: depende de él.</p>'}</div>`;
   return hero + `<div class="goal-grid">${routesCard}${ptsCard}${ownCard}${othersCard}</div>`;
+}
+
+// Vista con puntos fijos: qué tiene que pasar además de sumar esos puntos.
+function goalHTMLPts(G) {
+  const { agg, team, goal, target, combos } = G, gname = GOALS.find(g => g[0] === goal)[1].toLowerCase();
+  const ptx = n => n === 1 ? "1 punto" : `${n} puntos`;
+  if (!agg.n) return `<div class="goal-hero"><div class="big">—</div><div><h3>${tn(team)}</h3><p>No puede sumar ${ptx(target)} con los partidos que le quedan.</p></div></div>`;
+  const P = agg.w / agg.n;
+  const cls = v => v >= 0.7 ? "ok" : v >= 0.25 ? "mid" : "bad";
+  const others = MATCHES.filter(m => m.h !== team && m.a !== team && agg.match[m.id]).map(m => {
+    const x = agg.match[m.id], pr = [0, 1, 2].map(o => x[o][0] ? x[o][1] / x[o][0] : null);
+    const v = pr.filter(p => p != null), swing = Math.max(...v) - Math.min(...v);
+    return { m, pr, swing, best: pr.indexOf(Math.max(...v)), worst: pr.indexOf(Math.min(...v)) };
+  }).filter(o => o.swing > 0.01).sort((a, b) => b.swing - a.swing);
+  const lab = (m, o) => o === 0 ? `que gane ${T(m.h).n}` : o === 2 ? `que gane ${T(m.a).n}` : "que empaten";
+  let verdict, vc;
+  if (P >= 0.995) { verdict = `Con ${ptx(target)} lo logra seguro`; vc = "ok"; }
+  else if (P <= 0.0005) { verdict = `Con ${ptx(target)} no le alcanza`; vc = "bad"; }
+  else if (P >= 0.5) { verdict = "Favorito, pero depende de otros"; vc = "mid"; }
+  else { verdict = "Necesita que se den varios resultados"; vc = P >= 0.1 ? "mid" : "bad"; }
+  const key = others.slice(0, 3).map(o => `<b>${esc(lab(o.m, o.best))}</b> (${T(o.m.h).n}–${T(o.m.a).n})`);
+  const hero = `<div class="goal-hero"><div class="big">${pctP(P)}</div><div>
+    <h3>${tn(team)}&nbsp;· ${esc(gname)} sumando ${ptx(target)}</h3>
+    <p>${P >= 0.995 ? "Si suma esos puntos, no depende de nadie." : P <= 0.0005 ? "En ninguna simulación le alcanza con esos puntos, pase lo que pase en los otros partidos." : `Además de sumar ${ptx(target)}, lo que más lo ayuda: ${key.join(", ") || "nada en particular"}.`}</p>
+    <span class="verdict ${vc}">${verdict}</span></div></div>`;
+  const routes = Object.entries(agg.routes).map(([k, v]) => [k, v / agg.n]).filter(r => r[1] > 0.00005).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const routesCard = `<div class="gcard"><h4>Caminos</h4><p class="hint">Cómo llega cuando lo logra, sumando ${ptx(target)}.</p>
+    ${routes.length ? `<ul class="list">${routes.map(([k, v]) => `<li><span>${esc(k)}</span><b class="v">${pctP(v)}</b><span class="bar"><i style="width:${Math.max(1, v / Math.max(P, 1e-9) * 100)}%"></i></span></li>`).join("")}</ul>` : '<p class="hint">No aparece ningún camino.</p>'}</div>`;
+  // Cómo sumar esos puntos
+  const own = combos.own;
+  const desc = c => own.map((x, i) => { const o = c.outs[i], opp = T(x.home ? x.m.a : x.m.h).n;
+    return `${o === 0 ? "gana" : o === 1 ? "empata" : "pierde"} ${x.home ? "vs" : "en cancha de"} ${esc(opp)}`; }).join(" · ");
+  const combosCard = `<div class="gcard"><h4>Cómo sumar ${ptx(target)}</h4><p class="hint">Cada combinación de sus partidos, qué tan probable es y su chance de lograrlo.</p>
+    ${combos.length ? `<div class="tbl-wrap"><table><thead><tr><th class="l">Combinación</th><th>Probable</th><th>Lo logra</th></tr></thead><tbody>
+    ${combos.slice().sort((a, b) => b.pr - a.pr).slice(0, 10).map(c => `<tr><td class="l" style="white-space:normal">${desc(c)}</td><td>${pctP(c.pr)}</td><td class="pcell ${cls(c.n ? c.w / c.n : 0)}">${c.n ? pctP(c.w / c.n) : "—"}</td></tr>`).join("")}
+    </tbody></table></div>` : `<p class="hint">Ya tiene todos sus partidos cargados.</p>`}</div>`;
+  const othersCard = `<div class="gcard"><h4>Qué tiene que pasar además</h4><p class="hint">Los otros partidos que más mueven sus chances, ya sumando ${ptx(target)}.</p>
+    ${others.length ? others.slice(0, 10).map(({ m, pr, best, worst }) => `<div class="gm"><div class="who">${tn(m.h)} <small>vs</small> ${tn(m.a)} <small>· fecha ${m.f}</small></div>
+      <div class="opts"><span class="opt best">${esc(lab(m, best))}: ${pctP(pr[best])}</span><span class="opt worst">${esc(lab(m, worst))}: ${pctP(pr[worst])}</span></div></div>`).join("")
+      : '<p class="hint">Ningún otro resultado cambia sus chances: depende solo de él.</p>'}</div>`;
+  return hero + `<div class="goal-grid">${othersCard}<div style="display:grid;gap:16px">${routesCard}${combosCard}</div></div>`;
 }
 
 /* ===================== MODO ENFOQUE ===================== */
@@ -1629,7 +1725,8 @@ document.addEventListener("click", e => {
   }
 });
 document.addEventListener("change", e => {
-  if (e.target.id === "goal-team") { goalTeam = e.target.value; renderGoal(); return; }
+  if (e.target.id === "goal-team") { goalTeam = e.target.value; goalPts = "max"; renderGoal(); return; }
+  if (e.target.id === "goal-pts") { goalPts = e.target.value; renderGoal(); return; }
   if (e.target.id !== "focus-sel") return;
   focusTeam = e.target.value; save(); renderFixture(); applyFocus();
   if (focusTeam) toast(`Enfocado en ${T(focusTeam).n}`);
