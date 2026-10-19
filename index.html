@@ -341,7 +341,7 @@ tr.in td.pos { color: var(--accent); }
     <button class="tab" role="tab" data-tab="anual" id="tab-anual">Tabla Anual</button>
     <button class="tab" role="tab" data-tab="playoffs" id="tab-playoffs">Playoffs</button>
     <button class="tab" role="tab" data-tab="copas" id="tab-copas">Copas</button>
-    <button class="tab" role="tab" data-tab="proyeccion" id="tab-proyeccion">Proyección</button>
+    <button class="tab" role="tab" data-tab="proyeccion" id="tab-proyeccion">Probabilidades</button>
     <button class="tab" role="tab" data-tab="datos" id="tab-datos">Datos</button>
   </nav>
 
@@ -525,6 +525,7 @@ let cupPicks = {};  // tieId de copa -> teamId
 let aiCupPicks = {}; // llaves de copa que eligió la IA (se vuelven a pensar)
 let fechaFilter = "all";
 let focusTeam = "";
+let projCompact = false;
 let activeTab = "resumen";
 let projection = null;
 
@@ -535,11 +536,12 @@ function load() {
     if (s.teams && s.teams.length === BASE_TEAMS.length) teams = s.teams;
     results = s.results || {}; aiFilled = s.aiFilled || {}; poWinners = s.poWinners || {}; cupPicks = s.cupPicks || {}; aiCupPicks = s.aiCupPicks || {};
     if (s.activeTab) activeTab = s.activeTab;
+    projCompact = !!s.projCompact;
     if (s.focusTeam && BASE_TEAMS.some(t => t.id === s.focusTeam)) focusTeam = s.focusTeam;
   } catch (e) {}
 }
 function save() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify({ teams, results, aiFilled, poWinners, cupPicks, aiCupPicks, activeTab, focusTeam })); } catch (e) {}
+  try { localStorage.setItem(LS_KEY, JSON.stringify({ teams, results, aiFilled, poWinners, cupPicks, aiCupPicks, activeTab, focusTeam, projCompact })); } catch (e) {}
 }
 const T = id => teams.find(t => t.id === id) || { id, n: EXT[id].n };
 const isLocal = id => teams.some(t => t.id === id);
@@ -1036,9 +1038,7 @@ function renderSummary(st, br, cups) {
       <div class="sum-card desc"><div class="lbl">Zona de descenso</div><ul>${an.slice(-2).map(id => li(id)).join("")}</ul></div>
     </div>
     <div class="sum-grid three">${zoneT(st.A, "A")}${zoneT(st.B, "B")}${anT}</div>
-    <div class="sum-sec"><h3>Playoffs</h3><div class="bracket">${bracketCols(br, cups)}</div></div>
-    <div class="sum-sec" id="sum-proj"></div>`;
-  renderSummaryProj();
+    <div class="sum-sec"><h3>Playoffs</h3><div class="bracket">${bracketCols(br, cups)}</div></div>`;
 }
 
 /* ===================== RENDER: COPAS ===================== */
@@ -1134,8 +1134,13 @@ function renderProjection() {
   if (!projection) runProjection();
   const { N } = projection;
   el.innerHTML = `
-    <div class="panel-h"><h2>Proyección</h2><span class="sub">${N.toLocaleString("es-AR")} simulaciones de los partidos sin resultado, los playoffs y las copas</span></div>
-    <details class="explain" open><summary>Cómo calcula la IA</summary><ul>
+    <div class="panel-h"><h2>Probabilidades</h2><span class="sub">${N.toLocaleString("es-AR")} simulaciones de los partidos sin resultado, los playoffs y las copas</span></div>
+    <div class="chips" style="margin-bottom:12px">
+      <button class="chip" type="button" data-proj="full" aria-pressed="${!projCompact}">Completa</button>
+      <button class="chip" type="button" data-proj="compact" aria-pressed="${projCompact}">Resumida</button>
+    </div>
+    ${projCompact ? projTable() : ""}
+    <details class="explain"${projCompact ? "" : " open"}><summary>Cómo calcula la IA</summary><ul>
       <li><b>Nivel y presente:</b> puntos por partido del Clausura (pesa más) y de la Anual, más la diferencia de gol.</li>
       <li><b>Racha:</b> los últimos 4 partidos de promiedos (V/E/D) frente a su promedio del torneo.</li>
       <li><b>Momento:</b> suma o resta según venga mejor o peor que en el Apertura.</li>
@@ -1147,13 +1152,21 @@ function renderProjection() {
       <li><b>Localía:</b> el local espera 1,2 goles contra 0,9 del visitante a igual nivel. Copas: Estudiantes rinde más en la Libertadores que en la liga.</li>
     </ul></details>
     <p class="rule">Las chances chicas se muestran con un decimal (por ejemplo 0,3%): 0% es imposible en las simulaciones. Los resultados y ganadores que elegiste quedan fijos. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana).</p>
-    ${projTable()}
+    ${projCompact ? "" : projTable()}
     <div style="margin-top:12px"><button class="btn" type="button" id="btn-proj">Volver a simular</button></div>`;
 }
 function projTable() {
   const { acc } = projection;
   const rows = teams.slice().sort((a, b) => acc[b.id].pts - acc[a.id].pts || acc[b.id].lib - acc[a.id].lib);
   const cell = (v, c) => `<td class="pct" style="--c:${c}"><i style="width:${Math.round(v * 100)}%"></i><span>${pctP(v)}</span></td>`;
+  if (projCompact) {
+    // Versión resumida: lo que más se mira.
+    const order = teams.slice().sort((a, b) => acc[b.id].champ - acc[a.id].champ || acc[b.id].lib - acc[a.id].lib || acc[b.id].po - acc[a.id].po);
+    return `<div class="tbl-wrap"><table>
+      <thead><tr><th class="l">Equipo</th><th>Playoffs</th><th>Sudamericana</th><th>Libertadores</th><th>Campeón</th></tr></thead>
+      <tbody>${order.map(t => `<tr><td class="l team">${tn(t.id)}</td>${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].champ, "var(--lib)")}</tr>`).join("")}</tbody>
+    </table></div>`;
+  }
   return `<div class="tbl-wrap"><table>
       <thead><tr><th class="l">Equipo</th><th>Zona</th><th>Pts Anual (prom.)</th><th>Playoffs</th><th>1° de zona</th><th>Campeón Clausura</th><th>Gana una copa</th><th>Libertadores</th><th>Sudamericana</th><th>Desc.</th></tr></thead>
       <tbody>${rows.map(t => `<tr><td class="l team">${tn(t.id)}</td><td>${t.z}</td><td>${acc[t.id].pts.toFixed(1)}</td>
@@ -1161,19 +1174,12 @@ function projTable() {
         ${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].desc, "var(--danger)")}</tr>`).join("")}</tbody>
     </table></div>`;
 }
-// En el Resumen la tabla de probabilidades se recalcula sola, un momento después del último cambio.
+// Las probabilidades se recalculan solas un momento después del último cambio.
 let projTimer;
-function renderSummaryProj() {
-  const el = document.getElementById("sum-proj"); if (!el) return;
-  el.innerHTML = projection
-    ? `<h3>Probabilidades</h3><p class="rule">${projection.N.toLocaleString("es-AR")} simulaciones de lo que falta (los resultados cargados quedan fijos). Más detalle en la pestaña Proyección.</p>${projTable()}`
-    : `<h3>Probabilidades</h3><p class="rule">Calculando…</p>`;
-}
 function scheduleProjection() {
   clearTimeout(projTimer);
   projTimer = setTimeout(() => {
     if (!projection) runProjection();
-    renderSummaryProj();
     if (activeTab === "proyeccion") renderProjection();
     applyFocus();
   }, 450);
@@ -1321,6 +1327,8 @@ function fillRandom() {
 
 document.addEventListener("click", e => {
   const tab = e.target.closest(".tab"); if (tab) return showTab(tab.dataset.tab);
+  const pc = e.target.closest("[data-proj]");
+  if (pc) { projCompact = pc.dataset.proj === "compact"; save(); renderProjection(); applyFocus(); return; }
   const chip = e.target.closest(".chip"); if (chip) { fechaFilter = chip.dataset.f; renderChips(); renderFixture(); return; }
   const cupBtn = e.target.closest("button[data-cuptie]");
   if (cupBtn) {
