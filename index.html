@@ -392,6 +392,15 @@ tr.in td.pos { color: var(--accent); }
 .gm .opt { font-size: 12.5px; padding: 3px 8px; border-radius: 5px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
 .gm .opt.best { background: var(--sud-soft); color: var(--sud); box-shadow: none; font-weight: 700; }
 .gm .opt.worst { background: var(--danger-soft); color: var(--danger); box-shadow: none; }
+.split { margin-top: 12px; max-width: 560px; }
+.split-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: var(--line); }
+.split-bar i { display: block; height: 100%; }
+.split-leg { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 7px; font-size: 13.5px; color: var(--muted); }
+.split-leg span { display: inline-flex; align-items: center; gap: 6px; }
+.split-leg i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.split-leg b { color: var(--ink); }
+.split-tot { margin-top: 4px; font-size: 13.5px; color: var(--muted); }
+.split-tot b { color: var(--ink); }
 .risks { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .risks li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; padding: 8px 10px; border-radius: 7px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font-size: 14px; }
 .risks li small { color: var(--muted); }
@@ -1454,7 +1463,7 @@ function renderData() {
    camino llega (Anual, cupos liberados, título). */
 const GOALS = [
   ["po", "Clasificar a playoffs"], ["first", "Terminar 1° de su zona"], ["liga", "Campeón de Liga (1° de la Anual)"], ["lib", "Clasificar a Libertadores"],
-  ["sud", "Clasificar a Sudamericana"], ["champ", "Salir campeón del Clausura"], ["safe", "No descender"],
+  ["sud", "Jugar una copa (Libertadores o Sudamericana)"], ["champ", "Salir campeón del Clausura"], ["safe", "No descender"],
 ];
 let goalTeam = "riv", goalKind = "lib", goalRes = null, goalRun = 0;
 let goalPts = "max"; // "max" = lo máximo que puede sumar, "any" = sin filtro, o un número
@@ -1502,14 +1511,15 @@ function goalSim(team, goal, target) {
   };
   const fixed = {}; for (const m of MATCHES) if (results[m.id]) fixed[m.id] = results[m.id];
   const mine = MATCHES.filter(m => m.h === team || m.a === team);
-  const agg = { n: 0, w: 0, routes: {}, pts: {}, rec: {}, match: {} };
+  const agg = { n: 0, w: 0, routes: {}, pts: {}, rec: {}, match: {}, split: null, ptsSplit: {} };
+  if (goal === "lib" || goal === "sud") agg.split = [0, 0, 0]; // Libertadores / Sudamericana / sin copa
   for (const [m] of pending) agg.match[m.id] = [[0, 0], [0, 0], [0, 0]];
   const add = (o, k, w) => { const x = o[k] || (o[k] = [0, 0]); x[0]++; x[1] += w; };
   const routeAdd = (k, w) => { agg.routes[k] = (agg.routes[k] || 0) + w; };
   function once() {
     const res = Object.assign({}, fixed), outc = {};
     for (const [m, mm] of pending) { const r = sample(mm); res[m.id] = r; outc[m.id] = r[0] > r[1] ? 0 : r[0] === r[1] ? 1 : 2; }
-    let combo = null;
+    let combo = null, split = null;
     if (combos) {
       if (!combos.length) return;
       const u = Math.random(); combo = combos.find(c => c.cum >= u) || combos[combos.length - 1];
@@ -1529,18 +1539,23 @@ function goalSim(team, goal, target) {
       const cups = randomCups();
       if (goal === "champ") { if (zpos <= 8) { const p = bracketDist(st, cups).get(team) || 0; if (p) rt(`Entrando ${zpos}° de la Zona ${z}`, p); } }
       else {
+        split = [0, 0, 0];
         // Quién sale campeón del Clausura cambia los cupos, entre o no a playoffs.
         for (const [c, pc] of bracketDist(st, cups)) {
           const cu = cupos(an, c, cups);
           const h = cu.holders.find(x => x[0] === team && !x[2]);
-          if (goal === "lib") {
-            if (h) rt(h[1] === "campeón Clausura" ? "Salir campeón del Clausura" : /^(subcampeón|semifinalista)/.test(h[1]) ? "Por la Copa Argentina (el campeón ya tenía plaza)" : "Por título: " + h[1], pc);
-            else if (cu.lib.includes(team)) rt(arank < 3 ? "Terminar entre los 3 primeros de la Anual" : `Terminar ${arank + 1}° en la Anual y que se liberen cupos`, pc);
-          } else if (cu.sud.includes(team)) rt(arank < 9 ? "Terminar entre el 4° y el 9° de la Anual" : `Terminar ${arank + 1}° en la Anual y que se liberen cupos`, pc);
+          const k = cu.champs.includes(team) || cu.lib.includes(team) ? 0 : cu.sud.includes(team) ? 1 : 2;
+          split[k] += pc;
+          // Objetivo "jugar una copa": cuenta Libertadores o Sudamericana, y el camino dice cuál.
+          const pre = goal === "sud" ? "Libertadores · " : "";
+          if (h) rt(pre + (h[1] === "campeón Clausura" ? "Salir campeón del Clausura" : /^(subcampeón|semifinalista)/.test(h[1]) ? "Por la Copa Argentina (el campeón ya tenía plaza)" : "Por título: " + h[1]), pc);
+          else if (cu.lib.includes(team)) rt(pre + (arank < 3 ? "Terminar entre los 3 primeros de la Anual" : `Terminar ${arank + 1}° en la Anual y que se liberen cupos`), pc);
+          else if (goal === "sud" && cu.sud.includes(team)) rt("Sudamericana · " + (arank < 9 ? "Terminar entre el 4° y el 9° de la Anual" : `Terminar ${arank + 1}° en la Anual y que se liberen cupos`), pc);
         }
       }
     }
     agg.n++; agg.w += w;
+    if (agg.split && split) { for (let i = 0; i < 3; i++) agg.split[i] += split[i]; }
     for (const k in routes) routeAdd(k, routes[k]);
     // puntos y récord del equipo en lo que falta
     let pts = 0, W = 0, D = 0, L = 0;
@@ -1549,6 +1564,7 @@ function goalSim(team, goal, target) {
       if (gf > gc) { pts += 3; W++; } else if (gf === gc) { pts += 1; D++; } else L++;
     }
     add(agg.pts, pts, w); add(agg.rec, `${W}-${D}-${L}`, w);
+    if (agg.split && split) { const ps = agg.ptsSplit[pts] || (agg.ptsSplit[pts] = [0, 0, 0, 0]); for (let i = 0; i < 3; i++) ps[i] += split[i]; ps[3]++; }
     if (combo) { combo.n++; combo.w += w; }
     for (const [m] of pending) { const x = agg.match[m.id][outc[m.id]]; x[0]++; x[1] += w; }
   }
@@ -1624,18 +1640,26 @@ function goalHTML(G) {
     if (minSure != null && P < 0.995) lines.push(`Si suma <b>${ptx(minSure)} o más</b>, lo logra en todos los escenarios simulados.`);
     if (pMax < 0.995 && ptsRows.length) lines.push(`Aun sumando los ${maxPts} puntos que juega, lo logra el <b>${pctP(pMax)}</b> de las veces.`);
     if (maxNone != null && P > 0) lines.push(`Con <b>${ptx(maxNone)} o menos</b> no le alcanza en ninguna simulación.`);
-    if (goal === "sud" && pMax < P) lines.push("Si suma mucho puede terminar yendo a la Libertadores en vez de la Sudamericana.");
+    if (goal === "sud") lines.push("El porcentaje grande es jugar alguna copa; abajo, cuánto es Libertadores y cuánto Sudamericana.");
+  }
+  if (agg.split && P < 0.995 && agg.split[2] / agg.n <= 1e-9) {
+    if (goal === "lib") { verdict = "Copa asegurada: lo que no es Libertadores es Sudamericana"; vc = "ok"; }
   }
   const hero = `<div class="goal-hero"><div class="big">${pctP(P)}</div><div>
     <h3>${tn(team)}&nbsp;· ${esc(gname)}</h3>
     <p>${lines.join(" ") || "Chances según el modelo, con los resultados que ya cargaste fijos."}</p>
-    <span class="verdict ${vc}">${verdict}</span></div></div>`;
+    <span class="verdict ${vc}">${verdict}</span>${splitBlock(agg)}</div></div>`;
   // Caminos
   const routes = Object.entries(agg.routes).map(([k, v]) => [k, v / agg.n]).filter(r => r[1] > 0.00005).sort((a, b) => b[1] - a[1]).slice(0, 8);
   const routesCard = `<div class="gcard"><h4>Caminos</h4><p class="hint">Por dónde llega cuando lo logra (sobre el total de escenarios).</p>
     ${routes.length ? `<ul class="list">${routes.map(([k, v]) => `<li><span>${esc(k)}</span><b class="v">${pctP(v)}</b><span class="bar"><i style="width:${Math.max(1, v / Math.max(P, 1e-9) * 100)}%"></i></span></li>`).join("")}</ul>` : `<p class="hint">No aparece ningún camino en las simulaciones.</p>`}</div>`;
   // Puntos
-  const ptsCard = `<div class="gcard"><h4>Según cuántos puntos sume</h4><p class="hint">En sus partidos que faltan. Chance de lograrlo con cada total.</p>
+  const sp = k => { const x = agg.ptsSplit[k]; return x ? [x[0] / x[3], x[1] / x[3], x[2] / x[3]] : null; };
+  const ptsCard = agg.split
+    ? `<div class="gcard"><h4>Según cuántos puntos sume</h4><p class="hint">Con cada total: a qué copa va o si se queda sin copa.</p>
+    <div class="tbl-wrap"><table><thead><tr><th class="l">Puntos</th><th>Libertadores</th><th>Sudamericana</th><th>Sin copa</th><th>Qué tan probable es sumar eso</th></tr></thead>
+    <tbody>${ptsRows.map(([k, p, f]) => { const x = sp(k); return `<tr><td class="l"><b>${k}</b> ${k === 1 ? "punto" : "puntos"}</td><td class="pcell${goal === "lib" ? " " + cls(x[0]) : ""}" style="color:var(--lib)">${pctP(x[0])}</td><td class="pcell" style="color:var(--sud)">${pctP(x[1])}</td><td class="pcell" style="color:var(--muted)">${pctP(x[2])}</td><td>${pctP(f)}</td></tr>`; }).join("")}</tbody></table></div></div>`
+    : `<div class="gcard"><h4>Según cuántos puntos sume</h4><p class="hint">En sus partidos que faltan. Chance de lograrlo con cada total.</p>
     <div class="tbl-wrap"><table><thead><tr><th class="l">Puntos</th><th>Lo logra</th><th>Qué tan probable es sumar eso</th></tr></thead>
     <tbody>${ptsRows.map(([k, p, f]) => `<tr><td class="l"><b>${k}</b> ${k === 1 ? "punto" : "puntos"}</td><td class="pcell ${cls(p)}">${pctP(p)}</td><td>${pctP(f)}</td></tr>`).join("")}</tbody></table></div></div>`;
   // Sus partidos
@@ -1707,11 +1731,14 @@ function goalHTMLPts(G) {
         math = `Llegaría a <b>${zm.final} puntos</b>. ${zm.above.length ? `${zm.above.length} equipo${zm.above.length > 1 ? "s ya tienen" : " ya tiene"} más puntos. ` : ""}Necesita que <b>${zm.threats.length - 7} de estos ${catchable.length}</b> terminen debajo: ${catchable.map(r => tn(r.id)).join(", ")}.`; }
     }
   }
+  if (agg.split && P < 0.995 && agg.split[2] / agg.n <= 1e-9) {
+    if (goal === "lib") { verdict = "Copa asegurada: lo que no es Libertadores es Sudamericana"; vc = "ok"; }
+  }
   const hero = `<div class="goal-hero"><div class="big">${pctP(P)}</div><div>
     <h3>${tn(team)}&nbsp;· ${esc(gname)} sumando ${ptx(target)}</h3>
     <p>${P >= 1 ? "Si suma esos puntos, no depende de nadie." : P <= 0 ? `En ninguna de las ${agg.n.toLocaleString("es-AR")} simulaciones le alcanza con esos puntos.`
       : `${P < 0.01 ? `Pasa en ${Math.max(1, Math.round(agg.w)).toLocaleString("es-AR")} de ${agg.n.toLocaleString("es-AR")} escenarios simulados. ` : ""}${agg.w < 5 ? "Es un caso extremo: casi todos los rivales tienen que perder." : P > 0.995 ? "Prácticamente no depende de nadie: solo un combo muy raro de resultados lo dejaría afuera." : `Además de sumar ${ptx(target)}, lo que más lo ayuda: ${key.join(", ") || "nada en particular"}.`}`}${math ? ` ${math}` : ""}</p>
-    <span class="verdict ${vc}">${verdict}</span></div></div>`;
+    <span class="verdict ${vc}">${verdict}</span>${splitBlock(agg)}</div></div>`;
   const routes = Object.entries(agg.routes).map(([k, v]) => [k, v / agg.n]).filter(r => r[1] > 0.00005).sort((a, b) => b[1] - a[1]).slice(0, 8);
   const routesCard = `<div class="gcard"><h4>Caminos</h4><p class="hint">Cómo llega cuando lo logra, sumando ${ptx(target)}.</p>
     ${routes.length ? `<ul class="list">${routes.map(([k, v]) => `<li><span>${esc(k)}</span><b class="v">${pctP(v)}</b><span class="bar"><i style="width:${Math.max(1, v / Math.max(P, 1e-9) * 100)}%"></i></span></li>`).join("")}</ul>` : '<p class="hint">No aparece ningún camino.</p>'}</div>`;
@@ -1727,6 +1754,16 @@ function goalHTMLPts(G) {
   return hero + `<div class="goal-grid">${othersCard}<div style="display:grid;gap:16px">${routesCard}${combosCard}</div></div>`;
 }
 
+// Reparto Libertadores / Sudamericana / sin copa, para que el % de una copa no se lea como "queda afuera".
+function splitBlock(agg) {
+  if (!agg.split || !agg.n) return "";
+  const [l, s, n] = agg.split.map(v => v / agg.n), w = v => Math.max(0, v * 100).toFixed(2);
+  return `<div class="split">
+    <div class="split-bar" role="img" aria-label="Libertadores ${pctP(l)}, Sudamericana ${pctP(s)}, sin copa ${pctP(n)}"><i style="width:${w(l)}%;background:var(--lib)"></i><i style="width:${w(s)}%;background:var(--sud)"></i><i style="width:${w(n)}%;background:var(--line)"></i></div>
+    <div class="split-leg"><span><i style="background:var(--lib)"></i>Libertadores <b>${pctP(l)}</b></span><span><i style="background:var(--sud)"></i>Sudamericana <b>${pctP(s)}</b></span><span><i style="background:var(--line)"></i>Sin copa <b>${pctP(n)}</b></span></div>
+    <div class="split-tot">Juega alguna copa internacional: <b>${pctP(l + s)}</b>${n <= 1e-9 ? " · en todos los escenarios juega una copa" : n > 0.5 ? " · lo más probable es quedarse sin copa" : ""}</div>
+  </div>`;
+}
 // Lista "qué tiene que pasar": una frase por partido y las 3 formas en que puede terminar, con su chance en cada una.
 function needsCard(list, P, team, title, empty) {
   const nm = id => `<b>${esc(T(id).n)}</b>`;
