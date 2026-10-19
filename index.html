@@ -667,7 +667,10 @@ function isUpset(mm, r) {
   return p < 0.30 && p < (r[0] > r[1] ? mm.pa : mm.ph);
 }
 // Llaves: casi siempre pasa el favorito, pero con lugar para sorpresas.
-const sharpen = p => { const a = Math.pow(p, 2.2), b = Math.pow(1 - p, 2.2); return a / (a + b); };
+// Llaves a partido único son muy abiertas: el favorito pasa un poco más que lo que dice su %, no siempre.
+const sharpen = p => { const a = Math.pow(p, 1.3), b = Math.pow(1 - p, 1.3); return a / (a + b); };
+// Batacazo en una llave: pasa el que tenía menos de 40% de chances.
+const bataTag = (won, p) => won && p < 0.4 ? '<span class="mini-tag desc" style="margin-right:6px">BATACAZO</span>' : "";
 function aiPick(mm) {
   const outcome = isClose(mm) ? "d" : mm.ph >= mm.pa ? "h" : "a";
   let best = null;
@@ -948,7 +951,7 @@ function tieHTML(t, s, cups) {
     const p = other ? (id === t.h ? advanceProb(t.h, t.a, t.neutral, cups) : 1 - advanceProb(t.h, t.a, t.neutral, cups)) : null;
     const cls = t.w ? (t.w === id ? "win" : "lose") : "";
     return `<button type="button" class="${cls}" data-tie="${t.id}" data-team="${id}" ${other ? "" : "disabled"}>
-      <span class="seed">${s[id].p}${s[id].z}</span><span class="nm">${tn(id)}</span><span class="pr">${p == null ? "" : pct(p)}</span></button>`;
+      <span class="seed">${s[id].p}${s[id].z}</span><span class="nm">${tn(id)}</span><span class="pr">${p == null ? "" : bataTag(t.w === id, p) + pct(p)}</span></button>`;
   };
   return `<div class="tie">${row(t.h, t.a)}${row(t.a, t.h)}</div>`;
 }
@@ -999,7 +1002,7 @@ function renderCups(cups) {
       const p = other ? (id === t.h ? cupTieProb(t, t.h, t.a) : 1 - cupTieProb(t, t.h, t.a)) : null;
       const cls = t.w ? (t.w === id ? "win" : "lose") : "";
       return `<button type="button" class="${cls}" data-cuptie="${t.id}" data-team="${id}" ${other ? "" : "disabled"}>
-        <span class="seed">${isLocal(id) ? "ARG" : ""}</span><span class="nm">${tn(id)}</span><span class="pr">${p == null ? "" : pct(p)}</span></button>`;
+        <span class="seed">${isLocal(id) ? "ARG" : ""}</span><span class="nm">${tn(id)}</span><span class="pr">${p == null ? "" : bataTag(t.w === id, p) + pct(p)}</span></button>`;
     };
     return `<div class="tie">${row(t.h, t.a)}${row(t.a, t.h)}</div>`;
   };
@@ -1163,7 +1166,7 @@ function fillAI() {
   for (const id of Object.keys(aiCupPicks)) delete cupPicks[id];
   aiCupPicks = {};
   let surprises = 0;
-  const pickTie = (p, h, a) => { const w = Math.random() < sharpen(p) ? h : a; if ((p >= 0.5) !== (w === h)) surprises++; return w; };
+  const pickTie = (p, h, a) => { const w = Math.random() < sharpen(p) ? h : a; if ((w === h ? p : 1 - p) < 0.4) surprises++; return w; };
   const cups = resolveCups((t, h, a) => (cupPicks[t.id] === h || cupPicks[t.id] === a) ? cupPicks[t.id] : pickTie(cupTieProb(t, h, a), h, a));
   for (const t of cups.ties) if (t.w && !cupPicks[t.id]) { cupPicks[t.id] = t.w; aiCupPicks[t.id] = true; }
   poWinners = {};
@@ -1172,7 +1175,7 @@ function fillAI() {
   for (const t of br.ties) if (t.w) poWinners[t.id] = t.w;
   projection = null; save(); renderAll();
   const bata = plan.items.filter(([m, r]) => isUpset(matchModel(m), r)).length;
-  toast(`IA: ${plan.items.length} partidos, ${plan.draws} empates, ${plan.upsets} triunfos del no favorito (${bata} batacazos) y ${surprises} sorpresas en llaves`);
+  toast(`IA: ${plan.items.length} partidos, ${plan.draws} empates, ${plan.upsets} triunfos del no favorito (${bata} batacazos) y ${surprises} batacazos en playoffs y copas`);
 }
 function fillRandom() {
   for (const m of MATCHES) if (!results[m.id] || aiFilled[m.id]) { results[m.id] = sample(matchModel(m)); aiFilled[m.id] = true; }
