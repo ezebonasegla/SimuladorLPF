@@ -1214,7 +1214,8 @@ function renderSummary(st, br, cups) {
   document.getElementById("pane-resumen").innerHTML = `
     <div class="panel-h"><h2>Resumen</h2><span class="sub">${filled}/${MATCHES.length} partidos cargados${filled < MATCHES.length ? " · el resto todavía no suma" : ""}</span></div>
     <div class="sum-head">
-      <div class="sum-card"><div class="lbl">Campeón Clausura</div>${champ}${cupChamps ? `<div class="lbl" style="margin-top:10px">Campeones de copa</div><ul>${cupChamps}</ul>` : ""}</div>
+      <div class="sum-card"><div class="lbl">Campeón Clausura</div>${champ}
+        <div class="lbl" style="margin-top:12px">Campeón de Liga · 1° de la Anual${filled < MATCHES.length ? " (por ahora)" : ""}</div><div class="big">${tn(an[0])}</div>${cupChamps ? `<div class="lbl" style="margin-top:10px">Campeones de copa</div><ul>${cupChamps}</ul>` : ""}</div>
       <div class="sum-card lib"><div class="lbl">Copa Libertadores 2027</div><ul>${c.holders.filter(h => !h[2]).map(h => li(h[0], `&nbsp;<span class="mini-tag champ">${h[1].startsWith("subcampeón") ? "SUBCAMP. CA" : h[1].startsWith("semifinalista") ? "SEMIS CA" : "TÍTULO"}</span>`)).join("")}${c.lib.map(id => li(id)).join("")}</ul></div>
       <div class="sum-card sud"><div class="lbl">Copa Sudamericana 2027</div><ul>${c.sud.map(id => li(id)).join("")}</ul></div>
       <div class="sum-card desc"><div class="lbl">Descienden</div><ul>${relegated(st).map(id => li(id)).join("")}</ul></div>
