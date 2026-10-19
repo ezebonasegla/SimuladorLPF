@@ -440,6 +440,19 @@ const H2H = {
   "lan|ban": [0, "Clásico del Sur", true],
   "gim|irv": [0, "clásico mendocino", true],
 };
+/* Jerarquía: peso de la historia ganando títulos (ligas, copas nacionales e internacionales) y
+   costumbre de jugar definiciones. 0 = sin títulos de Primera, 1 = los más ganadores.
+   Pesa poco en la fase regular y bastante en partidos de eliminación directa (playoffs y copas). */
+const GRANDEZA = {
+  boc: 1.0, riv: 1.0, ind: 0.8, rac: 0.75, est: 0.7, slo: 0.7, vel: 0.65, new: 0.5, cen: 0.5, lan: 0.45,
+  arg: 0.4, hur: 0.35, tal: 0.3, bel: 0.3, dyj: 0.25, pla: 0.25, glp: 0.2, ban: 0.2, irv: 0.15, tig: 0.15,
+  cco: 0.1, atu: 0.1, uni: 0.1, ins: 0.05, sar: 0.05, bar: 0.05, gim: 0.03, rie: 0.02, ald: 0.02, erc: 0,
+  fla: 1.0, pal: 1.0, flu: 0.8, cam: 0.75, vas: 0.7, ctq: 0.1,
+};
+const grand = id => GRANDEZA[id] ?? 0.2;
+const G_LEAGUE = 0.08, G_KO = 0.42;
+const koBonus = id => G_KO * (grand(id) - 0.4);
+
 /* Escudos: no son los oficiales, son insignias con los colores y el diseño de cada camiseta.
    p: s = lisa, v = bastones, h = franja horizontal, d = banda diagonal, m = mitades, c = V, r = rayas horizontales */
 const CREST = {
@@ -515,7 +528,7 @@ function strength(t) {
   return 0.55 * clp + 0.45 * anp + 0.35 * (0.55 * cld + 0.45 * and);
 }
 const teamStr = id => EXT[id] ? EXT[id].s : strength(T(id));
-const cupStr = id => teamStr(id) + (CUP_BOOST[id] ? CUP_BOOST[id].v : 0);
+const cupStr = id => teamStr(id) + (CUP_BOOST[id] ? CUP_BOOST[id].v : 0) + koBonus(id);
 // Momento: cuánto mejor (o peor) viene en el Clausura respecto del Apertura.
 function momentum(t) {
   const apj = t.an[0] - t.cl[0]; if (apj <= 0) return 0;
@@ -597,6 +610,9 @@ function matchModel(m) {
     const s = st[t.id];
     if (s && s.v) { adj(side, s.v); keys.push({ c: s.v > 0 ? "" : "neg", t: `<b>${esc(t.n)}</b> ${s.txt}` }); }
   }
+  const gd = grand(m.h) - grand(m.a);
+  sh += G_LEAGUE * gd / 2; sa -= G_LEAGUE * gd / 2;
+  if (Math.abs(gd) >= 0.5) keys.push({ c: "", t: `Jerarquía: <b>${esc((gd > 0 ? H : A).n)}</b> tiene mucha más historia ganando títulos` });
   const hh = h2h(m.h, m.a);
   if (hh) {
     sh += hh.v / 2; sa -= hh.v / 2;
@@ -669,7 +685,7 @@ function playoffFatigue(id, cups) {
 }
 // Probabilidad de que "home" pase la llave a partido único (empate → penales 50/50).
 function advanceProb(hId, aId, neutral, cups) {
-  const m = modelS(teamStr(hId) - playoffFatigue(hId, cups), teamStr(aId) - playoffFatigue(aId, cups), neutral);
+  const m = modelS(teamStr(hId) + koBonus(hId) - playoffFatigue(hId, cups), teamStr(aId) + koBonus(aId) - playoffFatigue(aId, cups), neutral);
   return m.ph + m.pd * 0.5;
 }
 // Llave de copa: ida y vuelta con resultado de ida (agg), o partido único neutral.
@@ -915,7 +931,7 @@ function renderPlayoffs(st, br, cups) {
   const filled = MATCHES.filter(m => results[m.id]).length;
   document.getElementById("pane-playoffs").innerHTML = `
     <div class="panel-h"><h2>Playoffs Clausura</h2><span class="sub">${filled < MATCHES.length ? `Proyección con ${filled}/${MATCHES.length} resultados cargados` : "Con todos los resultados cargados"} · tocá un equipo para hacerlo avanzar</span></div>
-    <p class="rule">Partido único, local el mejor ubicado. 1° vs 8° de la otra zona, 2° vs 7°, 3° vs 6°, 4° vs 5°. El % es la chance de pasar la llave (si empatan, penales 50/50). La final es en cancha neutral. Los equipos que llegan a una final de copa en noviembre o diciembre restan un poco por cansancio.</p>
+    <p class="rule">Partido único, local el mejor ubicado. 1° vs 8° de la otra zona, 2° vs 7°, 3° vs 6°, 4° vs 5°. El % es la chance de pasar la llave (si empatan, penales 50/50). La final es en cancha neutral. Los equipos que llegan a una final de copa en noviembre o diciembre restan un poco por cansancio. La jerarquía (historia ganando títulos) pesa en cada llave.</p>
     <div class="bracket">${cols}</div>
     ${br.champ ? `<div class="champion"><div><div class="lbl">Campeón del Clausura</div><div class="big">${tn(br.champ)}</div></div><span class="cross">Clasifica a la Libertadores por título${br.champ === APERTURA_CHAMP ? " (ya lo tenía por el Apertura, así que no libera un cupo nuevo)" : ""}.</span></div>` : ""}`;
 }
@@ -1055,6 +1071,7 @@ function renderProjection() {
       <li><b>Historial y clásicos:</b> Superclásico, Independiente-Boca, Clásico del Sur y clásico mendocino suben la chance de empate; River-Racing con ventaja histórica de River.</li>
       <li><b>Lo que se juega:</b> suma a quien pelea playoffs, un cupo por la Anual o no terminar último; resta a quien no tiene nada en juego.</li>
       <li><b>Completar con IA:</b> no pone siempre el resultado más probable. Reparte empates y batacazos en la cantidad que marcan las probabilidades (los batacazos caen más donde el chico tiene más chances) y elige marcadores verosímiles. Cada clic arma otra fecha posible; lo que cargaste a mano no se toca.</li>
+      <li><b>Jerarquía:</b> la historia ganando títulos pesa poco en la fase regular y bastante en playoffs y copas, donde los clubes acostumbrados a definir rinden más. Por eso un puntero sin tradición, como Instituto, no es tan candidato al título como su tabla sugiere.</li>
       <li><b>Localía:</b> el local espera 1,2 goles contra 0,9 del visitante a igual nivel. Copas: Estudiantes rinde más en la Libertadores que en la liga.</li>
     </ul></details>
     <p class="rule">Los resultados y ganadores que elegiste quedan fijos. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana).</p>
