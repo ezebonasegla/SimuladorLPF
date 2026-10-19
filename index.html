@@ -282,6 +282,39 @@ tr.in td.pos { color: var(--accent); }
 .cup .out { margin-top: 10px; font-size: 13.5px; }
 .cup .out b { color: var(--lib); }
 
+/* Probabilidades */
+.proj { max-width: 980px; margin: 0 auto; }
+.proj.compact-w { max-width: 760px; }
+.proj-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.proj-head h2 { font: 700 26px/1 var(--font-display); text-transform: uppercase; letter-spacing: .03em; margin: 0; }
+.proj-sub { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+.proj-actions { display: flex; align-items: center; gap: 8px; }
+.seg { display: inline-flex; padding: 3px; border-radius: 9px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
+.seg button { border: 0; background: none; padding: 6px 14px; border-radius: 7px; font: 600 13px/1 var(--font-body); color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12), 0 0 0 1px var(--line); }
+.btn.icon { padding: 8px; }
+.ptable { border-radius: 10px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+.ptable table { font-size: 13.5px; }
+.ptable th { font-size: 11px; padding: 9px 10px; }
+.ptable tr.grp th { background: var(--surface); border-bottom: 0; padding: 8px 10px 0; font-size: 10.5px; color: var(--accent); text-align: center; letter-spacing: .12em; }
+.ptable tr.grp th:not(:first-child):not(:last-child) { border-bottom: 2px solid var(--accent-soft); }
+.ptable td { padding: 7px 10px; }
+.ptable tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--surface-2) 70%, var(--surface)); }
+.ptable tbody tr:hover td { background: var(--accent-soft); }
+.ptable td.rk { width: 30px; color: var(--muted); font: 600 13px/1 var(--font-display); text-align: center; }
+.ptable td.team { font-weight: 600; min-width: 170px; }
+.ptable .zb { margin-left: 8px; font-size: 10px; font-weight: 700; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 1px 4px; vertical-align: 1px; }
+.ptable td.num { color: var(--muted); }
+.pc { min-width: 82px; }
+.pc .pv { display: block; font-weight: 600; line-height: 1.1; }
+.pc .meter { display: block; height: 4px; margin-top: 4px; margin-left: auto; width: 64px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.pc .meter i { display: block; height: 100%; margin-left: auto; background: var(--c); border-radius: 2px; }
+.pc.hi .pv { font-weight: 800; color: var(--ink); }
+.pc.lo .pv { color: var(--muted); font-weight: 500; }
+.pc.nil .pv { color: var(--line); font-weight: 500; }
+.pc.nil .meter { opacity: .5; }
+.proj-note { margin: 10px 2px 0; color: var(--muted); font-size: 12.5px; }
+
 /* Datos */
 .data-tbl input { width: 58px; padding: 4px 6px; border: 1px solid var(--line); border-radius: 5px; background: var(--surface-2); text-align: right; }
 .data-tbl td { padding: 4px 6px; }
@@ -1092,13 +1125,23 @@ function bracketDist(st, cups) {
   const sf = [0, 1].map(i => merge(qf[2 * i], qf[2 * i + 1], false));
   return merge(sf[0], sf[1], true);
 }
-function runProjection(N = 6000) {
+const PROJ_N = 10000;
+function runProjection(N = PROJ_N) { const job = projJob(N); job.step(N); job.finish(); }
+// Trabajo de proyección que se puede correr de una o en tandas (para no trabar la página).
+function projJob(N) {
   const ids = teams.map(t => t.id);
   const acc = Object.fromEntries(ids.map(id => [id, { po: 0, first: 0, lib: 0, sud: 0, champ: 0, desc: 0, pts: 0 }]));
   const pending = MATCHES.filter(m => !results[m.id]).map(m => [m, matchModel(m)]);
   const fixed = {};
   for (const m of MATCHES) if (results[m.id]) fixed[m.id] = results[m.id];
-  for (let n = 0; n < N; n++) {
+  let done = 0;
+  const step = k => { const end = Math.min(N, done + k); for (; done < end; done++) simOnce(); return done >= N; };
+  const finish = () => {
+    for (const id of ids) for (const k in acc[id]) acc[id][k] /= N;
+    for (const id of ids) acc[id].cupT = (acc[id].libT || 0) + (acc[id].sudT || 0) + (acc[id].caT || 0);
+    projection = { acc, N, at: new Date() };
+  };
+  function simOnce() {
     const res = Object.assign({}, fixed);
     for (const [m, mm] of pending) res[m.id] = sample(mm);
     const st = standings(res);
@@ -1120,52 +1163,79 @@ function runProjection(N = 6000) {
     an.slice(-2).forEach(id => acc[id].desc++);
     st.AN.forEach(r => acc[r.id].pts += r.pts);
   }
-  for (const id of ids) for (const k in acc[id]) acc[id][k] /= N;
-  for (const id of ids) acc[id].cupT = (acc[id].libT || 0) + (acc[id].sudT || 0) + (acc[id].caT || 0);
-  projection = { acc, N, at: new Date() };
+  return { step, finish };
 }
 function renderProjection() {
   const el = document.getElementById("pane-proyeccion");
-  if (!projection) runProjection();
+  if (!projection) {
+    el.innerHTML = `<div class="proj"><div class="proj-head"><div><h2>Probabilidades</h2><p class="proj-sub">Calculando ${PROJ_N.toLocaleString("es-AR")} simulaciones…</p></div></div></div>`;
+    scheduleProjection();
+    return;
+  }
   const { N } = projection;
-  el.innerHTML = `
-    <div class="panel-h"><h2>Probabilidades</h2><span class="sub">${N.toLocaleString("es-AR")} simulaciones de los partidos sin resultado, los playoffs y las copas</span></div>
-    <div class="chips" style="margin-bottom:12px">
-      <button class="chip" type="button" data-proj="full" aria-pressed="${!projCompact}">Completa</button>
-      <button class="chip" type="button" data-proj="compact" aria-pressed="${projCompact}">Resumida</button>
+  const filled = MATCHES.filter(m => results[m.id]).length;
+  el.innerHTML = `<div class="proj${projCompact ? " compact-w" : ""}">
+    <div class="proj-head">
+      <div>
+        <h2>Probabilidades</h2>
+        <p class="proj-sub">${N.toLocaleString("es-AR")} simulaciones · ${filled}/${MATCHES.length} partidos cargados quedan fijos</p>
+      </div>
+      <div class="proj-actions">
+        <div class="seg" role="group" aria-label="Vista">
+          <button type="button" data-proj="compact" aria-pressed="${projCompact}">Resumida</button>
+          <button type="button" data-proj="full" aria-pressed="${!projCompact}">Completa</button>
+        </div>
+        <button class="btn ghost icon" type="button" id="btn-proj" title="Volver a simular" aria-label="Volver a simular">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 4v5h-5"/></svg>
+        </button>
+      </div>
     </div>
-    ${projCompact ? projTable() : ""}
-    <p class="rule">Las chances chicas se muestran con un decimal (por ejemplo 0,3%): 0% es imposible en las simulaciones. Los resultados y ganadores que elegiste quedan fijos. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana).</p>
-    ${projCompact ? "" : projTable()}
-    <div style="margin-top:12px"><button class="btn" type="button" id="btn-proj">Volver a simular</button></div>`;
+    ${projTable()}
+    <p class="proj-note">Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana). Las chances chicas van con un decimal; «—» es que no pasó en ninguna simulación.</p>
+  </div>`;
 }
 function projTable() {
   const { acc } = projection;
-  const rows = teams.slice().sort((a, b) => acc[b.id].pts - acc[a.id].pts || acc[b.id].lib - acc[a.id].lib);
-  const cell = (v, c) => `<td class="pct" style="--c:${c}"><i style="width:${Math.round(v * 100)}%"></i><span>${pctP(v)}</span></td>`;
+  // Celda: número + barrita. Más de 50% en negrita, menos de 5% atenuado.
+  const cell = (v, c) => {
+    const cls = v <= 0 ? "nil" : v >= 0.5 ? "hi" : v < 0.05 ? "lo" : "";
+    return `<td class="pc ${cls}" style="--c:${c}"><span class="pv">${v <= 0 ? "—" : pctP(v)}</span><span class="meter"><i style="width:${Math.max(v > 0 ? 2 : 0, Math.round(v * 100))}%"></i></span></td>`;
+  };
+  const team = (t, i) => `<td class="rk">${i + 1}</td><td class="l team">${tn(t.id)}<span class="zb">${t.z}</span></td>`;
   if (projCompact) {
-    // Versión resumida: lo que más se mira.
     const order = teams.slice().sort((a, b) => acc[b.id].champ - acc[a.id].champ || acc[b.id].lib - acc[a.id].lib || acc[b.id].po - acc[a.id].po);
-    return `<div class="tbl-wrap"><table>
-      <thead><tr><th class="l">Equipo</th><th>Playoffs</th><th>Sudamericana</th><th>Libertadores</th><th>Campeón</th></tr></thead>
-      <tbody>${order.map(t => `<tr><td class="l team">${tn(t.id)}</td>${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].champ, "var(--lib)")}</tr>`).join("")}</tbody>
+    return `<div class="tbl-wrap ptable"><table>
+      <thead><tr><th></th><th class="l">Equipo</th><th>Playoffs</th><th>Sudamericana</th><th>Libertadores</th><th>Campeón</th></tr></thead>
+      <tbody>${order.map((t, i) => `<tr>${team(t, i)}${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].champ, "var(--lib)")}</tr>`).join("")}</tbody>
     </table></div>`;
   }
-  return `<div class="tbl-wrap"><table>
-      <thead><tr><th class="l">Equipo</th><th>Zona</th><th>Pts Anual (prom.)</th><th>Playoffs</th><th>1° de zona</th><th>Campeón Clausura</th><th>Gana una copa</th><th>Libertadores</th><th>Sudamericana</th><th>Desc.</th></tr></thead>
-      <tbody>${rows.map(t => `<tr><td class="l team">${tn(t.id)}</td><td>${t.z}</td><td>${acc[t.id].pts.toFixed(1)}</td>
-        ${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].first, "var(--accent)")}${cell(acc[t.id].champ, "var(--lib)")}${acc[t.id].cupT ? cell(acc[t.id].cupT, "var(--lib)") : "<td>–</td>"}
-        ${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].desc, "var(--danger)")}</tr>`).join("")}</tbody>
+  const rows = teams.slice().sort((a, b) => acc[b.id].pts - acc[a.id].pts || acc[b.id].lib - acc[a.id].lib);
+  return `<div class="tbl-wrap ptable"><table>
+      <thead>
+        <tr class="grp"><th colspan="3"></th><th colspan="3">Clausura</th><th colspan="2">Copas 2027</th><th colspan="2"></th></tr>
+        <tr><th></th><th class="l">Equipo</th><th>Pts Anual</th><th>Playoffs</th><th>1° zona</th><th>Campeón</th><th>Libertadores</th><th>Sudamericana</th><th>Gana copa</th><th>Desc.</th></tr>
+      </thead>
+      <tbody>${rows.map((t, i) => `<tr>${team(t, i)}<td class="num">${acc[t.id].pts.toFixed(1)}</td>
+        ${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].first, "var(--accent)")}${cell(acc[t.id].champ, "var(--lib)")}
+        ${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].cupT || 0, "var(--lib)")}${cell(acc[t.id].desc, "var(--danger)")}</tr>`).join("")}</tbody>
     </table></div>`;
 }
 // Las probabilidades se recalculan solas un momento después del último cambio.
-let projTimer;
+let projTimer, projRun = 0;
 function scheduleProjection() {
   clearTimeout(projTimer);
+  const run = ++projRun;
   projTimer = setTimeout(() => {
-    if (!projection) runProjection();
-    if (activeTab === "proyeccion") renderProjection();
-    applyFocus();
+    if (projection) return;
+    const job = projJob(PROJ_N);
+    const tick = () => {
+      if (run !== projRun) return; // hubo otro cambio: este cálculo ya no sirve
+      if (!job.step(800)) return setTimeout(tick, 0);
+      job.finish();
+      if (activeTab === "proyeccion") renderProjection();
+      applyFocus();
+    };
+    tick();
   }, 450);
 }
 
@@ -1337,7 +1407,7 @@ document.addEventListener("click", e => {
   if (e.target.closest("#btn-clear")) {
     results = {}; aiFilled = {}; poWinners = {}; cupPicks = {}; aiCupPicks = {}; projection = null; save(); renderAll(); toast("Resultados borrados"); return;
   }
-  if (e.target.closest("#btn-proj")) { projection = null; renderProjection(); applyFocus(); toast("Proyección actualizada"); return; }
+  if (e.target.closest("#btn-proj")) { projection = null; renderProjection(); toast("Recalculando 10.000 simulaciones…"); return; }
   if (e.target.closest("#btn-reset-data")) {
     teams = structuredClone(BASE_TEAMS); invalidate(); save(); renderAll(); toast("Datos originales restablecidos"); return;
   }
