@@ -1340,7 +1340,7 @@ function reachablePts(team) {
   return [...out].sort((a, b) => a - b);
 }
 const goalTarget = team => goalPts === "any" ? null : goalPts === "max" ? Math.max(...reachablePts(team)) : +goalPts;
-const GOAL_N = 6000;
+const GOAL_N = 6000, GOAL_N_MAX = 30000;
 function goalSim(team, goal, target) {
   const ownIds = new Set(ownPending(team).map(m => m.id));
   const pending = MATCHES.filter(m => !results[m.id] && !(target != null && ownIds.has(m.id))).map(m => [m, matchModel(m)]);
@@ -1452,9 +1452,11 @@ function runGoal() {
   let done = 0;
   const tick = () => {
     if (run !== goalRun) return;
-    const end = Math.min(GOAL_N, done + 500);
+    // Si lo logra en muy pocos escenarios, se simula más (hasta 30.000) para describir bien esos casos.
+    const goalN = job.agg.w < 25 ? GOAL_N_MAX : GOAL_N;
+    const end = Math.min(goalN, done + 500);
     for (; done < end; done++) job.once();
-    if (done < GOAL_N) return setTimeout(tick, 0);
+    if (done < goalN && !(done >= GOAL_N && job.agg.w >= 25)) return setTimeout(tick, 0);
     goalRes = { team, goal, stamp, target, agg: job.agg, mine: job.mine, combos: job.combos };
     if (activeTab === "objetivo") renderGoal();
   };
@@ -1467,13 +1469,15 @@ function goalHTML(G) {
   const cls = v => v >= 0.7 ? "ok" : v >= 0.25 ? "mid" : "bad";
   // Puntos
   const ptsRows = Object.entries(agg.pts).map(([k, v]) => [+k, v[1] / v[0], v[0] / agg.n]).sort((a, b) => b[0] - a[0]);
-  const sure = ptsRows.filter(r => r[1] >= 0.995).map(r => r[0]), none = ptsRows.filter(r => r[1] <= 0.0005).map(r => r[0]);
+  const sure = ptsRows.filter(r => r[1] >= 1).map(r => r[0]), none = ptsRows.filter(r => r[1] <= 0).map(r => r[0]);
   const maxPts = ptsRows.length ? ptsRows[0][0] : 0, pMax = ptsRows.length ? ptsRows[0][1] : 0;
   const minSure = sure.length ? Math.min(...sure) : null, maxNone = none.length ? Math.max(...none) : null;
   // Veredicto
   let verdict, vc;
-  if (P >= 0.995) { verdict = "Ya lo tiene prácticamente asegurado"; vc = "ok"; }
-  else if (P <= 0.0005) { verdict = "No le alcanza en ningún escenario"; vc = "bad"; }
+  if (P >= 1) { verdict = "Ya lo tiene asegurado"; vc = "ok"; }
+  else if (P >= 0.995) { verdict = "Ya lo tiene prácticamente asegurado"; vc = "ok"; }
+  else if (P <= 0) { verdict = "No le alcanza en ningún escenario"; vc = "bad"; }
+  else if (P < 0.01) { verdict = "Casi imposible: necesita muchos resultados a favor"; vc = "bad"; }
   else if (minSure != null && minSure <= maxPts) { verdict = `Depende de sí mismo: con ${minSure} puntos lo logra`; vc = "ok"; }
   else if (pMax >= 0.5) { verdict = "Ganando todo es favorito, pero necesita ayuda"; vc = "mid"; }
   else { verdict = "Necesita ganar y que se den otros resultados"; vc = P >= 0.1 ? "mid" : "bad"; }
@@ -1481,11 +1485,11 @@ function goalHTML(G) {
   const lines = [];
   if (goal === "champ") {
     lines.push("Primero tiene que entrar a playoffs y después ganar 4 llaves a partido único: cuanto mejor termine en la zona, más partidos juega de local y más fácil es el cuadro.");
-    if (P > 0.0005 && P < 0.995) { verdict = P >= 0.1 ? "Candidato al título" : P >= 0.02 ? "Tiene chances, pero es de abajo" : "Necesita casi un milagro"; vc = P >= 0.1 ? "ok" : P >= 0.02 ? "mid" : "bad"; }
+    if (P > 0 && P < 0.995) { verdict = P >= 0.1 ? "Candidato al título" : P >= 0.02 ? "Tiene chances, pero es de abajo" : "Necesita casi un milagro"; vc = P >= 0.1 ? "ok" : P >= 0.02 ? "mid" : "bad"; }
   } else {
     if (minSure != null && P < 0.995) lines.push(`Si suma <b>${ptx(minSure)} o más</b>, lo logra en todos los escenarios simulados.`);
     if (pMax < 0.995 && ptsRows.length) lines.push(`Aun sumando los ${maxPts} puntos que juega, lo logra el <b>${pctP(pMax)}</b> de las veces.`);
-    if (maxNone != null && P > 0.0005) lines.push(`Con <b>${ptx(maxNone)} o menos</b> no le alcanza en ninguna simulación.`);
+    if (maxNone != null && P > 0) lines.push(`Con <b>${ptx(maxNone)} o menos</b> no le alcanza en ninguna simulación.`);
     if (goal === "sud" && pMax < P) lines.push("Si suma mucho puede terminar yendo a la Libertadores en vez de la Sudamericana.");
   }
   const hero = `<div class="goal-hero"><div class="big">${pctP(P)}</div><div>
@@ -1517,7 +1521,7 @@ function goalHTML(G) {
     const v = pr.filter(p => p != null), swing = Math.max(...v) - Math.min(...v);
     const best = pr.indexOf(Math.max(...v)), worst = pr.indexOf(Math.min(...v));
     return { m, pr, swing, best, worst };
-  }).filter(o => o.swing > 0.01).sort((a, b) => b.swing - a.swing).slice(0, 8);
+  }).filter(o => o.swing > Math.max(0.0005, Math.min(0.01, P * 0.25))).sort((a, b) => b.swing - a.swing).slice(0, 8);
   const lab = (m, o) => o === 0 ? `que gane ${T(m.h).n}` : o === 2 ? `que gane ${T(m.a).n}` : "que empaten";
   const othersCard = `<div class="gcard"><h4>Le conviene</h4><p class="hint">Otros partidos que más mueven sus chances.</p>
     ${others.length ? others.map(({ m, pr, best, worst }) => `<div class="gm"><div class="who">${tn(m.h)} <small>vs</small> ${tn(m.a)} <small>· fecha ${m.f}</small></div>
@@ -1526,6 +1530,15 @@ function goalHTML(G) {
   return hero + `<div class="goal-grid">${routesCard}${ptsCard}${ownCard}${othersCard}</div>`;
 }
 
+// Cuentas "matemáticas" para la zona: con cuántos puntos queda y cuánto pueden sumar como máximo los rivales.
+function zoneMath(team, target) {
+  const z = T(team).z, final = T(team).cl[1] + target;
+  const rows = teams.filter(t => t.z === z && t.id !== team).map(t => {
+    const cur = t.cl[1] + ownFixedPts(t.id), left = 3 * ownPending(t.id).length;
+    return { id: t.id, cur, top: cur + left, max: final - cur };
+  });
+  return { final, rows, above: rows.filter(r => r.cur > final), threats: rows.filter(r => r.top >= final).sort((a, b) => a.max - b.max) };
+}
 // Vista con puntos fijos: qué tiene que pasar además de sumar esos puntos.
 function goalHTMLPts(G) {
   const { agg, team, goal, target, combos } = G, gname = GOALS.find(g => g[0] === goal)[1].toLowerCase();
@@ -1537,17 +1550,36 @@ function goalHTMLPts(G) {
     const x = agg.match[m.id], pr = [0, 1, 2].map(o => x[o][0] ? x[o][1] / x[o][0] : null);
     const v = pr.filter(p => p != null), swing = Math.max(...v) - Math.min(...v);
     return { m, pr, swing, best: pr.indexOf(Math.max(...v)), worst: pr.indexOf(Math.min(...v)) };
-  }).filter(o => o.swing > 0.01).sort((a, b) => b.swing - a.swing);
+  }).filter(o => o.swing > Math.max(0.0005, Math.min(0.01, P * 0.25))).sort((a, b) => b.swing - a.swing);
   const lab = (m, o) => o === 0 ? `que gane ${T(m.h).n}` : o === 2 ? `que gane ${T(m.a).n}` : "que empaten";
   let verdict, vc;
-  if (P >= 0.995) { verdict = `Con ${ptx(target)} lo logra seguro`; vc = "ok"; }
-  else if (P <= 0.0005) { verdict = `Con ${ptx(target)} no le alcanza`; vc = "bad"; }
+  if (P >= 1) { verdict = `Con ${ptx(target)} lo logra seguro`; vc = "ok"; }
+  else if (P >= 0.995) { verdict = `Con ${ptx(target)} lo logra casi seguro`; vc = "ok"; }
+  else if (P <= 0) { verdict = `Con ${ptx(target)} no le alcanza`; vc = "bad"; }
+  else if (P < 0.01) { verdict = "Casi imposible: necesita muchos resultados a favor"; vc = "bad"; }
   else if (P >= 0.5) { verdict = "Favorito, pero depende de otros"; vc = "mid"; }
   else { verdict = "Necesita que se den varios resultados"; vc = P >= 0.1 ? "mid" : "bad"; }
   const key = others.slice(0, 3).map(o => `<b>${esc(lab(o.m, o.best))}</b> (${T(o.m.h).n}–${T(o.m.a).n})`);
+  // Para 1° de zona y playoffs: ¿es posible en teoría aunque no haya salido en las simulaciones?
+  let math = "";
+  if ((goal === "first" || goal === "po") && P < 0.01) {
+    const zm = zoneMath(team, target), ptsTx = n => n === 1 ? "1 punto" : `${n} puntos`;
+    if (goal === "first") {
+      if (zm.above.length) { verdict = "Matemáticamente imposible"; vc = "bad"; math = `Con ${ptx(target)} llega a ${zm.final} y ${zm.above.map(r => T(r.id).n).join(", ")} ya tiene${zm.above.length > 1 ? "n" : ""} más.`; }
+      else if (zm.threats.length) {
+        if (P <= 0) verdict = "Matemáticamente posible, pero no pasó en ninguna simulación";
+        math = `Llegaría a <b>${zm.final} puntos</b>. Para terminar 1° necesita que ${zm.threats.map(r => `${tn(r.id)} sume como máximo <b>${ptsTx(Math.max(0, r.max))}</b>`).join(", ")} (si igualan en puntos define la diferencia de gol).`;
+      }
+    } else {
+      if (zm.above.length >= 8) { verdict = "Matemáticamente imposible"; vc = "bad"; math = `Con ${ptx(target)} llega a ${zm.final} y ya hay ${zm.above.length} equipos de la zona con más puntos.`; }
+      else if (P <= 0) { verdict = "Matemáticamente posible, pero no pasó en ninguna simulación"; const catchable = zm.threats.filter(r => r.cur <= zm.final);
+        math = `Llegaría a <b>${zm.final} puntos</b>. ${zm.above.length ? `${zm.above.length} equipo${zm.above.length > 1 ? "s ya tienen" : " ya tiene"} más puntos. ` : ""}Necesita que <b>${zm.threats.length - 7} de estos ${catchable.length}</b> terminen debajo: ${catchable.map(r => tn(r.id)).join(", ")}.`; }
+    }
+  }
   const hero = `<div class="goal-hero"><div class="big">${pctP(P)}</div><div>
     <h3>${tn(team)}&nbsp;· ${esc(gname)} sumando ${ptx(target)}</h3>
-    <p>${P >= 0.995 ? "Si suma esos puntos, no depende de nadie." : P <= 0.0005 ? "En ninguna simulación le alcanza con esos puntos, pase lo que pase en los otros partidos." : `Además de sumar ${ptx(target)}, lo que más lo ayuda: ${key.join(", ") || "nada en particular"}.`}</p>
+    <p>${P >= 1 ? "Si suma esos puntos, no depende de nadie." : P <= 0 ? `En ninguna de las ${agg.n.toLocaleString("es-AR")} simulaciones le alcanza con esos puntos.`
+      : `${P < 0.01 ? `Pasa en ${Math.max(1, Math.round(agg.w)).toLocaleString("es-AR")} de ${agg.n.toLocaleString("es-AR")} escenarios simulados. ` : ""}${agg.w < 5 ? "Es un caso extremo: casi todos los rivales tienen que perder." : `Además de sumar ${ptx(target)}, lo que más lo ayuda: ${key.join(", ") || "nada en particular"}.`}`}${math ? ` ${math}` : ""}</p>
     <span class="verdict ${vc}">${verdict}</span></div></div>`;
   const routes = Object.entries(agg.routes).map(([k, v]) => [k, v / agg.n]).filter(r => r[1] > 0.00005).sort((a, b) => b[1] - a[1]).slice(0, 8);
   const routesCard = `<div class="gcard"><h4>Caminos</h4><p class="hint">Cómo llega cuando lo logra, sumando ${ptx(target)}.</p>
