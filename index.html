@@ -285,6 +285,17 @@ tr.in td.pos { color: var(--accent); }
 /* Probabilidades */
 .proj { max-width: 980px; margin: 0 auto; }
 .proj.compact-w { max-width: 760px; }
+.proj-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
+.proj-split > .ptable + .ptable { margin-top: -1px; border-top-left-radius: 0; border-top-right-radius: 0; }
+.proj-split > .ptable:first-child { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+.proj-split > .ptable + .ptable thead { display: none; }
+@media (min-width: 1280px) {
+  .proj.compact-w { max-width: 1560px; }
+  .proj-split { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+  .proj-split > .ptable + .ptable { margin-top: 0; border-radius: 10px; }
+  .proj-split > .ptable:first-child { border-radius: 10px; }
+  .proj-split > .ptable + .ptable thead { display: table-header-group; }
+}
 .proj-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .proj-head h2 { font: 700 26px/1 var(--font-display); text-transform: uppercase; letter-spacing: .03em; margin: 0; }
 .proj-sub { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
@@ -1204,10 +1215,12 @@ function projTable() {
   const team = (t, i) => `<td class="rk">${i + 1}</td><td class="l team">${tn(t.id)}<span class="zb">${t.z}</span></td>`;
   if (projCompact) {
     const order = teams.slice().sort((a, b) => acc[b.id].champ - acc[a.id].champ || acc[b.id].lib - acc[a.id].lib || acc[b.id].po - acc[a.id].po);
-    return `<div class="tbl-wrap ptable"><table>
+    // En pantallas anchas va en dos columnas de 15; en el celular, una debajo de la otra.
+    const half = (from, to) => `<div class="tbl-wrap ptable"><table>
       <thead><tr><th></th><th class="l">Equipo</th><th>Playoffs</th><th>Sudamericana</th><th>Libertadores</th><th>Campeón</th></tr></thead>
-      <tbody>${order.map((t, i) => `<tr>${team(t, i)}${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].champ, "var(--lib)")}</tr>`).join("")}</tbody>
+      <tbody>${order.slice(from, to).map((t, i) => `<tr>${team(t, from + i)}${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].champ, "var(--lib)")}</tr>`).join("")}</tbody>
     </table></div>`;
+    return `<div class="proj-split">${half(0, 15)}${half(15, 30)}</div>`;
   }
   const rows = teams.slice().sort((a, b) => acc[b.id].pts - acc[a.id].pts || acc[b.id].lib - acc[a.id].lib);
   return `<div class="tbl-wrap ptable"><table>
