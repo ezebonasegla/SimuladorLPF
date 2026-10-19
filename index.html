@@ -396,6 +396,9 @@ tr.in td.pos { color: var(--accent); }
 .risks li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; padding: 8px 10px; border-radius: 7px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font-size: 14px; }
 .risks li small { color: var(--muted); }
 .risks li > b { color: var(--danger); white-space: nowrap; }
+.need-sep { display: flex; align-items: center; gap: 10px; margin-top: 6px; font: 700 14px/1 var(--font-display); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.need-sep:first-child { margin-top: 0; }
+.need-sep::after { content: ""; flex: 1; height: 2px; background: var(--line); border-radius: 1px; }
 .needs { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .need { border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; background: var(--surface); }
 .need-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14.5px; }
@@ -1696,26 +1699,29 @@ function needsCard(list, P, team, title, empty) {
   const nm = id => `<b>${esc(T(id).n)}</b>`;
   // Si ya casi lo tiene, no tiene sentido mostrar 100% / 100% / 99%: se muestra solo qué lo podría complicar.
   if (P >= 0.97) {
-    const risks = list.filter(o => o.pr[o.worst] < P - 0.0005).sort((a, b) => a.pr[a.worst] - b.pr[b.worst]).slice(0, 5);
+    const risks = list.filter(o => o.pr[o.worst] < P - 0.0005).sort((a, b) => a.pr[a.worst] - b.pr[b.worst]).slice(0, 5).sort((a, b) => a.m.f - b.m.f);
     const riskTxt = ({ m, worst }) => worst === 1 ? `que ${nm(m.h)} y ${nm(m.a)} empaten` : `que ${nm(worst === 0 ? m.h : m.a)} le gane a ${nm(worst === 0 ? m.a : m.h)}`;
     return `<div class="gcard"><h4>Qué lo podría complicar</h4>
       <p class="hint">${esc(T(team).n)} ya casi lo tiene asegurado (<b>${pctP(P)}</b>). ${risks.length ? "Estos son los únicos resultados que le bajan un poco la chance:" : "Ningún resultado de otros partidos le cambia la chance."}</p>
       ${risks.length ? `<ul class="risks">${risks.map(o => `<li><span>Si pasa ${riskTxt(o)} <small>(fecha ${o.m.f})</small></span><b>baja a ${pctP(o.pr[o.worst])}</b></li>`).join("")}</ul>
       <p class="hint" style="margin-top:10px">Para quedar afuera tendrían que darse varios de estos resultados juntos, y aun así es muy raro.</p>` : ""}</div>`;
   }
-  list = list.filter(o => o.swing >= 0.015 || (P < 0.05 && o.swing > Math.max(0.0005, P * 0.25)));
+  // Se eligen los que más le importan y después se ordenan por fecha (la más próxima primero).
+  list = list.filter(o => o.swing >= 0.015 || (P < 0.05 && o.swing > Math.max(0.0005, P * 0.25)))
+    .slice().sort((a, b) => a.m.f - b.m.f || b.swing - a.swing);
   const sentence = (m, o) => o === 0 ? `Que <b>${esc(T(m.h).n)}</b> le gane a <b>${esc(T(m.a).n)}</b>`
     : o === 2 ? `Que <b>${esc(T(m.a).n)}</b> le gane a <b>${esc(T(m.h).n)}</b>` : `Que <b>${esc(T(m.h).n)}</b> y <b>${esc(T(m.a).n)}</b> empaten`;
   const items = list.map(({ m, pr, best, worst }, i) => {
+    const sep = i === 0 || list[i - 1].m.f !== m.f ? `<li class="need-sep"><span>Fecha ${m.f}${m.f === 13 ? " · pendientes" : ""}</span></li>` : "";
     const opt = (o, label) => pr[o] == null ? "" : `<div class="nopt ${o === best ? "best" : o === worst ? "worst" : ""}">
         <span class="nl">${label}</span><b>${pctP(pr[o])}</b>${o === best ? '<span class="nt">le conviene</span>' : o === worst ? '<span class="nt">lo complica</span>' : ""}</div>`;
-    return `<li class="need">
-      <div class="need-head"><span class="num">${i + 1}</span><span class="txt">${sentence(m, best)}</span><span class="when">Fecha ${m.f}</span></div>
+    return `${sep}<li class="need">
+      <div class="need-head"><span class="num">${i + 1}</span><span class="txt">${sentence(m, best)}</span></div>
       <div class="need-opts">${opt(0, `${crest(m.h)}Gana ${esc(T(m.h).n)}`)}${opt(1, "Empate")}${opt(2, `${crest(m.a)}Gana ${esc(T(m.a).n)}`)}</div>
     </li>`;
   }).join("");
   return `<div class="gcard"><h4>${esc(title)}</h4>
-    <p class="hint">Hoy ${esc(T(team).n)} lo logra el <b>${pctP(P)}</b>. En cada partido, el número es <b>la chance que le queda</b> según cómo termine. Arriba, los que más le importan.</p>
+    <p class="hint">Hoy ${esc(T(team).n)} lo logra el <b>${pctP(P)}</b>. En cada partido, el número es <b>la chance que le queda</b> según cómo termine. Ordenados por fecha.</p>
     ${list.length ? `<ol class="needs">${items}</ol>` : `<p class="hint">${empty}</p>`}</div>`;
 }
 
