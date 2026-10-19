@@ -717,7 +717,15 @@ function playoffFatigue(id, cups) {
 // Probabilidad de que "home" pase la llave a partido único (empate → penales 50/50).
 // A partido único las diferencias se achican (KO_SHRINK): más lugar para el batacazo.
 const KO_SHRINK = 0.75;
+const advCache = new Map();
 function advanceProb(hId, aId, neutral, cups) {
+  const fh = playoffFatigue(hId, cups), fa = playoffFatigue(aId, cups);
+  const key = hId + aId + (neutral ? 1 : 0) + fh + "|" + fa;
+  let v = advCache.get(key);
+  if (v === undefined) { v = advanceProbRaw(hId, aId, neutral, cups); advCache.set(key, v); }
+  return v;
+}
+function advanceProbRaw(hId, aId, neutral, cups) {
   const sh = teamStr(hId) + koBonus(hId) - playoffFatigue(hId, cups), sa = teamStr(aId) + koBonus(aId) - playoffFatigue(aId, cups);
   const mid = (sh + sa) / 2, half = KO_SHRINK * (sh - sa) / 2;
   const m = modelS(mid + half, mid - half, neutral);
@@ -725,8 +733,10 @@ function advanceProb(hId, aId, neutral, cups) {
 }
 // Llave de copa: ida y vuelta con resultado de ida (agg), o partido único neutral.
 function cupTieProb(tie, h, a) {
-  if (tie.neutral || h !== tie.h) { const m = modelS(cupStr(h), cupStr(a), true); return m.ph + m.pd * 0.5; }
-  const m = modelS(cupStr(h), cupStr(a), false);
+  // Igual que en playoffs, en eliminación directa las diferencias se achican.
+  const sh = cupStr(h), sa = cupStr(a), mid = (sh + sa) / 2, half = KO_SHRINK * (sh - sa) / 2;
+  if (tie.neutral || h !== tie.h) { const m = modelS(mid + half, mid - half, true); return m.ph + m.pd * 0.5; }
+  const m = modelS(mid + half, mid - half, false);
   let p = 0;
   for (const [i, j, q] of m.cum) { const d = tie.agg + i - j; p += d > 0 ? q : d === 0 ? q * 0.5 : 0; }
   return p;
@@ -1026,7 +1036,9 @@ function renderSummary(st, br, cups) {
       <div class="sum-card desc"><div class="lbl">Zona de descenso</div><ul>${an.slice(-2).map(id => li(id)).join("")}</ul></div>
     </div>
     <div class="sum-grid three">${zoneT(st.A, "A")}${zoneT(st.B, "B")}${anT}</div>
-    <div class="sum-sec"><h3>Playoffs</h3><div class="bracket">${bracketCols(br, cups)}</div></div>`;
+    <div class="sum-sec"><h3>Playoffs</h3><div class="bracket">${bracketCols(br, cups)}</div></div>
+    <div class="sum-sec" id="sum-proj"></div>`;
+  renderSummaryProj();
 }
 
 /* ===================== RENDER: COPAS ===================== */
@@ -1066,7 +1078,26 @@ function renderCups(cups) {
 }
 
 /* ===================== PROYECCIÓN (Monte Carlo) ===================== */
-function runProjection(N = 10000) {
+// Probabilidad exacta de campeón de cada equipo dado el cuadro de playoffs de una simulación.
+function bracketDist(st, cups) {
+  const s = seedInfo(st);
+  const merge = (L, R, neutral) => {
+    const out = new Map();
+    for (const [x, px] of L) for (const [y, py] of R) {
+      const [h, a] = neutral ? [x, y] : better(s, x, y);
+      const ph = advanceProb(h, a, neutral, cups), w = px * py;
+      out.set(h, (out.get(h) || 0) + w * ph);
+      out.set(a, (out.get(a) || 0) + w * (1 - ph));
+    }
+    return out;
+  };
+  const leaf = id => new Map([[id, 1]]);
+  const r16 = R16.map(([z1, p1, z2, p2]) => merge(leaf((z1 === "A" ? st.A : st.B)[p1 - 1].id), leaf((z2 === "A" ? st.A : st.B)[p2 - 1].id), false));
+  const qf = [0, 1, 2, 3].map(i => merge(r16[2 * i], r16[2 * i + 1], false));
+  const sf = [0, 1].map(i => merge(qf[2 * i], qf[2 * i + 1], false));
+  return merge(sf[0], sf[1], true);
+}
+function runProjection(N = 6000) {
   const ids = teams.map(t => t.id);
   const acc = Object.fromEntries(ids.map(id => [id, { po: 0, first: 0, lib: 0, sud: 0, champ: 0, desc: 0, pts: 0 }]));
   const pending = MATCHES.filter(m => !results[m.id]).map(m => [m, matchModel(m)]);
@@ -1079,13 +1110,18 @@ function runProjection(N = 10000) {
     st.A.slice(0, 8).forEach(r => acc[r.id].po++); st.B.slice(0, 8).forEach(r => acc[r.id].po++);
     acc[st.A[0].id].first++; acc[st.B[0].id].first++;
     const cups = randomCups();
-    const br = bracket(st, t => Math.random() < advanceProb(t.h, t.a, t.neutral, cups) ? t.h : t.a);
-    acc[br.champ].champ++;
     for (const k of ["lib", "sud", "ca"]) if (cups.champ[k] && acc[cups.champ[k]]) acc[cups.champ[k]][k + "T"] = (acc[cups.champ[k]][k + "T"] || 0) + 1;
     const an = st.AN.map(r => r.id);
-    const c = cupos(an, br.champ, cups);
-    for (const id of c.champs) acc[id].lib++;
-    c.lib.forEach(id => acc[id].lib++); c.sud.forEach(id => acc[id].sud++);
+    // Playoffs calculados de forma exacta (no sorteados): así hasta un 8° tiene su chance real de campeón.
+    // Cupos: se arma una vez la Anual sin los campeones por título y se ve qué cambia según quién gane el Clausura.
+    const base = cupos(an, null, cups), held = new Set(base.champs), pool0 = an.filter(id => !held.has(id));
+    for (const [champ, pc] of bracketDist(st, cups)) {
+      acc[champ].champ += pc;
+      held.forEach(id => acc[id].lib += pc);
+      let pool = pool0;
+      if (!held.has(champ)) { acc[champ].lib += pc; const i = pool0.indexOf(champ); if (i < 9) pool = pool0.filter(id => id !== champ); }
+      for (let i = 0; i < 9; i++) acc[pool[i]][i < 3 ? "lib" : "sud"] += pc;
+    }
     an.slice(-2).forEach(id => acc[id].desc++);
     st.AN.forEach(r => acc[r.id].pts += r.pts);
   }
@@ -1096,9 +1132,7 @@ function runProjection(N = 10000) {
 function renderProjection() {
   const el = document.getElementById("pane-proyeccion");
   if (!projection) runProjection();
-  const { acc, N } = projection;
-  const rows = teams.slice().sort((a, b) => acc[b.id].pts - acc[a.id].pts || acc[b.id].lib - acc[a.id].lib);
-  const cell = (v, c) => `<td class="pct" style="--c:${c}"><i style="width:${Math.round(v * 100)}%"></i><span>${pctP(v)}</span></td>`;
+  const { N } = projection;
   el.innerHTML = `
     <div class="panel-h"><h2>Proyección</h2><span class="sub">${N.toLocaleString("es-AR")} simulaciones de los partidos sin resultado, los playoffs y las copas</span></div>
     <details class="explain" open><summary>Cómo calcula la IA</summary><ul>
@@ -1113,13 +1147,36 @@ function renderProjection() {
       <li><b>Localía:</b> el local espera 1,2 goles contra 0,9 del visitante a igual nivel. Copas: Estudiantes rinde más en la Libertadores que en la liga.</li>
     </ul></details>
     <p class="rule">Las chances chicas se muestran con un decimal (por ejemplo 0,3%): 0% es imposible en las simulaciones. Los resultados y ganadores que elegiste quedan fijos. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana).</p>
-    <div class="tbl-wrap"><table>
+    ${projTable()}
+    <div style="margin-top:12px"><button class="btn" type="button" id="btn-proj">Volver a simular</button></div>`;
+}
+function projTable() {
+  const { acc } = projection;
+  const rows = teams.slice().sort((a, b) => acc[b.id].pts - acc[a.id].pts || acc[b.id].lib - acc[a.id].lib);
+  const cell = (v, c) => `<td class="pct" style="--c:${c}"><i style="width:${Math.round(v * 100)}%"></i><span>${pctP(v)}</span></td>`;
+  return `<div class="tbl-wrap"><table>
       <thead><tr><th class="l">Equipo</th><th>Zona</th><th>Pts Anual (prom.)</th><th>Playoffs</th><th>1° de zona</th><th>Campeón Clausura</th><th>Gana una copa</th><th>Libertadores</th><th>Sudamericana</th><th>Desc.</th></tr></thead>
       <tbody>${rows.map(t => `<tr><td class="l team">${tn(t.id)}</td><td>${t.z}</td><td>${acc[t.id].pts.toFixed(1)}</td>
         ${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].first, "var(--accent)")}${cell(acc[t.id].champ, "var(--lib)")}${acc[t.id].cupT ? cell(acc[t.id].cupT, "var(--lib)") : "<td>–</td>"}
         ${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].desc, "var(--danger)")}</tr>`).join("")}</tbody>
-    </table></div>
-    <div style="margin-top:12px"><button class="btn" type="button" id="btn-proj">Volver a simular</button></div>`;
+    </table></div>`;
+}
+// En el Resumen la tabla de probabilidades se recalcula sola, un momento después del último cambio.
+let projTimer;
+function renderSummaryProj() {
+  const el = document.getElementById("sum-proj"); if (!el) return;
+  el.innerHTML = projection
+    ? `<h3>Probabilidades</h3><p class="rule">${projection.N.toLocaleString("es-AR")} simulaciones de lo que falta (los resultados cargados quedan fijos). Más detalle en la pestaña Proyección.</p>${projTable()}`
+    : `<h3>Probabilidades</h3><p class="rule">Calculando…</p>`;
+}
+function scheduleProjection() {
+  clearTimeout(projTimer);
+  projTimer = setTimeout(() => {
+    if (!projection) runProjection();
+    renderSummaryProj();
+    if (activeTab === "proyeccion") renderProjection();
+    applyFocus();
+  }, 450);
 }
 
 /* ===================== RENDER: DATOS ===================== */
@@ -1186,6 +1243,7 @@ function renderTables() {
   renderZone("A", st); renderZone("B", st); renderAnnual(st, br, cups); renderPlayoffs(st, br, cups); renderCups(cups, st); renderSummary(st, br, cups);
   if (activeTab === "proyeccion") renderProjection();
   applyFocus(st);
+  if (!projection) scheduleProjection();
 }
 function renderAll() {
   renderChips(); renderFocusSelect(); renderFixture(); renderTables(); renderData(); showTab(activeTab); applyFocus();
@@ -1193,7 +1251,7 @@ function renderAll() {
   document.getElementById("data-note").innerHTML =
     `<b>Tablas de promiedos al ${DATA_DATE}</b>. Faltan 3 partidos de la fecha 13 que se juegan hoy (Sarmiento-Barracas, Newell's-Central Córdoba y Riestra-Unión): cargá el resultado real o simulalos. Correcciones en la pestaña <b>Datos</b>. Cargados: <b>${done}/${MATCHES.length}</b> partidos.`;
 }
-function invalidate() { projection = null; cache.clear(); mcache.clear(); stakesCache = null; }
+function invalidate() { projection = null; cache.clear(); mcache.clear(); advCache.clear(); stakesCache = null; }
 const wide = matchMedia("(min-width: 1100px)");
 function showTab(tab) {
   if (wide.matches && tab === "partidos") tab = "resumen";
