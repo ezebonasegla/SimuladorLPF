@@ -301,13 +301,18 @@ tr.in td.pos { color: var(--accent); }
 .cup .out b { color: var(--lib); }
 
 /* Probabilidades */
-.proj { max-width: 980px; margin: 0 auto; }
-.proj.compact-w { max-width: 760px; }
+.proj { max-width: 1240px; margin: 0 auto; }
+.proj.compact-w { max-width: 860px; }
 .proj-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
 .proj-split > .ptable + .ptable { margin-top: -1px; border-top-left-radius: 0; border-top-right-radius: 0; }
 .proj-split > .ptable:first-child { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 .proj-split > .ptable + .ptable thead { display: none; }
-@media (min-width: 1280px) {
+.proj-split .ptable th { white-space: normal; line-height: 1.25; vertical-align: bottom; }
+.proj-split .pc { min-width: 64px; }
+.proj-split .pc .meter { width: 52px; }
+.proj-split .ptable td.team { min-width: 150px; }
+.proj-split .ptable td { padding: 7px 8px; }
+@media (min-width: 1400px) {
   .proj.compact-w { max-width: 1560px; }
   .proj-split { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
   .proj-split > .ptable + .ptable { margin-top: 0; border-radius: 10px; }
@@ -989,7 +994,9 @@ function cupos(an, clausuraChamp, cups) {
 /* ===================== RENDER: PARTIDOS ===================== */
 const pct = x => Math.round(x * 100) + "%";
 // Para chances chicas: no redondear a 0% algo que puede pasar.
-const pctP = v => v <= 0 ? "0%" : v < 0.001 ? "<0,1%" : v < 0.095 ? (v * 100).toFixed(1).replace(".", ",") + "%" : Math.round(v * 100) + "%";
+// Ni 0% ni 100% si no es seguro: cerca de los extremos se muestra con un decimal.
+const pctP = v => v <= 1e-9 ? "0%" : v >= 1 - 1e-9 ? "100%" : v < 0.001 ? "<0,1%" : v > 0.999 ? ">99,9%"
+  : v < 0.095 || v > 0.995 ? (v * 100).toFixed(1).replace(".", ",") + "%" : Math.round(v * 100) + "%";
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 function renderChips() {
   const opts = [["all", "Todas"], ["13", "F13 pend."], ["14", "Fecha 14"], ["15", "Fecha 15"], ["16", "Fecha 16"]];
@@ -1250,7 +1257,7 @@ function runProjection(N = PROJ_N) { const job = projJob(N); job.step(N); job.fi
 // Trabajo de proyección que se puede correr de una o en tandas (para no trabar la página).
 function projJob(N) {
   const ids = teams.map(t => t.id);
-  const acc = Object.fromEntries(ids.map(id => [id, { po: 0, first: 0, lib: 0, sud: 0, champ: 0, desc: 0, pts: 0 }]));
+  const acc = Object.fromEntries(ids.map(id => [id, { po: 0, first: 0, lib: 0, sud: 0, champ: 0, liga: 0, desc: 0, pts: 0 }]));
   const pending = MATCHES.filter(m => !results[m.id]).map(m => [m, matchModel(m)]);
   const fixed = {};
   for (const m of MATCHES) if (results[m.id]) fixed[m.id] = results[m.id];
@@ -1267,6 +1274,7 @@ function projJob(N) {
     const st = standings(res);
     poList(st, "A").slice(0, 8).forEach(r => acc[r.id].po++); poList(st, "B").slice(0, 8).forEach(r => acc[r.id].po++);
     acc[st.A[0].id].first++; acc[st.B[0].id].first++;
+    acc[st.AN[0].id].liga++; // Campeón de Liga: 1° de la Tabla Anual (art. 24.2)
     const cups = randomCups();
     for (const k of ["lib", "sud", "ca"]) if (cups.champ[k] && acc[cups.champ[k]]) acc[cups.champ[k]][k + "T"] = (acc[cups.champ[k]][k + "T"] || 0) + 1;
     const an = st.AN.map(r => r.id);
@@ -1314,28 +1322,29 @@ function projTable() {
   const { acc } = projection;
   // Celda: número + barrita. Más de 50% en negrita, menos de 5% atenuado.
   const cell = (v, c) => {
-    const cls = v <= 0 ? "nil" : v >= 0.5 ? "hi" : v < 0.05 ? "lo" : "";
-    return `<td class="pc ${cls}" style="--c:${c}"><span class="pv">${v <= 0 ? "—" : pctP(v)}</span><span class="meter"><i style="width:${Math.max(v > 0 ? 2 : 0, Math.round(v * 100))}%"></i></span></td>`;
+    const cls = v <= 1e-9 ? "nil" : v >= 0.5 ? "hi" : v < 0.05 ? "lo" : "";
+    return `<td class="pc ${cls}" style="--c:${c}"><span class="pv">${v <= 1e-9 ? "—" : pctP(v)}</span><span class="meter"><i style="width:${Math.max(v > 0 ? 2 : 0, Math.round(v * 100))}%"></i></span></td>`;
   };
   const team = (t, i) => `<td class="rk">${i + 1}</td><td class="l team">${tn(t.id)}<span class="zb">${t.z}</span></td>`;
   if (projCompact) {
-    const order = teams.slice().sort((a, b) => acc[b.id].champ - acc[a.id].champ || acc[b.id].lib - acc[a.id].lib || acc[b.id].po - acc[a.id].po);
+    const order = teams.slice().sort((a, b) => acc[b.id].champ + acc[b.id].liga - acc[a.id].champ - acc[a.id].liga || acc[b.id].lib - acc[a.id].lib || acc[b.id].po - acc[a.id].po);
     // En pantallas anchas va en dos columnas de 15; en el celular, una debajo de la otra.
     const half = (from, to) => `<div class="tbl-wrap ptable"><table>
-      <thead><tr><th></th><th class="l">Equipo</th><th>Playoffs</th><th>Sudamericana</th><th>Libertadores</th><th>Campeón</th></tr></thead>
-      <tbody>${order.slice(from, to).map((t, i) => `<tr>${team(t, from + i)}${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].champ, "var(--lib)")}</tr>`).join("")}</tbody>
+      <thead><tr><th></th><th class="l">Equipo</th><th>Playoffs</th><th>Sudamericana</th><th>Libertadores</th><th>Campeón Clausura</th><th>Campeón de Liga</th></tr></thead>
+      <tbody>${order.slice(from, to).map((t, i) => `<tr>${team(t, from + i)}${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].champ, "var(--lib)")}${cell(acc[t.id].liga, "var(--lib)")}</tr>`).join("")}</tbody>
     </table></div>`;
     return `<div class="proj-split">${half(0, 15)}${half(15, 30)}</div>`;
   }
   const rows = teams.slice().sort((a, b) => acc[b.id].pts - acc[a.id].pts || acc[b.id].lib - acc[a.id].lib);
   return `<div class="tbl-wrap ptable"><table>
       <thead>
-        <tr class="grp"><th colspan="3"></th><th colspan="3">Clausura</th><th colspan="2">Copas 2027</th><th colspan="2"></th></tr>
-        <tr><th></th><th class="l">Equipo</th><th>Pts Anual</th><th>Playoffs</th><th>1° zona</th><th>Campeón</th><th>Libertadores</th><th>Sudamericana</th><th>Gana copa</th><th>Desc.</th></tr>
+        <tr class="grp"><th colspan="3"></th><th colspan="3">Clausura</th><th colspan="2">Tabla Anual</th><th colspan="2">Copas 2027</th><th colspan="2"></th></tr>
+        <tr><th></th><th class="l">Equipo</th><th>Pts Anual</th><th>Playoffs</th><th>1° zona</th><th>Campeón</th><th>Campeón de Liga</th><th>Desc.</th><th>Libertadores</th><th>Sudamericana</th><th>Gana copa</th><th></th></tr>
       </thead>
       <tbody>${rows.map((t, i) => `<tr>${team(t, i)}<td class="num">${acc[t.id].pts.toFixed(1)}</td>
         ${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].first, "var(--accent)")}${cell(acc[t.id].champ, "var(--lib)")}
-        ${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].cupT || 0, "var(--lib)")}${cell(acc[t.id].desc, "var(--danger)")}</tr>`).join("")}</tbody>
+        ${cell(acc[t.id].liga, "var(--lib)")}${cell(acc[t.id].desc, "var(--danger)")}
+        ${cell(acc[t.id].lib, "var(--lib)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].cupT || 0, "var(--lib)")}<td></td></tr>`).join("")}</tbody>
     </table></div>`;
 }
 // Las probabilidades se recalculan solas un momento después del último cambio.
@@ -1382,7 +1391,7 @@ function renderData() {
    cuántos puntos necesita, qué partidos suyos pesan más, qué otros resultados le convienen y por qué
    camino llega (Anual, cupos liberados, título). */
 const GOALS = [
-  ["po", "Clasificar a playoffs"], ["first", "Terminar 1° de su zona"], ["lib", "Clasificar a Libertadores"],
+  ["po", "Clasificar a playoffs"], ["first", "Terminar 1° de su zona"], ["liga", "Campeón de Liga (1° de la Anual)"], ["lib", "Clasificar a Libertadores"],
   ["sud", "Clasificar a Sudamericana"], ["champ", "Salir campeón del Clausura"], ["safe", "No descender"],
 ];
 let goalTeam = "riv", goalKind = "lib", goalRes = null, goalRun = 0;
@@ -1452,6 +1461,7 @@ function goalSim(team, goal, target) {
     const rt = (k, v) => { routes[k] = (routes[k] || 0) + v; w += v; };
     if (goal === "po") { if (zpos <= 8) rt(`Terminar ${zpos}° de la Zona ${z}`, 1); }
     else if (goal === "first") { if (zr[0].id === team) rt("Terminar 1° de la zona", 1); }
+    else if (goal === "liga") { if (an[0] === team) rt("Terminar 1° de la Tabla Anual", 1); }
     else if (goal === "safe") { if (!relegated(st).includes(team)) rt(`Terminar ${arank + 1}° en la Anual`, 1); }
     else {
       const cups = randomCups();
@@ -1593,10 +1603,10 @@ function goalHTML(G) {
 }
 
 // Cuentas "matemáticas" para la zona: con cuántos puntos queda y cuánto pueden sumar como máximo los rivales.
-function zoneMath(team, target) {
-  const z = T(team).z, final = T(team).cl[1] + target;
-  const rows = teams.filter(t => t.z === z && t.id !== team).map(t => {
-    const cur = t.cl[1] + ownFixedPts(t.id), left = 3 * ownPending(t.id).length;
+function zoneMath(team, target, annual) {
+  const z = T(team).z, final = (annual ? T(team).an[1] : T(team).cl[1]) + target;
+  const rows = teams.filter(t => (annual || t.z === z) && t.id !== team).map(t => {
+    const cur = (annual ? t.an[1] : t.cl[1]) + ownFixedPts(t.id), left = 3 * ownPending(t.id).length;
     return { id: t.id, cur, top: cur + left, max: final - cur };
   });
   return { final, rows, above: rows.filter(r => r.cur > final), threats: rows.filter(r => r.top >= final).sort((a, b) => a.max - b.max) };
@@ -1624,13 +1634,13 @@ function goalHTMLPts(G) {
   const key = others.slice(0, 3).map(o => `<b>${esc(lab(o.m, o.best))}</b> (${T(o.m.h).n}–${T(o.m.a).n})`);
   // Para 1° de zona y playoffs: ¿es posible en teoría aunque no haya salido en las simulaciones?
   let math = "";
-  if ((goal === "first" || goal === "po") && P < 0.01) {
-    const zm = zoneMath(team, target), ptsTx = n => n === 1 ? "1 punto" : `${n} puntos`;
-    if (goal === "first") {
+  if ((goal === "first" || goal === "po" || goal === "liga") && P < 0.01) {
+    const zm = zoneMath(team, target, goal === "liga"), ptsTx = n => n === 1 ? "1 punto" : `${n} puntos`;
+    if (goal === "first" || goal === "liga") {
       if (zm.above.length) { verdict = "Matemáticamente imposible"; vc = "bad"; math = `Con ${ptx(target)} llega a ${zm.final} y ${zm.above.map(r => T(r.id).n).join(", ")} ya tiene${zm.above.length > 1 ? "n" : ""} más.`; }
       else if (zm.threats.length) {
         if (P <= 0) verdict = "Matemáticamente posible, pero no pasó en ninguna simulación";
-        math = `Llegaría a <b>${zm.final} puntos</b>. Para terminar 1° necesita que ${zm.threats.map(r => `${tn(r.id)} sume como máximo <b>${ptsTx(Math.max(0, r.max))}</b>`).join(", ")} (si igualan en puntos define la diferencia de gol).`;
+        math = `Llegaría a <b>${zm.final} puntos</b>${goal === "liga" ? " en la Anual" : ""}. Para terminar 1° necesita que ${zm.threats.map(r => `${tn(r.id)} sume como máximo <b>${ptsTx(Math.max(0, r.max))}</b>`).join(", ")} (si igualan en puntos define la diferencia de gol).`;
       }
     } else {
       if (zm.above.length >= 8) { verdict = "Matemáticamente imposible"; vc = "bad"; math = `Con ${ptx(target)} llega a ${zm.final} y ya hay ${zm.above.length} equipos de la zona con más puntos.`; }
@@ -1641,7 +1651,7 @@ function goalHTMLPts(G) {
   const hero = `<div class="goal-hero"><div class="big">${pctP(P)}</div><div>
     <h3>${tn(team)}&nbsp;· ${esc(gname)} sumando ${ptx(target)}</h3>
     <p>${P >= 1 ? "Si suma esos puntos, no depende de nadie." : P <= 0 ? `En ninguna de las ${agg.n.toLocaleString("es-AR")} simulaciones le alcanza con esos puntos.`
-      : `${P < 0.01 ? `Pasa en ${Math.max(1, Math.round(agg.w)).toLocaleString("es-AR")} de ${agg.n.toLocaleString("es-AR")} escenarios simulados. ` : ""}${agg.w < 5 ? "Es un caso extremo: casi todos los rivales tienen que perder." : `Además de sumar ${ptx(target)}, lo que más lo ayuda: ${key.join(", ") || "nada en particular"}.`}`}${math ? ` ${math}` : ""}</p>
+      : `${P < 0.01 ? `Pasa en ${Math.max(1, Math.round(agg.w)).toLocaleString("es-AR")} de ${agg.n.toLocaleString("es-AR")} escenarios simulados. ` : ""}${agg.w < 5 ? "Es un caso extremo: casi todos los rivales tienen que perder." : P > 0.995 ? "Prácticamente no depende de nadie: solo un combo muy raro de resultados lo dejaría afuera." : `Además de sumar ${ptx(target)}, lo que más lo ayuda: ${key.join(", ") || "nada en particular"}.`}`}${math ? ` ${math}` : ""}</p>
     <span class="verdict ${vc}">${verdict}</span></div></div>`;
   const routes = Object.entries(agg.routes).map(([k, v]) => [k, v / agg.n]).filter(r => r[1] > 0.00005).sort((a, b) => b[1] - a[1]).slice(0, 8);
   const routesCard = `<div class="gcard"><h4>Caminos</h4><p class="hint">Cómo llega cuando lo logra, sumando ${ptx(target)}.</p>
@@ -1688,7 +1698,7 @@ function applyFocus(st) {
   let chances = "";
   if (projection) {
     const a = projection.acc[focusTeam];
-    chances = `<span>Playoffs <b>${pctP(a.po)}</b></span><span>Campeón <b>${pctP(a.champ)}</b></span><span>Libertadores <b>${pctP(a.lib)}</b></span><span>Sudamericana <b>${pctP(a.sud)}</b></span>`;
+    chances = `<span>Playoffs <b>${pctP(a.po)}</b></span><span>Campeón Clausura <b>${pctP(a.champ)}</b></span><span>Campeón de Liga <b>${pctP(a.liga)}</b></span><span>Libertadores <b>${pctP(a.lib)}</b></span><span>Sudamericana <b>${pctP(a.sud)}</b></span>`;
   } else chances = `<button class="btn" type="button" id="btn-focus-proj" style="padding:4px 10px">Ver sus chances</button>`;
   info.innerHTML = `<span>${tn(focusTeam)}</span><span><b>${zp}°</b> Zona ${T(focusTeam).z} (${row.pts} pts${row.add ? `, <span class="delta" style="margin:0">+${row.add}</span>` : ""})</span>
     <span><b>${ar + 1}°</b> Anual (${an.pts} pts)</span><span>${done}/${ms.length} partidos cargados</span>${chances}
