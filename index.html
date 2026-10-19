@@ -852,6 +852,8 @@ function resolveCups(pick) {
     out.ties.push(fin);
     if (fin.h) out.finalists.add(fin.h); if (fin.a) out.finalists.add(fin.a);
     out.champ[c.id] = fin.w;
+    (out.runner || (out.runner = {}))[c.id] = fin.w ? (fin.w === fin.h ? fin.a : fin.h) : null;
+    if (c.id === "ca" && fin.w) out.caNext = [out.runner.ca, ...c.sf.map((t, i) => w[i] === t.h ? t.a : t.h)];
   }
   return out;
 }
@@ -918,26 +920,47 @@ function bracket(st, pick) {
   return { ties, champ: fin.w || null, seeds: s };
 }
 
-/* ===================== CUPOS INTERNACIONALES =====================
-   1°-3° de la Anual → Libertadores; 4°-9° → Sudamericana.
-   Tienen Libertadores por título: Belgrano (Apertura), el campeón del Clausura, el de la Copa Argentina
-   y el campeón de Libertadores o Sudamericana si es argentino (Estudiantes / Boca).
-   Se los saca de la Anual y los cupos corren al siguiente (si estaban en el top 9). */
-function titleHolders(clausuraChamp, cups) {
-  const list = [[APERTURA_CHAMP, "campeón Apertura"]];
-  if (clausuraChamp) list.push([clausuraChamp, "campeón Clausura"]);
-  if (cups) {
-    if (cups.champ.ca) list.push([cups.champ.ca, "campeón Copa Argentina"]);
-    if (cups.champ.lib && isLocal(cups.champ.lib)) list.push([cups.champ.lib, "campeón Copa Libertadores"]);
-    if (cups.champ.sud && isLocal(cups.champ.sud)) list.push([cups.champ.sud, "campeón Copa Sudamericana"]);
+/* ===================== CUPOS INTERNACIONALES (reglamento LPF 2026) =====================
+   Libertadores 2027:
+   - ARG 1 campeón Apertura (Belgrano) · ARG 2 campeón Clausura · ARG 3 campeón Copa Argentina (inalterable).
+   - ARG 4, 5 y 6: los mejores de la Tabla General excluidos los anteriores.
+   - Si el campeón del Apertura gana el Clausura, ARG 2 pasa al siguiente de la Tabla General.
+   - Si el campeón de la Copa Argentina ya ocupa la plaza de Apertura/Clausura (o gana Libertadores o Sudamericana),
+     ARG 3 pasa al siguiente mejor ubicado en la Copa Argentina (subcampeón; después semifinalistas por Tabla General).
+   - Campeón argentino de Libertadores o Sudamericana: plaza adicional; si ya tenía otra plaza, esa pasa al siguiente
+     de la Tabla General (o al siguiente de la Copa Argentina si era ARG 3).
+   Sudamericana 2027: los 6 mejores de la Tabla General que no hayan entrado a la Libertadores. */
+function cupos(an, clausuraChamp, cups) {
+  const Q = new Set(), seat = {}, holders = []; // holders: [equipo, motivo, a dónde pasa su plaza si ya estaba clasificado]
+  let extra = 0;
+  const add = (id, why, k) => { Q.add(id); seat[id] = k; holders.push([id, why, null]); };
+  // Siguientes mejor ubicados en la Copa Argentina: subcampeón y después semifinalistas (por Tabla General).
+  const caNext = () => {
+    if (!cups || !cups.caNext) return null;
+    const semis = cups.caNext.slice(1).filter(Boolean).sort((a, b) => an.indexOf(a) - an.indexOf(b));
+    return [cups.caNext[0], ...semis].find(id => id && !Q.has(id)) || null;
+  };
+  const passCA = (from, why) => {
+    const nx = caNext();
+    if (nx) { holders.push([from, why, nx]); add(nx, nx === cups.caNext[0] ? "subcampeón Copa Argentina" : "semifinalista Copa Argentina", "ca"); }
+    else { holders.push([from, why, "anual"]); extra++; }
+  };
+  add(APERTURA_CHAMP, "campeón Apertura", "ape");
+  if (clausuraChamp) { if (Q.has(clausuraChamp)) { holders.push([clausuraChamp, "campeón Clausura", "anual"]); extra++; } else add(clausuraChamp, "campeón Clausura", "cla"); }
+  const ca = cups && cups.champ.ca;
+  if (ca) { if (Q.has(ca)) passCA(ca, "campeón Copa Argentina"); else add(ca, "campeón Copa Argentina", "ca"); }
+  if (cups) for (const [k, n] of [["lib", "Libertadores"], ["sud", "Sudamericana"]]) {
+    const id = cups.champ[k], why = `campeón Copa ${n}`;
+    if (!id || !isLocal(id)) continue;
+    if (!Q.has(id)) { add(id, why, k); continue; }
+    // Ya tenía plaza: entra por su copa y libera la otra.
+    const prev = seat[id]; seat[id] = k;
+    const old = holders.find(h => h[0] === id && !h[2]); if (old) old[1] = why;
+    if (prev === "ca") passCA(id, "campeón Copa Argentina");
+    else holders.push([id, prev === "cla" ? "campeón Clausura" : prev === "ape" ? "campeón Apertura" : `campeón Copa ${prev === "lib" ? "Libertadores" : "Sudamericana"}`, "anual"]), extra++;
   }
-  return list;
-}
-function cupos(anOrder, clausuraChamp, cups) {
-  const holders = titleHolders(clausuraChamp, cups);
-  const champs = new Set(holders.map(h => h[0]));
-  const pool = anOrder.filter(id => !champs.has(id));
-  return { champs: [...champs], holders, lib: pool.slice(0, 3), sud: pool.slice(3, 9) };
+  const pool = an.filter(id => !Q.has(id)), libN = 3 + extra;
+  return { champs: [...Q], holders, lib: pool.slice(0, libN), sud: pool.slice(libN, libN + 6) };
 }
 
 /* ===================== RENDER: PARTIDOS ===================== */
@@ -1030,7 +1053,7 @@ function renderAnnual(st, br, cups) {
   const an = st.AN.map(r => r.id);
   const c = cupos(an, br.champ, cups);
   const lib = new Set(c.lib), sud = new Set(c.sud);
-  const titles = {}; for (const [id, why] of c.holders) (titles[id] = titles[id] || []).push(why);
+  const titles = {}; for (const [id, why] of c.holders) (titles[id] = titles[id] || []).push(why.replace(/ \(1° de la Anual\)/, ""));
   const desc = new Set(an.slice(-2));
   const rows = st.AN.map((r, i) => {
     const pos = i + 1;
@@ -1039,6 +1062,7 @@ function renderAnnual(st, br, cups) {
     if (lib.has(r.id)) { tag += '<span class="tag lib">Libertadores</span>'; band = "rowband-lib"; }
     if (sud.has(r.id)) { tag += '<span class="tag sud">Sudamericana</span>'; band = "rowband-sud"; }
     if (desc.has(r.id)) { tag += '<span class="tag desc">Desciende</span>'; band = "rowband-desc"; }
+    if (i === 0) tag = '<span class="tag po">Campeón de Liga</span>' + tag;
     return `<tr class="${band}">
       <td class="pos">${pos}</td>
       <td class="l team">${tn(r.id)}${moveTag(r.id, pos, order)}${tag}</td>
@@ -1048,11 +1072,9 @@ function renderAnnual(st, br, cups) {
   }).join("");
   const nm = id => tn(id);
   const pos = id => an.indexOf(id) + 1;
-  const seen = new Set();
-  const holderLis = c.holders.map(([id, why]) => {
-    const again = seen.has(id); seen.add(id);
-    return `<li>${nm(id)} <small>· ${why} (${pos(id)}° Anual)${again ? " · ya clasificado, no libera otro cupo" : ""}</small></li>`;
-  }).join("");
+  const holderLis = c.holders.map(([id, why, freed]) => freed
+    ? `<li style="list-style:none;margin-left:-20px"><small>↳ ${nm(id)} también es ${why}: ya estaba clasificado, su cupo pasa ${freed === "anual" ? "al siguiente de la Anual" : `a ${nm(freed)}`}</small></li>`
+    : `<li>${nm(id)} <small>· ${why}${why.includes("Anual") ? "" : ` (${pos(id)}° Anual)`}</small></li>`).join("");
   const pending = [];
   if (!br.champ) pending.push("Clausura (pestaña Playoffs)");
   if (!cups.champ.ca) pending.push("Copa Argentina");
@@ -1060,7 +1082,7 @@ function renderAnnual(st, br, cups) {
   if (!cups.champ.sud) pending.push("Sudamericana (¿Boca?)");
   document.getElementById("pane-anual").innerHTML = `
     <div class="panel-h"><h2>Tabla Anual 2026</h2><span class="sub">Apertura + Clausura · suman las fechas que faltan, no los playoffs</span></div>
-    <p class="rule">Del 1° al 3° van a Libertadores y del 4° al 9° a Sudamericana. A diferencia de promiedos, acá Belgrano sí libera su cupo. Tienen Libertadores por título Belgrano (Apertura), el campeón del Clausura, el de la Copa Argentina y Estudiantes o Boca si ganan la Libertadores o la Sudamericana. Si están en el top 9 liberan su lugar y el cupo corre al siguiente.</p>
+    <p class="rule">Según el reglamento LPF 2026: ARG 1 campeón del Apertura (Belgrano), ARG 2 campeón del Clausura, ARG 3 campeón de la Copa Argentina, y ARG 4 a 6 los 3 mejores de la Anual sin contar a esos campeones. Si Belgrano gana el Clausura, su plaza pasa al siguiente de la Anual. Si el campeón de la Copa Argentina ya tenía plaza por Apertura, Clausura, Libertadores o Sudamericana, la suya pasa al subcampeón de la Copa Argentina. Un campeón argentino de Libertadores o Sudamericana suma una plaza extra. Sudamericana: los 6 siguientes de la Anual. A diferencia de promiedos, acá Belgrano sí libera su lugar.</p>
     <div class="cupos">
       <div class="cupo-box lib"><h3>Copa Libertadores</h3><ol>
         ${holderLis}
@@ -1133,7 +1155,7 @@ function renderSummary(st, br, cups) {
     <div class="panel-h"><h2>Resumen</h2><span class="sub">${filled}/${MATCHES.length} partidos cargados${filled < MATCHES.length ? " · el resto todavía no suma" : ""}</span></div>
     <div class="sum-head">
       <div class="sum-card"><div class="lbl">Campeón Clausura</div>${champ}${cupChamps ? `<div class="lbl" style="margin-top:10px">Campeones de copa</div><ul>${cupChamps}</ul>` : ""}</div>
-      <div class="sum-card lib"><div class="lbl">Copa Libertadores 2027</div><ul>${c.holders.filter((h, i, a) => a.findIndex(x => x[0] === h[0]) === i).map(h => li(h[0], '&nbsp;<span class="mini-tag champ">TÍTULO</span>')).join("")}${c.lib.map(id => li(id)).join("")}</ul></div>
+      <div class="sum-card lib"><div class="lbl">Copa Libertadores 2027</div><ul>${c.holders.filter(h => !h[2]).map(h => li(h[0], `&nbsp;<span class="mini-tag champ">${h[1].startsWith("subcampeón") ? "SUBCAMP. CA" : h[1].startsWith("semifinalista") ? "SEMIS CA" : "TÍTULO"}</span>`)).join("")}${c.lib.map(id => li(id)).join("")}</ul></div>
       <div class="sum-card sud"><div class="lbl">Copa Sudamericana 2027</div><ul>${c.sud.map(id => li(id)).join("")}</ul></div>
       <div class="sum-card desc"><div class="lbl">Zona de descenso</div><ul>${an.slice(-2).map(id => li(id)).join("")}</ul></div>
     </div>
@@ -1223,14 +1245,10 @@ function projJob(N) {
     for (const k of ["lib", "sud", "ca"]) if (cups.champ[k] && acc[cups.champ[k]]) acc[cups.champ[k]][k + "T"] = (acc[cups.champ[k]][k + "T"] || 0) + 1;
     const an = st.AN.map(r => r.id);
     // Playoffs calculados de forma exacta (no sorteados): así hasta un 8° tiene su chance real de campeón.
-    // Cupos: se arma una vez la Anual sin los campeones por título y se ve qué cambia según quién gane el Clausura.
-    const base = cupos(an, null, cups), held = new Set(base.champs), pool0 = an.filter(id => !held.has(id));
     for (const [champ, pc] of bracketDist(st, cups)) {
       acc[champ].champ += pc;
-      held.forEach(id => acc[id].lib += pc);
-      let pool = pool0;
-      if (!held.has(champ)) { acc[champ].lib += pc; const i = pool0.indexOf(champ); if (i < 9) pool = pool0.filter(id => id !== champ); }
-      for (let i = 0; i < 9; i++) acc[pool[i]][i < 3 ? "lib" : "sud"] += pc;
+      const c = cupos(an, champ, cups);
+      c.champs.forEach(id => acc[id].lib += pc); c.lib.forEach(id => acc[id].lib += pc); c.sud.forEach(id => acc[id].sud += pc);
     }
     an.slice(-2).forEach(id => acc[id].desc++);
     st.AN.forEach(r => acc[r.id].pts += r.pts);
@@ -1409,18 +1427,16 @@ function goalSim(team, goal, target) {
     else if (goal === "safe") { if (arank < an.length - 2) rt(`Terminar ${arank + 1}° en la Anual`, 1); }
     else {
       const cups = randomCups();
-      const base = cupos(an, null, cups), held = new Set(base.champs), pool0 = an.filter(id => !held.has(id));
-      if (goal === "lib" && held.has(team)) rt("Por título: " + base.holders.find(h => h[0] === team)[1], 1);
-      else if (goal === "champ") { if (zpos <= 8) { const p = bracketDist(st, cups).get(team) || 0; if (p) rt(`Entrando ${zpos}° de la Zona ${z}`, p); } }
-      else if (!held.has(team)) {
-        // Quién sale campeón del Clausura cambia los cupos de la Anual, entre o no a playoffs.
+      if (goal === "champ") { if (zpos <= 8) { const p = bracketDist(st, cups).get(team) || 0; if (p) rt(`Entrando ${zpos}° de la Zona ${z}`, p); } }
+      else {
+        // Quién sale campeón del Clausura cambia los cupos, entre o no a playoffs.
         for (const [c, pc] of bracketDist(st, cups)) {
-          if (goal === "lib" && c === team) { rt("Salir campeón del Clausura", pc); continue; }
-          if (c === team) continue; // si sale campeón va a Libertadores, no a Sudamericana
-          const pool = c && !held.has(c) && pool0.indexOf(c) < 9 ? pool0.filter(id => id !== c) : pool0;
-          const i = pool.indexOf(team);
-          if (goal === "lib" && i >= 0 && i < 3) rt(arank < 3 ? "Terminar entre los 3 primeros de la Anual" : `Terminar ${arank + 1}° en la Anual y que se liberen cupos`, pc);
-          if (goal === "sud" && i >= 3 && i < 9) rt(arank < 9 ? "Terminar entre el 4° y el 9° de la Anual" : `Terminar ${arank + 1}° en la Anual y que se liberen cupos`, pc);
+          const cu = cupos(an, c, cups);
+          const h = cu.holders.find(x => x[0] === team && !x[2]);
+          if (goal === "lib") {
+            if (h) rt(h[1] === "campeón Clausura" ? "Salir campeón del Clausura" : /^(subcampeón|semifinalista)/.test(h[1]) ? "Por la Copa Argentina (el campeón ya tenía plaza)" : "Por título: " + h[1], pc);
+            else if (cu.lib.includes(team)) rt(arank < 3 ? "Terminar entre los 3 primeros de la Anual" : `Terminar ${arank + 1}° en la Anual y que se liberen cupos`, pc);
+          } else if (cu.sud.includes(team)) rt(arank < 9 ? "Terminar entre el 4° y el 9° de la Anual" : `Terminar ${arank + 1}° en la Anual y que se liberen cupos`, pc);
         }
       }
     }
