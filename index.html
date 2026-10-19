@@ -392,6 +392,22 @@ tr.in td.pos { color: var(--accent); }
 .gm .opt { font-size: 12.5px; padding: 3px 8px; border-radius: 5px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
 .gm .opt.best { background: var(--sud-soft); color: var(--sud); box-shadow: none; font-weight: 700; }
 .gm .opt.worst { background: var(--danger-soft); color: var(--danger); box-shadow: none; }
+.needs { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.need { border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; background: var(--surface); }
+.need-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14.5px; }
+.need-head .num { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--sud); color: var(--surface); display: grid; place-items: center; font: 700 13px/1 var(--font-display); }
+.need-head .txt { flex: 1; min-width: 0; }
+.need-head .when { flex: none; font-size: 12px; color: var(--muted); }
+.need-opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.nopt { display: grid; gap: 2px; padding: 7px 8px; border-radius: 7px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font-size: 12.5px; text-align: center; }
+.nopt .nl { color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px; min-width: 0; line-height: 1.2; overflow-wrap: anywhere; }
+.nopt .nl .crest { margin-right: 4px; }
+.nopt b { font: 700 19px/1.1 var(--font-display); color: var(--ink); }
+.nopt .nt { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.nopt.best { background: var(--sud-soft); box-shadow: inset 0 0 0 2px var(--sud); }
+.nopt.best b, .nopt.best .nt { color: var(--sud); }
+.nopt.worst { background: var(--danger-soft); box-shadow: none; }
+.nopt.worst b, .nopt.worst .nt { color: var(--danger); }
 .goal-wait { color: var(--muted); padding: 30px 0; text-align: center; }
 
 /* Datos */
@@ -1601,10 +1617,7 @@ function goalHTML(G) {
     return { m, pr, swing, best, worst };
   }).filter(o => o.swing > Math.max(0.0005, Math.min(0.01, P * 0.25))).sort((a, b) => b.swing - a.swing).slice(0, 8);
   const lab = (m, o) => o === 0 ? `que gane ${T(m.h).n}` : o === 2 ? `que gane ${T(m.a).n}` : "que empaten";
-  const othersCard = `<div class="gcard"><h4>Le conviene</h4><p class="hint">Otros partidos que más mueven sus chances.</p>
-    ${others.length ? others.map(({ m, pr, best, worst }) => `<div class="gm"><div class="who">${tn(m.h)} <small>vs</small> ${tn(m.a)} <small>· fecha ${m.f}</small></div>
-      <div class="opts"><span class="opt best">${esc(lab(m, best))}: ${pctP(pr[best])}</span><span class="opt worst">${esc(lab(m, worst))}: ${pctP(pr[worst])}</span></div></div>`).join("")
-      : '<p class="hint">Ningún otro resultado cambia mucho sus chances: depende de él.</p>'}</div>`;
+  const othersCard = needsCard(others, P, team, "Qué le conviene en otros partidos", "Ningún otro resultado cambia mucho sus chances: depende de él.");
   return hero + `<div class="goal-grid">${routesCard}${ptsCard}${ownCard}${othersCard}</div>`;
 }
 
@@ -1670,11 +1683,25 @@ function goalHTMLPts(G) {
     ${combos.length ? `<div class="tbl-wrap"><table><thead><tr><th class="l">Combinación</th><th>Probable</th><th>Lo logra</th></tr></thead><tbody>
     ${combos.slice().sort((a, b) => b.pr - a.pr).slice(0, 10).map(c => `<tr><td class="l" style="white-space:normal">${desc(c)}</td><td>${pctP(c.pr)}</td><td class="pcell ${cls(c.n ? c.w / c.n : 0)}">${c.n ? pctP(c.w / c.n) : "—"}</td></tr>`).join("")}
     </tbody></table></div>` : `<p class="hint">Ya tiene todos sus partidos cargados.</p>`}</div>`;
-  const othersCard = `<div class="gcard"><h4>Qué tiene que pasar además</h4><p class="hint">Los otros partidos que más mueven sus chances, ya sumando ${ptx(target)}.</p>
-    ${others.length ? others.slice(0, 10).map(({ m, pr, best, worst }) => `<div class="gm"><div class="who">${tn(m.h)} <small>vs</small> ${tn(m.a)} <small>· fecha ${m.f}</small></div>
-      <div class="opts"><span class="opt best">${esc(lab(m, best))}: ${pctP(pr[best])}</span><span class="opt worst">${esc(lab(m, worst))}: ${pctP(pr[worst])}</span></div></div>`).join("")
-      : '<p class="hint">Ningún otro resultado cambia sus chances: depende solo de él.</p>'}</div>`;
+  const othersCard = needsCard(others.slice(0, 10), P, team, `Qué tiene que pasar además (sumando ${ptx(target)})`, "Ningún otro resultado cambia sus chances: depende solo de él.");
   return hero + `<div class="goal-grid">${othersCard}<div style="display:grid;gap:16px">${routesCard}${combosCard}</div></div>`;
+}
+
+// Lista "qué tiene que pasar": una frase por partido y las 3 formas en que puede terminar, con su chance en cada una.
+function needsCard(list, P, team, title, empty) {
+  const sentence = (m, o) => o === 0 ? `Que <b>${esc(T(m.h).n)}</b> le gane a <b>${esc(T(m.a).n)}</b>`
+    : o === 2 ? `Que <b>${esc(T(m.a).n)}</b> le gane a <b>${esc(T(m.h).n)}</b>` : `Que <b>${esc(T(m.h).n)}</b> y <b>${esc(T(m.a).n)}</b> empaten`;
+  const items = list.map(({ m, pr, best, worst }, i) => {
+    const opt = (o, label) => pr[o] == null ? "" : `<div class="nopt ${o === best ? "best" : o === worst ? "worst" : ""}">
+        <span class="nl">${label}</span><b>${pctP(pr[o])}</b>${o === best ? '<span class="nt">le conviene</span>' : o === worst ? '<span class="nt">lo complica</span>' : ""}</div>`;
+    return `<li class="need">
+      <div class="need-head"><span class="num">${i + 1}</span><span class="txt">${sentence(m, best)}</span><span class="when">Fecha ${m.f}</span></div>
+      <div class="need-opts">${opt(0, `${crest(m.h)}Gana ${esc(T(m.h).n)}`)}${opt(1, "Empate")}${opt(2, `${crest(m.a)}Gana ${esc(T(m.a).n)}`)}</div>
+    </li>`;
+  }).join("");
+  return `<div class="gcard"><h4>${esc(title)}</h4>
+    <p class="hint">Hoy ${esc(T(team).n)} lo logra el <b>${pctP(P)}</b>. Para cada partido, cómo queda esa chance según cómo termine. Están ordenados por cuánto le importan.</p>
+    ${list.length ? `<ol class="needs">${items}</ol>` : `<p class="hint">${empty}</p>`}</div>`;
 }
 
 /* ===================== MODO ENFOQUE ===================== */
