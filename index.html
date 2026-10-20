@@ -449,7 +449,7 @@ tr.in td.pos { color: var(--accent); }
   <header class="top">
     <div class="brand">
       <h1>Simulador LPF · Clausura 2026</h1>
-      <p>Fechas 14, 15 y 16 (más los 3 pendientes de la 13), playoffs y semifinales de Libertadores, Sudamericana y Copa Argentina. Las probabilidades tienen en cuenta el presente, el cansancio por las copas, el historial y lo que se juega cada equipo.</p>
+      <p>Fechas 14, 15 y 16 (más el pendiente de la 13), playoffs y semifinales de Libertadores, Sudamericana y Copa Argentina. Las probabilidades tienen en cuenta el presente, el cansancio por las copas, el historial y lo que se juega cada equipo.</p>
     </div>
     <div class="actions">
       <button class="btn primary" id="btn-ia" type="button">
@@ -517,7 +517,9 @@ tr.in td.pos { color: var(--accent); }
    cl: Clausura [PJ, Pts, DG, GF]   an: Tabla Anual [PJ, Pts, DG, GF]   f: últimos 4 (más reciente primero)
    pr: promedios, puntos y partidos de 2024 y 2025 [Pts, PJ] (el promedio suma los de 2026) · py: puntos 2024 y 2025 por separado
    Editables desde la pestaña "Datos". */
-const DATA_DATE = "19/10/2026";
+const DATA_DATE = "20/10/2026";
+// Subir este número cuando cambian los datos base: descarta las tablas guardadas en el navegador.
+const DATA_VERSION = 2; // 2: Newell's 2-1 Central Córdoba y Sarmiento 1-1 Barracas (fecha 13)
 const DATA_SRC = "promiedos";
 const BASE_TEAMS = [
   // Zona A
@@ -528,13 +530,13 @@ const BASE_TEAMS = [
   { id: "lan", n: "Lanús", z: "A", cl: [13, 23, 7, 16], an: [29, 47, 10, 34], f: "VVEV", pr: [109, 73], py: [59, 50] },
   { id: "gim", n: "Gimnasia (M)", z: "A", cl: [13, 20, 2, 15], an: [29, 39, -6, 29], f: "DVDE", pr: [0, 0], py: [0, 0] },
   { id: "ind", n: "Independiente", z: "A", cl: [13, 19, -1, 12], an: [29, 43, 3, 36], f: "EEDV", pr: [110, 73], py: [63, 47] },
-  { id: "new", n: "Newell's", z: "A", cl: [12, 17, 2, 11], an: [28, 32, -10, 26], f: "DEVE", pr: [82, 73], py: [49, 33] },
+  { id: "new", n: "Newell's", z: "A", cl: [13, 20, 3, 13], an: [29, 35, -9, 28], f: "VDEV", pr: [82, 73], py: [49, 33] },
   { id: "slo", n: "San Lorenzo", z: "A", cl: [13, 17, -5, 7], an: [29, 39, -5, 21], f: "VVDD", pr: [96, 73], py: [45, 51] },
   { id: "est", n: "Estudiantes (LP)", z: "A", cl: [13, 14, 1, 16], an: [29, 45, 13, 35], f: "DEVD", pr: [105, 73], py: [63, 42] },
   { id: "uni", n: "Unión", z: "A", cl: [12, 13, -4, 17], an: [28, 34, 0, 41], f: "DDDD", pr: [99, 73], py: [60, 39] },
   { id: "rie", n: "Dep. Riestra", z: "A", cl: [12, 11, -3, 9], an: [28, 22, -10, 14], f: "DEED", pr: [100, 73], py: [48, 52] },
   { id: "pla", n: "Platense", z: "A", cl: [13, 11, -7, 12], an: [29, 27, -12, 22], f: "DEED", pr: [92, 73], py: [57, 35] },
-  { id: "cco", n: "Central Córdoba", z: "A", cl: [12, 10, -6, 10], an: [28, 26, -16, 21], f: "EEED", pr: [84, 73], py: [42, 42] },
+  { id: "cco", n: "Central Córdoba", z: "A", cl: [13, 10, -7, 11], an: [29, 26, -17, 22], f: "DEEE", pr: [84, 73], py: [42, 42] },
   { id: "tal", n: "Talleres", z: "A", cl: [13, 9, -8, 12], an: [29, 35, -4, 29], f: "DEDD", pr: [106, 73], py: [72, 34] },
   // Zona B
   { id: "cen", n: "Rosario Central", z: "B", cl: [13, 25, 9, 20], an: [29, 53, 13, 40], f: "VVEV", pr: [113, 73], py: [47, 66] },
@@ -542,10 +544,10 @@ const BASE_TEAMS = [
   { id: "bel", n: "Belgrano", z: "B", cl: [13, 22, 4, 14], an: [29, 48, 8, 31], f: "DVVV", pr: [86, 73], py: [49, 37] },
   { id: "glp", n: "Gimnasia (LP)", z: "B", cl: [13, 22, 1, 19], an: [29, 48, 1, 38], f: "VEEE", pr: [86, 73], py: [48, 38] },
   { id: "riv", n: "River Plate", z: "B", cl: [13, 20, 5, 18], an: [29, 49, 15, 40], f: "VEVD", pr: [123, 73], py: [70, 53] },
-  { id: "sar", n: "Sarmiento", z: "B", cl: [12, 20, 3, 21], an: [28, 39, -4, 34], f: "EVDE", pr: [70, 73], py: [35, 35] },
+  { id: "sar", n: "Sarmiento", z: "B", cl: [13, 21, 3, 22], an: [29, 40, -4, 35], f: "EEVD", pr: [70, 73], py: [35, 35] },
   { id: "hur", n: "Huracán", z: "B", cl: [13, 19, 0, 12], an: [29, 41, 4, 29], f: "DDVV", pr: [109, 73], py: [62, 47] },
   { id: "irv", n: "Ind. Rivadavia", z: "B", cl: [13, 19, -4, 17], an: [29, 53, 10, 46], f: "EDEV", pr: [89, 73], py: [46, 43] },
-  { id: "bar", n: "Barracas Central", z: "B", cl: [12, 18, 1, 10], an: [28, 39, 1, 25], f: "VVDE", pr: [98, 73], py: [49, 49] },
+  { id: "bar", n: "Barracas Central", z: "B", cl: [13, 19, 1, 11], an: [29, 40, 1, 26], f: "EVVD", pr: [98, 73], py: [49, 49] },
   { id: "atu", n: "Atl. Tucumán", z: "B", cl: [13, 14, -1, 12], an: [29, 28, -6, 27], f: "DEDD", pr: [84, 73], py: [50, 34] },
   { id: "tig", n: "Tigre", z: "B", cl: [13, 13, -2, 13], an: [29, 33, 1, 31], f: "EDDD", pr: [88, 73], py: [39, 49] },
   { id: "ban", n: "Banfield", z: "B", cl: [13, 13, -5, 14], an: [29, 31, -7, 31], f: "DVEE", pr: [76, 73], py: [41, 35] },
@@ -557,7 +559,7 @@ const APERTURA_CHAMP = "bel"; // Belgrano, campeón del Apertura 2026
 
 // Fixture de las 3 fechas que quedan. [local, visitante]
 const FIXTURE = {
-  13: { A: [["new","cco"],["rie","uni"]], B: [["sar","bar"]], I: [] },
+  13: { A: [["rie","uni"]], B: [], I: [] },
   14: { A: [["gim","pla"],["cco","vel"],["slo","new"],["uni","est"],["ins","rie"],["tal","dyj"],["ind","boc"]],
         B: [["arg","irv"],["tig","atu"],["cen","hur"],["glp","sar"],["bar","erc"],["ald","bel"],["riv","rac"]],
         I: [["lan","ban"]] },
@@ -677,6 +679,11 @@ function load() {
   try {
     const s = JSON.parse(localStorage.getItem(LS_KEY) || "null");
     if (!s) return;
+    if (s.dv !== DATA_VERSION) { // datos base nuevos: se tiran las tablas viejas y se reubican los pendientes de la fecha 13
+      delete s.teams;
+      const r = s.results || {}, a = s.aiFilled || {};
+      if (!s.dv) { r.f13A0 = r.f13A1; a.f13A0 = a.f13A1; delete r.f13A1; delete a.f13A1; delete r.f13B0; delete a.f13B0; if (!r.f13A0) delete r.f13A0; if (!a.f13A0) delete a.f13A0; }
+    }
     if (s.teams && s.teams.length === BASE_TEAMS.length) {
       teams = s.teams;
       teams.forEach(t => { if (!t.pr) t.pr = BASE_TEAMS.find(b => b.id === t.id).pr.slice(); }); // datos guardados antes de sumar promedios
@@ -688,7 +695,7 @@ function load() {
   } catch (e) {}
 }
 function save() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify({ teams, results, aiFilled, poWinners, cupPicks, aiCupPicks, activeTab, focusTeam, projCompact })); } catch (e) {}
+  try { localStorage.setItem(LS_KEY, JSON.stringify({ dv: DATA_VERSION, teams, results, aiFilled, poWinners, cupPicks, aiCupPicks, activeTab, focusTeam, projCompact })); } catch (e) {}
 }
 const T = id => teams.find(t => t.id === id) || { id, n: EXT[id].n };
 const isLocal = id => teams.some(t => t.id === id);
@@ -1073,7 +1080,7 @@ function renderFixture() {
     const ms = MATCHES.filter(m => m.f === f && (!focusTeam || m.h === focusTeam || m.a === focusTeam));
     if (!ms.length) continue;
     const done = ms.filter(m => results[m.id]).length;
-    out.push(`<div class="fecha"><div class="fecha-h">Fecha ${f}${f === 13 ? " · pendientes (lunes 19/10)" : ""} <span class="sub" style="font:500 13px var(--font-body);color:var(--muted);text-transform:none;letter-spacing:0">${done}/${ms.length} cargados</span></div>`);
+    out.push(`<div class="fecha"><div class="fecha-h">Fecha ${f}${f === 13 ? " · pendiente" : ""} <span class="sub" style="font:500 13px var(--font-body);color:var(--muted);text-transform:none;letter-spacing:0">${done}/${ms.length} cargados</span></div>`);
     for (const [g, l] of [["A", "Zona A"], ["B", "Zona B"], ["I", "Interzonal"]]) {
       if (!ms.some(m => m.g === g)) continue;
       out.push(`<div class="group-l">${l}</div>`);
@@ -1847,7 +1854,7 @@ function renderAll() {
   renderChips(); renderFocusSelect(); renderFixture(); renderTables(); renderData(); showTab(activeTab); applyFocus();
   const done = MATCHES.filter(m => results[m.id]).length;
   document.getElementById("data-note").innerHTML =
-    `<b>Tablas de promiedos al ${DATA_DATE}</b>. Faltan 3 partidos de la fecha 13 que se juegan hoy (Sarmiento-Barracas, Newell's-Central Córdoba y Riestra-Unión): cargá el resultado real o simulalos. Correcciones en la pestaña <b>Datos</b>. Cargados: <b>${done}/${MATCHES.length}</b> partidos.`;
+    `<b>Tablas de promiedos al ${DATA_DATE}</b>. Ya están Newell's 2-1 Central Córdoba y Sarmiento 1-1 Barracas. De la fecha 13 falta Riestra-Unión: cargá el resultado real o simulalo. Correcciones en la pestaña <b>Datos</b>. Cargados: <b>${done}/${MATCHES.length}</b> partidos.`;
 }
 function invalidate() { projection = null; cache.clear(); mcache.clear(); advCache.clear(); stakesCache = null; }
 const wide = matchMedia("(min-width: 1100px)");
