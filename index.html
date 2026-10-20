@@ -449,7 +449,7 @@ tr.in td.pos { color: var(--accent); }
   <header class="top">
     <div class="brand">
       <h1>Simulador LPF · Clausura 2026</h1>
-      <p>Fechas 14, 15 y 16 (más el pendiente de la 13), playoffs y semifinales de Libertadores, Sudamericana y Copa Argentina. Las probabilidades tienen en cuenta el presente, el cansancio por las copas, el historial y lo que se juega cada equipo.</p>
+      <p>Fechas 14, 15 y 16, playoffs y semifinales de Libertadores, Sudamericana y Copa Argentina. Las probabilidades tienen en cuenta el presente, el cansancio por las copas, el historial y lo que se juega cada equipo.</p>
     </div>
     <div class="actions">
       <button class="btn primary" id="btn-ia" type="button">
@@ -519,7 +519,7 @@ tr.in td.pos { color: var(--accent); }
    Editables desde la pestaña "Datos". */
 const DATA_DATE = "20/10/2026";
 // Subir este número cuando cambian los datos base: descarta las tablas guardadas en el navegador.
-const DATA_VERSION = 2; // 2: Newell's 2-1 Central Córdoba y Sarmiento 1-1 Barracas (fecha 13)
+const DATA_VERSION = 3; // 2: Newell's 2-1 Central Córdoba y Sarmiento 1-1 Barracas · 3: Riestra 1-1 Unión (fecha 13 completa)
 const DATA_SRC = "promiedos";
 const BASE_TEAMS = [
   // Zona A
@@ -533,8 +533,8 @@ const BASE_TEAMS = [
   { id: "new", n: "Newell's", z: "A", cl: [13, 20, 3, 13], an: [29, 35, -9, 28], f: "VDEV", pr: [82, 73], py: [49, 33] },
   { id: "slo", n: "San Lorenzo", z: "A", cl: [13, 17, -5, 7], an: [29, 39, -5, 21], f: "VVDD", pr: [96, 73], py: [45, 51] },
   { id: "est", n: "Estudiantes (LP)", z: "A", cl: [13, 14, 1, 16], an: [29, 45, 13, 35], f: "DEVD", pr: [105, 73], py: [63, 42] },
-  { id: "uni", n: "Unión", z: "A", cl: [12, 13, -4, 17], an: [28, 34, 0, 41], f: "DDDD", pr: [99, 73], py: [60, 39] },
-  { id: "rie", n: "Dep. Riestra", z: "A", cl: [12, 11, -3, 9], an: [28, 22, -10, 14], f: "DEED", pr: [100, 73], py: [48, 52] },
+  { id: "uni", n: "Unión", z: "A", cl: [13, 14, -4, 18], an: [29, 35, 0, 42], f: "EDDD", pr: [99, 73], py: [60, 39] },
+  { id: "rie", n: "Dep. Riestra", z: "A", cl: [13, 12, -3, 10], an: [29, 23, -10, 15], f: "EDEE", pr: [100, 73], py: [48, 52] },
   { id: "pla", n: "Platense", z: "A", cl: [13, 11, -7, 12], an: [29, 27, -12, 22], f: "DEED", pr: [92, 73], py: [57, 35] },
   { id: "cco", n: "Central Córdoba", z: "A", cl: [13, 10, -7, 11], an: [29, 26, -17, 22], f: "DEEE", pr: [84, 73], py: [42, 42] },
   { id: "tal", n: "Talleres", z: "A", cl: [13, 9, -8, 12], an: [29, 35, -4, 29], f: "DEDD", pr: [106, 73], py: [72, 34] },
@@ -559,7 +559,6 @@ const APERTURA_CHAMP = "bel"; // Belgrano, campeón del Apertura 2026
 
 // Fixture de las 3 fechas que quedan. [local, visitante]
 const FIXTURE = {
-  13: { A: [["rie","uni"]], B: [], I: [] },
   14: { A: [["gim","pla"],["cco","vel"],["slo","new"],["uni","est"],["ins","rie"],["tal","dyj"],["ind","boc"]],
         B: [["arg","irv"],["tig","atu"],["cen","hur"],["glp","sar"],["bar","erc"],["ald","bel"],["riv","rac"]],
         I: [["lan","ban"]] },
@@ -571,7 +570,7 @@ const FIXTURE = {
         I: [["gim","irv"]] },
 };
 const MATCHES = [];
-const FECHAS = [13, 14, 15, 16];
+const FECHAS = [14, 15, 16];
 for (const f of FECHAS) for (const g of ["A", "B", "I"]) FIXTURE[f][g].forEach(([h, a], i) => MATCHES.push({ id: `f${f}${g}${i}`, f, g, h, a }));
 
 /* ===================== CONTEXTO: COPAS, CANSANCIO, HISTORIAL ===================== */
@@ -682,7 +681,8 @@ function load() {
     if (s.dv !== DATA_VERSION) { // datos base nuevos: se tiran las tablas viejas y se reubican los pendientes de la fecha 13
       delete s.teams;
       const r = s.results || {}, a = s.aiFilled || {};
-      if (!s.dv) { r.f13A0 = r.f13A1; a.f13A0 = a.f13A1; delete r.f13A1; delete a.f13A1; delete r.f13B0; delete a.f13B0; if (!r.f13A0) delete r.f13A0; if (!a.f13A0) delete a.f13A0; }
+      // La fecha 13 ya está completa en los datos base: se borra lo que se hubiera cargado para sus partidos.
+      for (const k of ["f13A0", "f13A1", "f13B0"]) { delete r[k]; delete a[k]; }
     }
     if (s.teams && s.teams.length === BASE_TEAMS.length) {
       teams = s.teams;
@@ -1044,7 +1044,7 @@ const pctP = v => v <= 1e-9 ? "0%" : v >= 1 - 1e-9 ? "100%" : v < 0.001 ? "<0,1%
   : v < 0.095 || v > 0.995 ? (v * 100).toFixed(1).replace(".", ",") + "%" : Math.round(v * 100) + "%";
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 function renderChips() {
-  const opts = [["all", "Todas"], ["13", "F13 pend."], ["14", "Fecha 14"], ["15", "Fecha 15"], ["16", "Fecha 16"]];
+  const opts = [["all", "Todas"], ["14", "Fecha 14"], ["15", "Fecha 15"], ["16", "Fecha 16"]];
   document.getElementById("fecha-chips").innerHTML = opts.map(([v, l]) =>
     `<button class="chip" type="button" data-f="${v}" aria-pressed="${fechaFilter === v}">${l}</button>`).join("");
 }
@@ -1854,7 +1854,7 @@ function renderAll() {
   renderChips(); renderFocusSelect(); renderFixture(); renderTables(); renderData(); showTab(activeTab); applyFocus();
   const done = MATCHES.filter(m => results[m.id]).length;
   document.getElementById("data-note").innerHTML =
-    `<b>Tablas de promiedos al ${DATA_DATE}</b>. Ya están Newell's 2-1 Central Córdoba y Sarmiento 1-1 Barracas. De la fecha 13 falta Riestra-Unión: cargá el resultado real o simulalo. Correcciones en la pestaña <b>Datos</b>. Cargados: <b>${done}/${MATCHES.length}</b> partidos.`;
+    `<b>Tablas de promiedos al ${DATA_DATE}</b>. Fecha 13 completa (Newell's 2-1 Central Córdoba, Sarmiento 1-1 Barracas y Riestra 1-1 Unión). Correcciones en la pestaña <b>Datos</b>. Cargados: <b>${done}/${MATCHES.length}</b> partidos.`;
 }
 function invalidate() { projection = null; cache.clear(); mcache.clear(); advCache.clear(); stakesCache = null; }
 const wide = matchMedia("(min-width: 1100px)");
