@@ -519,7 +519,7 @@ tr.in td.pos { color: var(--accent); }
    Editables desde la pestaña "Datos". */
 const DATA_DATE = "20/10/2026";
 // Subir este número cuando cambian los datos base: descarta las tablas guardadas en el navegador.
-const DATA_VERSION = 3; // 2: Newell's 2-1 Central Córdoba y Sarmiento 1-1 Barracas · 3: Riestra 1-1 Unión (fecha 13 completa)
+const DATA_VERSION = 4; // 4: Banfield-Lanús con Banfield de local · 2: Newell's 2-1 Central Córdoba y Sarmiento 1-1 Barracas · 3: Riestra 1-1 Unión (fecha 13 completa)
 const DATA_SRC = "promiedos";
 const BASE_TEAMS = [
   // Zona A
@@ -561,7 +561,7 @@ const APERTURA_CHAMP = "bel"; // Belgrano, campeón del Apertura 2026
 const FIXTURE = {
   14: { A: [["gim","pla"],["cco","vel"],["slo","new"],["uni","est"],["ins","rie"],["tal","dyj"],["ind","boc"]],
         B: [["arg","irv"],["tig","atu"],["cen","hur"],["glp","sar"],["bar","erc"],["ald","bel"],["riv","rac"]],
-        I: [["lan","ban"]] },
+        I: [["ban","lan"]] },
   15: { A: [["dyj","ind"],["rie","tal"],["est","ins"],["new","uni"],["vel","slo"],["pla","cco"],["lan","gim"]],
         B: [["hur","tig"],["sar","cen"],["rac","ald"],["glp","erc"],["bel","bar"],["atu","arg"],["irv","ban"]],
         I: [["boc","riv"]] },
@@ -678,11 +678,14 @@ function load() {
   try {
     const s = JSON.parse(localStorage.getItem(LS_KEY) || "null");
     if (!s) return;
-    if (s.dv !== DATA_VERSION) { // datos base nuevos: se tiran las tablas viejas y se reubican los pendientes de la fecha 13
-      delete s.teams;
+    if (s.dv !== DATA_VERSION) {
+      // Datos base nuevos: se tiran las tablas guardadas (salvo desde la v3, que solo cambia una localía).
+      const keepTeams = s.dv === 3;
+      if (!keepTeams) delete s.teams;
       const r = s.results || {}, a = s.aiFilled || {};
       // La fecha 13 ya está completa en los datos base: se borra lo que se hubiera cargado para sus partidos.
       for (const k of ["f13A0", "f13A1", "f13B0"]) { delete r[k]; delete a[k]; }
+      if ((s.dv || 0) < 4 && r.f14I0) r.f14I0 = [r.f14I0[1], r.f14I0[0]]; // Lanús-Banfield pasó a Banfield-Lanús: se da vuelta el resultado guardado
     }
     if (s.teams && s.teams.length === BASE_TEAMS.length) {
       teams = s.teams;
