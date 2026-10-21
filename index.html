@@ -23,6 +23,9 @@
   --lib: #a77a06;
   --pre: #c0661c;
   --pre-soft: #f8e3d1;
+  --champ: #7a4fb5;
+  --liga: #b03a6a;
+  --hm-hi: #ffffff;
   --lib-soft: #f6ecd0;
   --sud: #2b7a4b;
   --sud-soft: #dcefe3;
@@ -37,7 +40,7 @@
 }
 :root[data-sim-theme="dark"] {
   --bg: #222c29; --surface: #2c3833; --surface-2: #33403b; --ink: #edf3f0; --muted: #a9b8b1; --line: #45544e;
-  --accent: #6cbedb; --accent-ink: #0b1a20; --accent-soft: #2a4650; --lib: #e8c25e; --lib-soft: #4a3f22; --pre: #f2a25e; --pre-soft: #4d3524;
+  --accent: #6cbedb; --accent-ink: #0b1a20; --accent-soft: #2a4650; --lib: #e8c25e; --lib-soft: #4a3f22; --pre: #f2a25e; --pre-soft: #4d3524; --champ: #b693ea; --liga: #e88bb0; --hm-hi: #10201a;
   --sud: #72d09b; --sud-soft: #27473a; --po: #6cbedb; --danger: #ec8080; --danger-soft: #503030; --draw: #a9b0ac;
   color-scheme: dark;
 }
@@ -359,6 +362,19 @@ tr.in td.pos { color: var(--accent); }
 .pc.lo .pv { color: var(--muted); font-weight: 500; }
 .pc.nil .pv { color: var(--line); font-weight: 500; }
 .pc.nil .meter { opacity: .5; }
+/* Vista resumida: mapa de calor */
+.ptable.heat { border-radius: 14px; }
+.ptable.heat th { font-size: 10.5px; letter-spacing: .03em; padding: 10px 3px 9px; vertical-align: bottom; }
+.ptable.heat th i { display: block; width: 20px; height: 4px; border-radius: 2px; margin: 0 auto 6px; }
+.ptable.heat th.l { padding-left: 8px; }
+.ptable.heat td { padding: 4px 3px; }
+.ptable.heat tbody tr:nth-child(even) td { background: transparent; }
+.ptable.heat td.team { font-size: 15px; }
+.ptable.heat td.rk { font-size: 15px; }
+.pill { height: 34px; border-radius: 8px; display: grid; place-items: center; font: 700 18px/1 var(--font-display); color: var(--ink);
+  background: color-mix(in srgb, var(--c) var(--a), var(--surface)); }
+.pill.hi { color: var(--hm-hi); }
+.pill.nil { background: none; color: var(--line); font-weight: 500; }
 .proj-note { margin: 10px 2px 0; color: var(--muted); font-size: 12.5px; }
 
 /* ¿Qué tiene que pasar? */
@@ -1411,7 +1427,7 @@ function renderProjection() {
       </div>
     </div>
     ${projTable()}
-    <p class="proj-note">«Lib. directo» es fase de grupos; «Lib. fase previa» es el último que entra por la Tabla Anual. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana). Las chances chicas van con un decimal; «—» es que no pasó en ninguna simulación.</p>
+    <p class="proj-note">Cuanto más fuerte el color, más probable. «Libertadores directo» es fase de grupos; «Lib. fase previa» es el último que entra por la Tabla Anual. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana). Las chances chicas van con un decimal; «—» es que no pasó en ninguna simulación.</p>
   </div>`;
 }
 function projTable() {
@@ -1427,9 +1443,18 @@ function projTable() {
     // En pantallas anchas va en dos columnas de 15; en el celular, una debajo de la otra.
     // Mismos anchos de columna en las dos mitades para que queden alineadas cuando van una debajo de la otra.
     const cols = `<colgroup><col class="c-rk"><col class="c-team">${"<col class=\"c-pc\">".repeat(6)}</colgroup>`;
-    const half = (from, to) => `<div class="tbl-wrap ptable"><table class="fixed">${cols}
-      <thead><tr><th></th><th class="l">Equipo</th><th>Playoffs</th><th>Sudamericana</th><th>Lib. fase previa</th><th>Lib. directo</th><th>Campeón Clausura</th><th>Campeón de Liga</th></tr></thead>
-      <tbody>${order.slice(from, to).map((t, i) => `<tr>${team(t, from + i)}${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].pre, "var(--pre)")}${cell(acc[t.id].lib - acc[t.id].pre, "var(--lib)")}${cell(acc[t.id].champ, "var(--lib)")}${cell(acc[t.id].liga, "var(--lib)")}</tr>`).join("")}</tbody>
+    // Mapa de calor: cuanto más alto el %, más fuerte el color; números grandes. Un color por columna.
+    const HM = [["Playoffs", t => acc[t].po, "var(--accent)"], ["Sudamericana", t => acc[t].sud, "var(--sud)"],
+      ["Libertadores fase previa", t => acc[t].pre, "var(--pre)"], ["Libertadores directo", t => acc[t].lib - acc[t].pre, "var(--lib)"],
+      ["Campeón Clausura", t => acc[t].champ, "var(--champ)"], ["Campeón de Liga", t => acc[t].liga, "var(--liga)"]];
+    const heat = (v, c) => {
+      if (v <= 1e-9) return `<td class="hm"><div class="pill nil">—</div></td>`;
+      const a = Math.round(Math.max(0.07, Math.min(1, Math.sqrt(v))) * 100);
+      return `<td class="hm"><div class="pill${a >= 74 ? " hi" : ""}" style="--c:${c};--a:${a}%">${pctP(v)}</div></td>`;
+    };
+    const half = (from, to) => `<div class="tbl-wrap ptable heat"><table class="fixed">${cols}
+      <thead><tr><th></th><th class="l">Equipo</th>${HM.map(h => `<th><i style="background:${h[2]}"></i>${h[0]}</th>`).join("")}</tr></thead>
+      <tbody>${order.slice(from, to).map((t, i) => `<tr>${team(t, from + i)}${HM.map(h => heat(h[1](t.id), h[2])).join("")}</tr>`).join("")}</tbody>
     </table></div>`;
     return `<div class="proj-split">${half(0, 15)}${half(15, 30)}</div>`;
   }
