@@ -649,8 +649,8 @@ const grand = id => GRANDEZA[id] ?? 0.2;
 const G_LEAGUE = 0.08, G_KO = 0.42;
 const koBonus = id => G_KO * (grand(id) - 0.4);
 
-/* Escudos oficiales: imágenes de football-logos.cc. Si no cargan (sin conexión), queda la insignia dibujada. */
-const LOGO_BASE = "https://assets.football-logos.cc/logos";
+/* Escudos oficiales: imágenes de football-logos.cc guardadas en escudos/<id>.png (las baja la acción .github/workflows/escudos.yml).
+   Si no cargan, queda la insignia dibujada. */
 const LOGO = {
   ald: "argentina/aldosivi.6a2fb242", arg: "argentina/argeninos-juniors.b2780d67", atu: "argentina/atletico-tucuman.10ddf6b8",
   ban: "argentina/banfield.b34d0f03", bar: "argentina/barracas-central.20586205", bel: "argentina/belgrano.6b246ab5",
@@ -665,7 +665,7 @@ const LOGO = {
   fla: "brazil/flamengo.0ec2cd2d", pal: "brazil/palmeiras.cd04fee3", flu: "brazil/fluminense.7b0d1eec",
   vas: "brazil/vasco-da-gama.2d89e86d", cam: "brazil/atletico-mineiro.da10887f", ctq: "uruguay/montevideo-city-torque.8b2ca0dc",
 };
-const logoUrl = id => { const l = LOGO[id]; if (!l) return ""; const [c, f] = l.split("/"); return `${LOGO_BASE}/${c}/512x512/${f}.png`; };
+const logoUrl = id => LOGO[id] ? `escudos/${id}.png` : "";
 // La imagen se muestra recién cuando carga; si falla se borra y queda la insignia
 document.addEventListener("load", e => { if (e.target.classList?.contains("crest-img")) e.target.parentNode.classList.add("ok"); }, true);
 document.addEventListener("error", e => { if (e.target.classList?.contains("crest-img")) e.target.remove(); }, true);
@@ -1519,7 +1519,7 @@ function scheduleProjection() {
 
 /* ===================== EXPORTAR IMAGEN ===================== */
 // Dibuja la tabla resumida en un canvas de 1920×1080 (a doble resolución) y la descarga como PNG.
-// Usa los colores del tema activo. Los escudos se intentan bajar con CORS; si no se puede, va la insignia dibujada.
+// Usa los colores del tema activo. Los escudos salen de escudos/; si alguno falta, va la insignia dibujada.
 function loadImg(src, cors) {
   return new Promise(res => {
     const im = new Image(); if (cors) im.crossOrigin = "anonymous";
@@ -1533,7 +1533,7 @@ const crestDataUrl = id => "data:image/svg+xml;charset=utf-8," + encodeURICompon
 async function crestImages(ids, real) {
   const out = {};
   await Promise.all(ids.map(async id => {
-    out[id] = (real && LOGO[id] && await loadImg(logoUrl(id) + "?export=1", true)) || await loadImg(crestDataUrl(id), false);
+    out[id] = (real && LOGO[id] && await loadImg(logoUrl(id), false)) || await loadImg(crestDataUrl(id), false);
   }));
   return out;
 }
@@ -1603,7 +1603,7 @@ async function exportProjImage(btn) {
           x.textBaseline = "middle"; x.textAlign = "center"; x.fillStyle = C.muted; x.font = `700 18px ${DF}`;
           x.fillText(String(half * 15 + i + 1), X + rkw / 2, cy + 1);
           const im = imgs[t.id];
-          if (im) { const real = !im.src.startsWith("data:"), bw = real ? 28 : 22, bh = real ? 28 : 26; x.drawImage(im, X + rkw + 8 + (28 - bw) / 2, cy - bh / 2, bw, bh); }
+          if (im) { const real = !im.src.startsWith("data:"), bw = real ? 32 : 22, bh = real ? 32 : 26; x.drawImage(im, X + rkw + 8 + (28 - bw) / 2, cy - bh / 2, bw, bh); }
           x.textAlign = "left"; x.fillStyle = C.ink; x.font = `600 18px ${BF}`;
           const nx = X + rkw + 44, maxw = px0 - nx - 40;
           let name = t.n; while (x.measureText(name).width > maxw && name.length > 3) name = name.slice(0, -2) + "…";
