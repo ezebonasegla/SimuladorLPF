@@ -430,6 +430,24 @@ tr.in td.pos { color: var(--accent); }
 .route-dlg ul.rlist .bar i { background: var(--accent); }
 .route-dlg .res { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 4px; font: 700 11px/1 var(--font-body); color: #fff; vertical-align: 1px; }
 .route-dlg .res.r0 { background: var(--sud); } .route-dlg .res.r1 { background: var(--draw); } .route-dlg .res.r2 { background: var(--danger); }
+.route-dlg .ex-champs { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 4px; font-size: 14px; }
+.route-dlg .ex-champs li { display: flex; gap: 10px; align-items: center; }
+.route-dlg .ex-champs li > span:first-child { min-width: 170px; color: var(--muted); }
+.route-dlg .ex-sub { margin: 12px 0 6px; font: 700 13px/1 var(--font-display); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.route-dlg ul.ex-res { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 14px; }
+.route-dlg ul.ex-res small { color: var(--muted); display: inline-block; width: 26px; }
+.route-dlg .sc { display: inline-block; min-width: 34px; text-align: center; margin: 0 4px; padding: 1px 6px; border-radius: 5px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); font-variant-numeric: tabular-nums; }
+.route-dlg .ex-tbl table { font-size: 13.5px; width: 100%; }
+.route-dlg .ex-tbl td, .route-dlg .ex-tbl th { padding: 5px 8px; }
+.route-dlg .ex-tbl td small { color: var(--sud); font-weight: 600; }
+.route-dlg .ex-tbl tr.me td { background: var(--accent-soft); font-weight: 700; }
+.route-dlg .ex-tbl td.how { font-size: 12.5px; white-space: normal; }
+.route-dlg .ex-tbl td.how.lib { color: var(--lib); font-weight: 600; }
+.route-dlg .ex-tbl td.how.pre { color: var(--pre); font-weight: 600; }
+.route-dlg .ex-tbl td.how.sud { color: var(--sud); font-weight: 600; }
+.route-dlg .ex-why { margin: 8px 0 0; font-size: 14px; line-height: 1.5; }
+.route-dlg details.ex-all { margin-top: 10px; font-size: 14px; }
+.route-dlg details.ex-all summary { cursor: pointer; color: var(--accent); font-weight: 600; }
 .route-dlg ul.lifts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .route-dlg ul.lifts li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; font-size: 14px; }
 .route-dlg ul.lifts small { color: var(--muted); }
@@ -1759,21 +1777,26 @@ function goalSim(team, goal, target) {
   const routeAdd = (k, w) => { agg.routes[k] = (agg.routes[k] || 0) + w; };
   function once() {
     const res = Object.assign({}, fixed), outc = {};
-    for (const [m, mm] of pending) { const r = sample(mm); res[m.id] = r; outc[m.id] = r[0] > r[1] ? 0 : r[0] === r[1] ? 1 : 2; }
-    let combo = null, split = null;
+    // ll: qué tan probable es este escenario (log), para quedarse con el ejemplo más probable de cada camino.
+    let ll = 0;
+    for (const [m, mm] of pending) { const r = sample(mm); res[m.id] = r; const o = outc[m.id] = r[0] > r[1] ? 0 : r[0] === r[1] ? 1 : 2; ll += Math.log([mm.ph, mm.pd, mm.pa][o] || 1e-12); }
+    let combo = null, split = null, cups = null;
     if (combos) {
       if (!combos.length) return;
       const u = Math.random(); combo = combos.find(c => c.cum >= u) || combos[combos.length - 1];
       combos.own.forEach((x, i) => { const o = combo.outs[i], ho = x.home ? o : 2 - o; res[x.m.id] = scoreIn(x.mm, ho); });
+      ll += Math.log(combo.pr || 1e-12);
     }
     const st = standings(res), z = T(team).z, zr = z === "A" ? st.A : st.B;
     const pz = poList(st, z).findIndex(r => r.id === team), zpos = pz < 0 ? 99 : pz + 1; // puesto a efectos de playoffs (14.1.2)
     const an = st.AN.map(r => r.id), arank = an.indexOf(team);
     let w = 0;
-    const routes = {}, ctx = {};
+    const routes = {}, ctx = {}, ex = {};
     // x: detalle del escenario para explicar el camino (campeón del Clausura, quiénes liberan el cupo, rival de octavos)
     const rt = (k, v, x) => {
       routes[k] = (routes[k] || 0) + v; w += v;
+      const sc = ll + Math.log(Math.max(v, 1e-12));
+      if (!ex[k] || sc > ex[k].sc) ex[k] = { sc, champ: x && x.champ, cu: x && x.cu, rival: x && x.rival };
       if (!x) return;
       const c = ctx[k] || (ctx[k] = { champ: {}, free: {}, rival: {} });
       if (x.champ) c.champ[x.champ] = (c.champ[x.champ] || 0) + v;
@@ -1785,7 +1808,11 @@ function goalSim(team, goal, target) {
     else if (goal === "liga") { if (an[0] === team) rt("Terminar 1° de la Tabla Anual", 1); }
     else if (goal === "safe") { if (!relegated(st).includes(team)) rt(`Terminar ${arank + 1}° en la Anual`, 1); }
     else {
-      const cups = randomCups();
+      cups = resolveCups((t, h, a) => {
+        if (cupPicks[t.id] === h || cupPicks[t.id] === a) return cupPicks[t.id];
+        const p = cupTieProb(t, h, a), wn = Math.random() < p ? h : a;
+        ll += Math.log((wn === h ? p : 1 - p) || 1e-12); return wn;
+      });
       if (goal === "champ") { if (zpos <= 8) { const p = bracketDist(st, cups).get(team) || 0;
         const rival = (poList(st, z === "A" ? "B" : "A")[8 - zpos] || {}).id;
         if (p) rt(`Entrando ${zpos}° de la Zona ${z}`, p, { rival }); } }
@@ -1801,7 +1828,7 @@ function goalSim(team, goal, target) {
           const pre = goal === "sud" ? "Libertadores · " : "";
           // Los que terminan arriba en la Anual pero ya tienen plaza por un título: le dejan libre su lugar.
           const free = an.slice(0, arank).filter(id => cu.champs.includes(id)).map(id => id + "|" + ((cu.holders.find(x => x[0] === id && !x[2]) || [])[1] || "título"));
-          const x = { champ: c, free };
+          const x = { champ: c, free, cu };
           if (h) rt(pre + (h[1] === "campeón Clausura" ? "Salir campeón del Clausura" : /^(subcampeón|semifinalista)/.test(h[1]) ? "Por la Copa Argentina (el campeón ya tenía plaza)" : "Por título: " + h[1]), pc, x);
           else if (cu.lib.includes(team)) rt(pre + (arank < 3 ? "Terminar entre los 3 primeros de la Anual" : `Terminar ${arank + 1}° en la Anual y que se liberen cupos`) + (cu.pre === team ? " (fase previa)" : ""), pc, x);
           else if (goal === "sud" && cu.sud.includes(team)) rt("Sudamericana · " + (arank < 9 ? "Terminar entre el 4° y el 9° de la Anual" : `Terminar ${arank + 1}° en la Anual y que se liberen cupos`), pc, x);
@@ -1825,6 +1852,8 @@ function goalSim(team, goal, target) {
       const inc = (o, key, by) => { o[key] = (o[key] || 0) + by; };
       d.w += v; inc(d.rec, `${W}-${D}-${L}`, v); inc(d.own, ownRes, v); inc(d.pos, arank + 1, v); inc(d.zpos, zpos, v);
       const c = ctx[k]; if (c) for (const f of ["champ", "free", "rival"]) for (const id in c[f]) inc(d[f], id, c[f][id]);
+      // Ejemplo: el escenario más probable visto para este camino (se guardan referencias, no copias).
+      const e = ex[k]; if (e && (!d.ex || e.sc > d.ex.sc)) d.ex = Object.assign(e, { res, st, cups });
       for (const [m] of pending) { const a = d.match[m.id] || (d.match[m.id] = [0, 0, 0]); a[outc[m.id]] += v; }
     }
     if (agg.split && split) { const ps = agg.ptsSplit[pts] || (agg.ptsSplit[pts] = [0, 0, 0, 0, 0]); for (let i = 0; i < 4; i++) ps[i] += split[i]; ps[4]++; }
@@ -2048,6 +2077,59 @@ function routeRule(k, team) {
   if ((m = base.match(/^Terminar (\d+)° en la Anual$/))) return `Termina <b>${m[1]}°</b> en la Tabla Anual y no queda con el peor promedio: no desciende. Descienden el último de la Anual y el peor promedio (si es el mismo equipo, el anteúltimo de la Anual).`;
   return "";
 }
+// Ejemplo concreto: el escenario más probable de los simulados en los que se da este camino.
+function routeExample(G, k, d) {
+  const e = d.ex; if (!e || !e.st) return "";
+  const team = G.team, st = e.st, res = e.res, cu = e.cu, z = T(team).z;
+  const an = st.AN, arank = an.findIndex(r => r.id === team);
+  const score = m => { const r = res[m.id]; return r ? `${tn(m.h)} <b class="sc">${r[0]}-${r[1]}</b> ${tn(m.a)}` : ""; };
+  // Cómo clasifica cada equipo en este ejemplo
+  const how = id => {
+    if (!cu) return ["", ""];
+    const h = cu.holders.find(x => x[0] === id && !x[2]);
+    if (h) return ["lib", `Libertadores por título (${h[1]})`];
+    const i = cu.lib.indexOf(id);
+    if (i >= 0) return [id === cu.pre ? "pre" : "lib", `Libertadores por la Anual · ${i + 1}° cupo${id === cu.pre ? " · fase previa" : " · directo"}`];
+    const j = cu.sud.indexOf(id);
+    if (j >= 0) return ["sud", `Sudamericana por la Anual · ${j + 1}° cupo`];
+    return ["", "—"];
+  };
+  const tbl = (rows, from, withHow) => `<div class="tbl-wrap ex-tbl"><table><thead><tr><th></th><th class="l">Equipo</th><th>Pts</th>${withHow ? '<th class="l">Cómo clasifica</th>' : ""}</tr></thead><tbody>
+    ${rows.map((r, i) => { const [c, txt] = how(r.id);
+      return `<tr class="${r.id === team ? "me" : ""}"><td class="rk">${from + i + 1}</td><td class="l">${tn(r.id)}</td><td>${r.pts}${r.add ? ` <small>+${r.add}</small>` : ""}</td>${withHow ? `<td class="l how ${c}">${txt}</td>` : ""}</tr>`; }).join("")}
+    </tbody></table></div>`;
+  let body = "";
+  // Copas y campeón del Clausura
+  const champs = [];
+  if (e.champ) champs.push(`<li><span>Campeón del Clausura</span>${tn(e.champ)}</li>`);
+  if (e.cups && cu) for (const c of CUPS) { const w = e.cups.champ[c.id]; if (w) champs.push(`<li><span>${esc(c.n)}</span>${tn(w)}</li>`); }
+  if (champs.length) body += `<ul class="ex-champs">${champs.join("")}</ul>`;
+  // Sus partidos
+  if (G.mine.length) body += `<p class="ex-sub">Partidos de ${esc(T(team).n)}</p><ul class="ex-res">${G.mine.map(m => `<li><small>F${m.f}</small> ${score(m)}</li>`).join("")}</ul>`;
+  // Tabla con cómo clasifica cada uno
+  if (cu) {
+    const last = Math.max(arank + 2, cu.lib.length ? an.findIndex(r => r.id === cu.lib[cu.lib.length - 1]) + 1 : 0, /^Sudamericana/.test(k) ? 0 : 7);
+    const rows = an.slice(0, Math.min(an.length, last + 1));
+    const above = an.slice(0, arank).filter(r => cu.champs.includes(r.id));
+    const libN = cu.lib.length, sudR = /^Sudamericana/.test(k);
+    const why = above.length
+      ? `${above.map(r => `${tn(r.id)} (${an.indexOf(r) + 1}°)`).join(", ")} ${above.length > 1 ? "ya tienen" : "ya tiene"} lugar por título, así que no ${above.length > 1 ? "ocupan" : "ocupa"} cupo de la Anual. Por eso los ${libN} cupos de Libertadores por la Anual${sudR ? " y los 6 de Sudamericana" : ""} llegan hasta el <b>${arank + 1}°</b>.`
+      : `Nadie de arriba le libera lugar: entra por su propio puesto.`;
+    body += `<p class="ex-sub">Tabla Anual final de este ejemplo</p>${tbl(rows, 0, true)}<p class="ex-why">${why}</p>`;
+  } else if (/Zona|zona/.test(k)) {
+    const zr = z === "A" ? st.A : st.B, zpos = zr.findIndex(r => r.id === team);
+    body += `<p class="ex-sub">Zona ${z} final de este ejemplo</p>${tbl(zr.slice(0, Math.max(9, zpos + 2)), 0, false)}`;
+    if (e.rival) body += `<p class="ex-why">En octavos le toca <b>${esc(T(e.rival).n)}</b>.</p>`;
+  } else {
+    const from = arank < 6 ? 0 : Math.max(0, an.length - 8);
+    body += `<p class="ex-sub">Tabla Anual final de este ejemplo</p>${tbl(an.slice(from, arank < 6 ? 6 : an.length), from, false)}`;
+  }
+  // Todos los demás resultados del ejemplo
+  const others = MATCHES.filter(m => !results[m.id] && m.h !== team && m.a !== team && res[m.id]);
+  if (others.length) body += `<details class="ex-all"><summary>Ver los otros ${others.length} resultados de este ejemplo</summary>${FECHAS.map(f => {
+      const ms = others.filter(m => m.f === f); return ms.length ? `<p class="ex-sub">Fecha ${f}</p><ul class="ex-res">${ms.map(m => `<li>${score(m)}</li>`).join("")}</ul>` : ""; }).join("")}</details>`;
+  return `<section class="ex"><h5>Un ejemplo: el caso más probable</h5><p class="hint">De todos los escenarios simulados en los que se da este camino, este es el más probable (no es el único).</p>${body}</section>`;
+}
 function openRoute(k) {
   const G = goalRes; if (!G) return;
   const d = G.agg.rd[k]; if (!d || !d.w) return;
@@ -2082,6 +2164,7 @@ function openRoute(k) {
       <button type="button" class="btn ghost icon rd-close" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <p class="rd-p">Pasa en <b>${pctP(P)}</b> de los escenarios simulados.</p>
     ${sec("Qué significa", "", `<p class="rd-rule">${routeRule(k, team)}</p>`)}
+    ${routeExample(G, k, d)}
     ${G.mine.length ? sec(`Lo que tiene que hacer ${esc(t.n)}`, "Cómo le va en sus partidos cuando llega por este camino.", recBody + ownBody) : ""}
     ${sec("Rival en octavos", "Con quién cruza más seguido cuando sale campeón entrando así.", rival ? `<ul class="rlist">${rival}</ul>` : "")}
     ${sec("Quiénes le liberan el lugar", "Equipos que terminan arriba en la Anual pero ya tienen plaza por un título (cuántas veces pasa en este camino).", free ? `<ul class="rlist">${free}</ul>` : "")}
