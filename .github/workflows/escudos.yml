@@ -1,0 +1,66 @@
+name: Bajar escudos
+# Baja los escudos oficiales de football-logos.cc y los guarda en escudos/<id>.png (128 px)
+# para que la página los sirva desde el mismo sitio y se puedan usar al exportar la imagen.
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  escudos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pillow
+      - name: Descargar y achicar
+        run: |
+          mkdir -p escudos
+          while read -r id path; do
+            [ -z "$id" ] && continue
+            curl -fsSL --retry 3 "https://assets.football-logos.cc/logos/$path" -o "/tmp/$id.png"
+            python3 -c "from PIL import Image; im=Image.open('/tmp/$id.png').convert('RGBA'); im.thumbnail((128,128), Image.LANCZOS); im.save('escudos/$id.png', optimize=True)"
+          done <<'LISTA'
+            ald argentina/512x512/aldosivi.6a2fb242.png
+            arg argentina/512x512/argeninos-juniors.b2780d67.png
+            atu argentina/512x512/atletico-tucuman.10ddf6b8.png
+            ban argentina/512x512/banfield.b34d0f03.png
+            bar argentina/512x512/barracas-central.20586205.png
+            bel argentina/512x512/belgrano.6b246ab5.png
+            boc argentina/512x512/boca-juniors.ea01d4a3.png
+            hur argentina/512x512/ca-huracan.97fa4461.png
+            cco argentina/512x512/central-cordoba.2ebcc2c9.png
+            pla argentina/512x512/club-atletico-platanense.cb5c762c.png
+            dyj argentina/512x512/defensa-y-justicia.1a8311a2.png
+            rie argentina/512x512/deportivo-riestra.b03ac726.png
+            est argentina/512x512/estudiantes-de-la-plata.51f54156.png
+            glp argentina/512x512/gimnasia-lp.953a0a50.png
+            ind argentina/512x512/independiente.fd959dab.png
+            irv argentina/512x512/independiente-rivadavia.55b639a5.png
+            ins argentina/512x512/instituto-cordoba.186b2667.png
+            lan argentina/512x512/lanus.479fce96.png
+            new argentina/512x512/newells-old-boys.b60acb78.png
+            rac argentina/512x512/racing-club.b31447c6.png
+            riv argentina/512x512/river-plate.01acb6fc.png
+            cen argentina/512x512/rosario-central.028c4599.png
+            slo argentina/512x512/san-lorenzo-de-almagro.55e6a0bf.png
+            sar argentina/512x512/sarmiento.cce0f83b.png
+            tal argentina/512x512/talleres.d1c887d7.png
+            tig argentina/512x512/tigre.c5af188f.png
+            uni argentina/512x512/union.4d3d12f2.png
+            vel argentina/512x512/velez-sarsfield.1f962690.png
+            gim argentina/512x512/gimnasia-y-esgrima.841ab8fe.png
+            erc argentina/512x512/estudiantes-de-rio-cuarto.93c28336.png
+            fla brazil/512x512/flamengo.0ec2cd2d.png
+            pal brazil/512x512/palmeiras.cd04fee3.png
+            flu brazil/512x512/fluminense.7b0d1eec.png
+            vas brazil/512x512/vasco-da-gama.2d89e86d.png
+            cam brazil/512x512/atletico-mineiro.da10887f.png
+            ctq uruguay/512x512/montevideo-city-torque.8b2ca0dc.png
+          LISTA
+          ls -la escudos
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add escudos
+          git diff --cached --quiet || git commit -m "Escudos de los clubes (football-logos.cc)"
+          git push
