@@ -1631,8 +1631,16 @@ async function exportProjImage(btn) {
     let cv = draw(await crestImages(ids, true)), blob;
     try { blob = await new Promise((res, rej) => { try { cv.toBlob(b => b ? res(b) : rej(), "image/png"); } catch (e) { rej(e); } }); }
     catch { cv = draw(await crestImages(ids, false)); blob = await new Promise(res => cv.toBlob(res, "image/png")); }
+    const filename = `probabilidades-lpf-${DATA_DATE.replace(/\//g, "-")}.png`;
+    // Dentro del visor de Claude la descarga pasa por su capacidad "downloads"; en la web, un link común.
+    const dl = window.claude?.use ? await window.claude.use("downloads").catch(() => null) : null;
+    if (dl) {
+      try { await dl.save({ filename, data: blob }); toast("Imagen descargada (1920×1080 en alta resolución)"); }
+      catch (e) { if (e?.code !== "declined") toast("No se pudo descargar la imagen"); }
+      return;
+    }
     const url = URL.createObjectURL(blob), a = document.createElement("a");
-    a.href = url; a.download = `probabilidades-lpf-${DATA_DATE.replace(/\//g, "-")}.png`;
+    a.href = url; a.download = filename;
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 30000);
     toast("Imagen descargada (1920×1080 en alta resolución)");
