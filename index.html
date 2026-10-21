@@ -109,11 +109,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 @media (prefers-reduced-motion: reduce) { .tab { transition: none; } }
 
 .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
-@media (min-width: 1100px) {
-  .layout { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); }
-  .layout > #pane-partidos { display: block !important; position: sticky; top: 78px; max-height: calc(100vh - 90px); overflow: auto; padding-right: 4px; }
-  .tab[data-tab="partidos"] { display: none; }
-}
+/* Tablas a un ancho cómodo de leer, centradas */
+#pane-zona-a, #pane-zona-b, #pane-anual, #pane-promedios { max-width: 1080px; margin-inline: auto; }
+/* Partidos: en pantallas anchas, los partidos de cada grupo en grilla */
+.mgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr)); gap: 6px 10px; }
+.mgrid .match { margin-bottom: 0; }
 
 .panel-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
 .panel-h h2 { font: 700 22px/1.1 var(--font-display); text-transform: uppercase; letter-spacing: .03em; margin: 0; }
@@ -265,8 +265,6 @@ tr.in td.pos { color: var(--accent); }
 .tie .nm, .team-n { display: block; }
 
 /* Resumen */
-.layout.full { grid-template-columns: minmax(0, 1fr) !important; }
-.layout.full > #pane-partidos { display: none !important; }
 .sum-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
 @media (min-width: 760px) { .sum-grid.three { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1100px) { .sum-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -1190,7 +1188,7 @@ function renderFixture() {
     for (const [g, l] of [["A", "Zona A"], ["B", "Zona B"], ["I", "Interzonal"]]) {
       if (!ms.some(m => m.g === g)) continue;
       out.push(`<div class="group-l">${l}</div>`);
-      ms.filter(m => m.g === g).forEach(m => out.push(matchHTML(m)));
+      out.push(`<div class="mgrid">${ms.filter(m => m.g === g).map(matchHTML).join("")}</div>`);
     }
     out.push(`</div>`);
   }
@@ -2275,12 +2273,8 @@ function renderAll() {
     `<b>Tablas de promiedos al ${DATA_DATE}</b>. Fecha 13 completa (Newell's 2-1 Central Córdoba, Sarmiento 1-1 Barracas y Riestra 1-1 Unión). Correcciones en la pestaña <b>Datos</b>. Cargados: <b>${done}/${MATCHES.length}</b> partidos.`;
 }
 function invalidate() { projection = null; cache.clear(); mcache.clear(); advCache.clear(); stakesCache = null; }
-const wide = matchMedia("(min-width: 1100px)");
 function showTab(tab) {
-  if (wide.matches && tab === "partidos") tab = "resumen";
   activeTab = tab;
-  // Resumen y Probabilidades ocupan todo el ancho, sin la columna de partidos.
-  document.querySelector(".layout").classList.toggle("full", tab === "resumen" || tab === "proyeccion" || tab === "objetivo");
   document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
   document.querySelectorAll(".pane").forEach(p => p.hidden = p.dataset.pane !== tab);
   if (tab === "proyeccion") { renderProjection(); applyFocus(); }
