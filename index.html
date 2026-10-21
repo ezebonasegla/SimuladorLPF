@@ -320,8 +320,6 @@ tr.in td.pos { color: var(--accent); }
 .proj-split > .ptable:first-child { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
 .proj-split > .ptable + .ptable thead { display: none; }
 .proj-split .ptable th { white-space: normal; line-height: 1.25; vertical-align: bottom; }
-.proj-split .pc { min-width: 64px; }
-.proj-split .pc .meter { width: 52px; }
 .proj-split .ptable td.team { min-width: 150px; }
 .proj-split .ptable td { padding: 7px 8px; }
 .proj-split table.fixed { table-layout: fixed; min-width: 680px; }
@@ -332,7 +330,6 @@ tr.in td.pos { color: var(--accent); }
   .proj.compact-w { max-width: 1640px; }
   .proj-split table.fixed { min-width: 0; }
   .proj-split col.c-pc { width: 12.5%; }
-  .proj-split .pc .meter { width: 44px; }
   .proj-split { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
   .proj-split > .ptable + .ptable { margin-top: 0; border-radius: 10px; }
   .proj-split > .ptable:first-child { border-radius: 10px; }
@@ -341,7 +338,7 @@ tr.in td.pos { color: var(--accent); }
 .proj-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .proj-head h2 { font: 700 26px/1 var(--font-display); text-transform: uppercase; letter-spacing: .03em; margin: 0; }
 .proj-sub { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
-.proj-actions { display: flex; align-items: center; gap: 8px; }
+.proj-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .seg { display: inline-flex; padding: 3px; border-radius: 9px; background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); }
 .seg button { border: 0; background: none; padding: 6px 14px; border-radius: 7px; font: 600 13px/1 var(--font-body); color: var(--muted); }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12), 0 0 0 1px var(--line); }
@@ -358,14 +355,6 @@ tr.in td.pos { color: var(--accent); }
 .ptable td.team { font-weight: 600; min-width: 170px; }
 .ptable .zb { margin-left: 8px; font-size: 10px; font-weight: 700; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 1px 4px; vertical-align: 1px; }
 .ptable td.num { color: var(--muted); }
-.pc { min-width: 82px; }
-.pc .pv { display: block; font-weight: 600; line-height: 1.1; }
-.pc .meter { display: block; height: 4px; margin-top: 4px; margin-left: auto; width: 64px; border-radius: 2px; background: var(--line); overflow: hidden; }
-.pc .meter i { display: block; height: 100%; margin-left: auto; background: var(--c); border-radius: 2px; }
-.pc.hi .pv { font-weight: 800; color: var(--ink); }
-.pc.lo .pv { color: var(--muted); font-weight: 500; }
-.pc.nil .pv { color: var(--line); font-weight: 500; }
-.pc.nil .meter { opacity: .5; }
 /* Vista resumida: mapa de calor */
 .ptable.heat { border-radius: 14px; }
 .ptable.heat th { font-size: 10.5px; letter-spacing: .03em; padding: 10px 3px 9px; vertical-align: bottom; }
@@ -379,6 +368,14 @@ tr.in td.pos { color: var(--accent); }
   background: color-mix(in srgb, var(--c) var(--a), var(--surface)); }
 .pill.hi { color: var(--hm-hi); }
 .pill.nil { background: none; color: var(--line); font-weight: 500; }
+.ptable.full table.fixed { min-width: 1040px; }
+.ptable.full col.c-rk { width: 36px; }
+.ptable.full col.c-team { width: 210px; }
+.ptable.full col.c-pts { width: 74px; }
+.ptable.full col.c-pc { width: 9.5%; }
+.ptable.full tr.grp th { padding: 9px 3px 4px; }
+.ptable.full td.num { text-align: center; font: 600 16px/1 var(--font-display); }
+.ptable.full .pill { height: 32px; font-size: 17px; }
 .proj-note { margin: 10px 2px 0; color: var(--muted); font-size: 12.5px; }
 
 /* ¿Qué tiene que pasar? */
@@ -687,7 +684,7 @@ const CREST = {
   cam: ["v", "#111111", "#ffffff"], ctq: ["s", "#7cc0ea"],
 };
 const SHIELD = "M2 2h20v11.5c0 7-5 11.3-10 13.5C7 24.8 2 20.5 2 13.5z";
-function crest(id) {
+function crestFill(id) {
   const c = CREST[id]; if (!c) return "";
   const [pt, a, b] = c;
   let fill = `<rect width="24" height="28" fill="${a}"/>`;
@@ -698,6 +695,10 @@ function crest(id) {
   if (pt === "m") fill += `<rect x="12" width="12" height="28" fill="${b}"/>`;
   if (pt === "c") fill += `<path d="M2 3 L12 18 L22 3 L22 8 L12 23 L2 8z" fill="${b}"/>`;
   if (pt === "s" && b) fill += `<rect x="5" y="9" width="14" height="3" fill="${b}"/>`;
+  return fill;
+}
+function crest(id) {
+  const fill = crestFill(id); if (!fill) return "";
   const svg = `<svg class="crest-svg" viewBox="0 0 24 28" aria-hidden="true"><g clip-path="url(#crest-shield)">${fill}</g><path d="${SHIELD}" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width="1.2"/></svg>`;
   const u = logoUrl(id);
   return `<span class="crest">${svg}${u ? `<img class="crest-img" src="${u}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ""}</span>`;
@@ -1447,6 +1448,9 @@ function renderProjection() {
           <button type="button" data-proj="compact" aria-pressed="${projCompact}">Resumida</button>
           <button type="button" data-proj="full" aria-pressed="${!projCompact}">Completa</button>
         </div>
+        <button class="btn ghost" type="button" id="btn-proj-img" title="Descargar la tabla resumida como imagen Full HD">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Exportar imagen
+        </button>
         <button class="btn ghost icon" type="button" id="btn-proj" title="Volver a simular" aria-label="Volver a simular">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 4v5h-5"/></svg>
         </button>
@@ -1456,12 +1460,14 @@ function renderProjection() {
     <p class="proj-note">Cuanto más fuerte el color, más probable. «Libertadores directo» es fase de grupos; «Lib. fase previa» es el último que entra por la Tabla Anual. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana). Las chances chicas van con un decimal; «—» es que no pasó en ninguna simulación.</p>
   </div>`;
 }
+const heatAlpha = v => Math.round(Math.max(0.07, Math.min(1, Math.sqrt(v))) * 100);
 function projTable() {
   const { acc } = projection;
-  // Celda: número + barrita. Más de 50% en negrita, menos de 5% atenuado.
-  const cell = (v, c) => {
-    const cls = v <= 1e-9 ? "nil" : v >= 0.5 ? "hi" : v < 0.05 ? "lo" : "";
-    return `<td class="pc ${cls}" style="--c:${c}"><span class="pv">${v <= 1e-9 ? "—" : pctP(v)}</span><span class="meter"><i style="width:${Math.max(v > 0 ? 2 : 0, Math.round(v * 100))}%"></i></span></td>`;
+  // Mapa de calor: cuanto más alto el %, más fuerte el color; números grandes. Un color por columna.
+  const heat = (v, c) => {
+    if (v <= 1e-9) return `<td class="hm"><div class="pill nil">—</div></td>`;
+    const a = heatAlpha(v);
+    return `<td class="hm"><div class="pill${a >= 74 ? " hi" : ""}" style="--c:${c};--a:${a}%">${pctP(v)}</div></td>`;
   };
   const team = (t, i) => `<td class="rk">${i + 1}</td><td class="l team">${tn(t.id)}<span class="zb">${t.z}</span></td>`;
   if (projCompact) {
@@ -1469,15 +1475,9 @@ function projTable() {
     // En pantallas anchas va en dos columnas de 15; en el celular, una debajo de la otra.
     // Mismos anchos de columna en las dos mitades para que queden alineadas cuando van una debajo de la otra.
     const cols = `<colgroup><col class="c-rk"><col class="c-team">${"<col class=\"c-pc\">".repeat(6)}</colgroup>`;
-    // Mapa de calor: cuanto más alto el %, más fuerte el color; números grandes. Un color por columna.
     const HM = [["Playoffs", t => acc[t].po, "var(--accent)"], ["Sudamericana", t => acc[t].sud, "var(--sud)"],
       ["Libertadores fase previa", t => acc[t].pre, "var(--pre)"], ["Libertadores directo", t => acc[t].lib - acc[t].pre, "var(--lib)"],
       ["Campeón Clausura", t => acc[t].champ, "var(--champ)"], ["Campeón de Liga", t => acc[t].liga, "var(--liga)"]];
-    const heat = (v, c) => {
-      if (v <= 1e-9) return `<td class="hm"><div class="pill nil">—</div></td>`;
-      const a = Math.round(Math.max(0.07, Math.min(1, Math.sqrt(v))) * 100);
-      return `<td class="hm"><div class="pill${a >= 74 ? " hi" : ""}" style="--c:${c};--a:${a}%">${pctP(v)}</div></td>`;
-    };
     const half = (from, to) => `<div class="tbl-wrap ptable heat"><table class="fixed">${cols}
       <thead><tr><th></th><th class="l">Equipo</th>${HM.map(h => `<th><i style="background:${h[2]}"></i>${h[0]}</th>`).join("")}</tr></thead>
       <tbody>${order.slice(from, to).map((t, i) => `<tr>${team(t, from + i)}${HM.map(h => heat(h[1](t.id), h[2])).join("")}</tr>`).join("")}</tbody>
@@ -1485,15 +1485,17 @@ function projTable() {
     return `<div class="proj-split">${half(0, 15)}${half(15, 30)}</div>`;
   }
   const rows = teams.slice().sort((a, b) => acc[b.id].pts - acc[a.id].pts || acc[b.id].lib - acc[a.id].lib);
-  return `<div class="tbl-wrap ptable"><table>
+  const FULL = [["Playoffs", t => acc[t].po, "var(--accent)"], ["1° zona", t => acc[t].first, "var(--accent)"], ["Campeón", t => acc[t].champ, "var(--champ)"],
+    ["Campeón de Liga", t => acc[t].liga, "var(--liga)"], ["Desc.", t => acc[t].desc, "var(--danger)"],
+    ["Lib. directo", t => acc[t].lib - acc[t].pre, "var(--lib)"], ["Lib. fase previa", t => acc[t].pre, "var(--pre)"], ["Sudamericana", t => acc[t].sud, "var(--sud)"],
+    ["Gana copa", t => acc[t].cupT || 0, "var(--lib)"]];
+  return `<div class="tbl-wrap ptable heat full"><table class="fixed">
+      <colgroup><col class="c-rk"><col class="c-team"><col class="c-pts">${"<col class=\"c-pc\">".repeat(FULL.length)}</colgroup>
       <thead>
-        <tr class="grp"><th colspan="3"></th><th colspan="3">Clausura</th><th colspan="2">Tabla Anual</th><th colspan="3">Copas 2027</th><th colspan="2"></th></tr>
-        <tr><th></th><th class="l">Equipo</th><th>Pts Anual</th><th>Playoffs</th><th>1° zona</th><th>Campeón</th><th>Campeón de Liga</th><th>Desc.</th><th>Lib. directo</th><th>Lib. fase previa</th><th>Sudamericana</th><th>Gana copa</th><th></th></tr>
+        <tr class="grp"><th colspan="3"></th><th colspan="3">Clausura</th><th colspan="2">Tabla Anual</th><th colspan="4">Copas 2027</th></tr>
+        <tr><th></th><th class="l">Equipo</th><th>Pts Anual</th>${FULL.map(h => `<th><i style="background:${h[2]}"></i>${h[0]}</th>`).join("")}</tr>
       </thead>
-      <tbody>${rows.map((t, i) => `<tr>${team(t, i)}<td class="num">${acc[t.id].pts.toFixed(1)}</td>
-        ${cell(acc[t.id].po, "var(--accent)")}${cell(acc[t.id].first, "var(--accent)")}${cell(acc[t.id].champ, "var(--lib)")}
-        ${cell(acc[t.id].liga, "var(--lib)")}${cell(acc[t.id].desc, "var(--danger)")}
-        ${cell(acc[t.id].lib - acc[t.id].pre, "var(--lib)")}${cell(acc[t.id].pre, "var(--pre)")}${cell(acc[t.id].sud, "var(--sud)")}${cell(acc[t.id].cupT || 0, "var(--lib)")}<td></td></tr>`).join("")}</tbody>
+      <tbody>${rows.map((t, i) => `<tr>${team(t, i)}<td class="num">${acc[t.id].pts.toFixed(1)}</td>${FULL.map(h => heat(h[1](t.id), h[2])).join("")}</tr>`).join("")}</tbody>
     </table></div>`;
 }
 // Las probabilidades se recalculan solas un momento después del último cambio.
@@ -1513,6 +1515,130 @@ function scheduleProjection() {
     };
     tick();
   }, 450);
+}
+
+/* ===================== EXPORTAR IMAGEN ===================== */
+// Dibuja la tabla resumida en un canvas de 1920×1080 (a doble resolución) y la descarga como PNG.
+// Usa los colores del tema activo. Los escudos se intentan bajar con CORS; si no se puede, va la insignia dibujada.
+function loadImg(src, cors) {
+  return new Promise(res => {
+    const im = new Image(); if (cors) im.crossOrigin = "anonymous";
+    const t = setTimeout(() => res(null), 4000);
+    im.onload = () => { clearTimeout(t); res(im); }; im.onerror = () => { clearTimeout(t); res(null); };
+    im.src = src;
+  });
+}
+const crestDataUrl = id => "data:image/svg+xml;charset=utf-8," + encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 28" width="96" height="112"><defs><clipPath id="s"><path d="${SHIELD}"/></clipPath></defs><g clip-path="url(#s)">${crestFill(id)}</g><path d="${SHIELD}" fill="none" stroke="#7f8c86" stroke-width="1.2"/></svg>`);
+async function crestImages(ids, real) {
+  const out = {};
+  await Promise.all(ids.map(async id => {
+    out[id] = (real && LOGO[id] && await loadImg(logoUrl(id) + "?export=1", true)) || await loadImg(crestDataUrl(id), false);
+  }));
+  return out;
+}
+function mixHex(c, a, bg) {
+  const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const x = p(c), y = p(bg);
+  return "rgb(" + x.map((v, i) => Math.round(v * a + y[i] * (1 - a))).join(",") + ")";
+}
+async function exportProjImage(btn) {
+  if (!projection) { toast("Esperá a que terminen las simulaciones"); return; }
+  btn.disabled = true;
+  try {
+    const css = getComputedStyle(document.documentElement), v = n => css.getPropertyValue(n).trim();
+    const dark = document.documentElement.getAttribute("data-sim-theme") === "dark";
+    const C = { bg: v("--bg"), card: v("--surface"), head: v("--surface-2"), ink: v("--ink"), muted: v("--muted"), line: v("--line"),
+      accent: v("--accent"), hi: v("--hm-hi") };
+    const DF = '"Barlow Condensed", "Arial Narrow", sans-serif', BF = '"Barlow", "Segoe UI", sans-serif';
+    await Promise.all([`700 58px ${DF}`, `600 18px ${BF}`, `400 17px ${BF}`].map(f => document.fonts?.load(f).catch(() => {})));
+    const { acc, N } = projection;
+    const order = teams.slice().sort((a, b) => acc[b.id].champ + acc[b.id].liga - acc[a.id].champ - acc[a.id].liga || acc[b.id].lib - acc[a.id].lib || acc[b.id].po - acc[a.id].po);
+    const COLS = [["Playoffs", t => acc[t].po, v("--accent")], ["Sudamericana", t => acc[t].sud, v("--sud")],
+      ["Libertadores|fase previa", t => acc[t].pre, v("--pre")], ["Libertadores|directo", t => acc[t].lib - acc[t].pre, v("--lib")],
+      ["Campeón|Clausura", t => acc[t].champ, v("--champ")], ["Campeón|de Liga", t => acc[t].liga, v("--liga")]];
+    const filled = MATCHES.filter(m => results[m.id]).length;
+
+    const draw = imgs => {
+      const W = 1920, H = 1080, S = 2, cv = document.createElement("canvas");
+      cv.width = W * S; cv.height = H * S;
+      const x = cv.getContext("2d"); x.scale(S, S);
+      const sp = em => { if ("letterSpacing" in x) x.letterSpacing = em; };
+      const rr = (X, Y, w, h, r) => { x.beginPath(); x.roundRect ? x.roundRect(X, Y, w, h, r) : x.rect(X, Y, w, h); };
+      // fondo
+      x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
+      const g = x.createRadialGradient(0, 0, 0, 0, 0, 1100); g.addColorStop(0, mixHex(C.accent, dark ? .12 : .08, C.bg)); g.addColorStop(1, C.bg);
+      x.fillStyle = g; x.fillRect(0, 0, W, H);
+      // encabezado
+      x.textBaseline = "alphabetic"; x.textAlign = "left";
+      x.fillStyle = C.accent; x.font = `700 18px ${DF}`; sp("2.9px"); x.fillText("SIMULADOR LPF · CLAUSURA 2026", 52, 56);
+      x.fillStyle = C.ink; x.font = `700 58px ${DF}`; sp("0.6px"); x.fillText("PROBABILIDADES", 50, 112); sp("0px");
+      x.textAlign = "right"; x.font = `400 17px ${BF}`; x.fillStyle = C.muted;
+      x.fillText(`${N.toLocaleString("es-AR")} simulaciones de las fechas ${FECHAS[0]} a ${FECHAS[FECHAS.length - 1]}, playoffs y copas`, W - 52, 86);
+      x.fillText(`Tablas de promiedos al ${DATA_DATE} · ${filled}/${MATCHES.length} partidos cargados`, W - 52, 111);
+      // tablas
+      const top = 138, gap = 26, tw = (W - 104 - gap) / 2, hh = 62, rh = 55, pw = 98, rkw = 44;
+      for (let half = 0; half < 2; half++) {
+        const X = 52 + half * (tw + gap), th = hh + rh * 15;
+        x.save(); x.shadowColor = "rgba(0,0,0,.10)"; x.shadowBlur = 12; x.shadowOffsetY = 2;
+        x.fillStyle = C.card; rr(X, top, tw, th, 14); x.fill(); x.restore();
+        x.save(); rr(X, top, tw, th, 14); x.clip();
+        x.fillStyle = C.head; x.fillRect(X, top, tw, hh);
+        x.fillStyle = C.line; x.fillRect(X, top + hh - 2, tw, 2);
+        // cabeceras
+        x.font = `600 11.5px ${BF}`; x.fillStyle = C.muted; sp("0.3px");
+        x.textAlign = "left"; x.fillText("EQUIPO", X + rkw + 8, top + hh - 13);
+        const px0 = X + tw - pw * COLS.length;
+        COLS.forEach((c, k) => {
+          const cx = px0 + pw * k + pw / 2, lines = c[0].toUpperCase().split("|");
+          x.fillStyle = c[2]; rr(cx - 11, top + 12, 22, 4, 2); x.fill();
+          x.fillStyle = C.muted; x.textAlign = "center";
+          lines.forEach((l, li) => x.fillText(l, cx, top + hh - 13 - (lines.length - 1 - li) * 14));
+        });
+        sp("0px");
+        // filas
+        order.slice(half * 15, half * 15 + 15).forEach((t, i) => {
+          const y = top + hh + i * rh, cy = y + rh / 2;
+          if (i) { x.fillStyle = C.line; x.globalAlpha = .55; x.fillRect(X, y, tw, 1); x.globalAlpha = 1; }
+          x.textBaseline = "middle"; x.textAlign = "center"; x.fillStyle = C.muted; x.font = `700 18px ${DF}`;
+          x.fillText(String(half * 15 + i + 1), X + rkw / 2, cy + 1);
+          const im = imgs[t.id];
+          if (im) { const real = !im.src.startsWith("data:"), bw = real ? 28 : 22, bh = real ? 28 : 26; x.drawImage(im, X + rkw + 8 + (28 - bw) / 2, cy - bh / 2, bw, bh); }
+          x.textAlign = "left"; x.fillStyle = C.ink; x.font = `600 18px ${BF}`;
+          const nx = X + rkw + 44, maxw = px0 - nx - 40;
+          let name = t.n; while (x.measureText(name).width > maxw && name.length > 3) name = name.slice(0, -2) + "…";
+          x.fillText(name, nx, cy + 1);
+          const zx = nx + x.measureText(name).width + 9;
+          x.font = `700 11px ${BF}`; x.strokeStyle = C.line; x.lineWidth = 1; rr(zx, cy - 9, 18, 18, 4); x.stroke();
+          x.fillStyle = C.muted; x.textAlign = "center"; x.fillText(t.z, zx + 9, cy + 1);
+          COLS.forEach((c, k) => {
+            const val = c[1](t.id), bx = px0 + pw * k + 5, bwid = pw - 10;
+            x.font = `700 22px ${DF}`; x.textAlign = "center";
+            if (val <= 1e-9) { x.fillStyle = C.line; x.font = `500 22px ${DF}`; x.fillText("—", bx + bwid / 2, cy + 1); return; }
+            const a = heatAlpha(val);
+            x.fillStyle = mixHex(c[2], a / 100, C.card); rr(bx, cy - 20, bwid, 40, 9); x.fill();
+            x.fillStyle = a >= 74 ? C.hi : C.ink; x.fillText(pctP(val), bx + bwid / 2, cy + 1);
+          });
+          x.textBaseline = "alphabetic";
+        });
+        x.restore();
+      }
+      x.textAlign = "left"; x.font = `400 14px ${BF}`; x.fillStyle = C.muted;
+      x.fillText("Cuanto más fuerte el color, más probable · Libertadores directo = fase de grupos · fase previa = último clasificado por la Tabla Anual · Campeón de Liga = 1° de la Tabla Anual · «—» no pasó en ninguna simulación", 52, H - 30);
+      return cv;
+    };
+    const ids = order.map(t => t.id);
+    let cv = draw(await crestImages(ids, true)), blob;
+    try { blob = await new Promise((res, rej) => { try { cv.toBlob(b => b ? res(b) : rej(), "image/png"); } catch (e) { rej(e); } }); }
+    catch { cv = draw(await crestImages(ids, false)); blob = await new Promise(res => cv.toBlob(res, "image/png")); }
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = `probabilidades-lpf-${DATA_DATE.replace(/\//g, "-")}.png`;
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+    toast("Imagen descargada (1920×1080 en alta resolución)");
+  } catch (err) {
+    console.error(err); toast("No se pudo generar la imagen");
+  } finally { btn.disabled = false; }
 }
 
 /* ===================== RENDER: DATOS ===================== */
@@ -2026,6 +2152,7 @@ document.addEventListener("click", e => {
   if (e.target.closest("#btn-clear")) {
     results = {}; aiFilled = {}; poWinners = {}; cupPicks = {}; aiCupPicks = {}; projection = null; save(); renderAll(); toast("Resultados borrados"); return;
   }
+  if (e.target.closest("#btn-proj-img")) { exportProjImage(e.target.closest("#btn-proj-img")); return; }
   if (e.target.closest("#btn-proj")) { projection = null; renderProjection(); toast("Recalculando 10.000 simulaciones…"); return; }
   if (e.target.closest("#btn-reset-data")) {
     teams = structuredClone(BASE_TEAMS); invalidate(); save(); renderAll(); toast("Datos originales restablecidos"); return;
