@@ -405,6 +405,35 @@ tr.in td.pos { color: var(--accent); }
 .gcard ul.list .bar { grid-column: 1 / -1; height: 6px; }
 .gcard ul.list .bar i { background: var(--accent); }
 .gcard ul.list b.v { font-variant-numeric: tabular-nums; }
+.gcard ul.routes li { grid-template-columns: minmax(0, 1fr) auto auto; }
+.route-btn { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); background: var(--surface-2); color: var(--accent); border-radius: 999px; padding: 3px 9px 3px 6px; font: 600 12px/1 var(--font-body); }
+.route-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+.route-btn svg { width: 14px; height: 14px; }
+.route-dlg { border: 0; padding: 0; border-radius: 14px; width: min(640px, calc(100vw - 24px)); max-height: calc(100vh - 40px); background: var(--surface); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+.route-dlg::backdrop { background: rgba(10, 20, 16, .55); }
+.rd-body { padding: 18px 20px 20px; display: grid; gap: 14px; }
+.rd-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.rd-kick { font-size: 13px; font-weight: 600; color: var(--muted); }
+.rd-head h3 { margin: 4px 0 0; font: 700 22px/1.15 var(--font-display); text-transform: uppercase; letter-spacing: .02em; }
+.rd-p { margin: -6px 0 0; color: var(--muted); font-size: 14px; }
+.rd-p b { color: var(--accent); font-size: 16px; }
+.route-dlg section { border-top: 1px solid var(--line); padding-top: 12px; }
+.route-dlg h5 { margin: 0 0 4px; font: 700 15px/1.1 var(--font-display); text-transform: uppercase; letter-spacing: .06em; }
+.route-dlg .hint { margin: 0 0 8px; color: var(--muted); font-size: 12.5px; }
+.rd-rule { margin: 0; font-size: 14.5px; line-height: 1.5; }
+.route-dlg .kv { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 10px; font-size: 13.5px; color: var(--muted); }
+.route-dlg .kv b { color: var(--ink); }
+.route-dlg ul.rlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.route-dlg ul.rlist li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; font-size: 14px; line-height: 1.45; }
+.route-dlg ul.rlist li small { color: var(--muted); margin-left: 4px; }
+.route-dlg ul.rlist .bar { grid-column: 1 / -1; height: 5px; }
+.route-dlg ul.rlist .bar i { background: var(--accent); }
+.route-dlg .res { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 4px; font: 700 11px/1 var(--font-body); color: #fff; vertical-align: 1px; }
+.route-dlg .res.r0 { background: var(--sud); } .route-dlg .res.r1 { background: var(--draw); } .route-dlg .res.r2 { background: var(--danger); }
+.route-dlg ul.lifts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.route-dlg ul.lifts li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; font-size: 14px; }
+.route-dlg ul.lifts small { color: var(--muted); }
+.route-dlg ul.lifts .cmp b { color: var(--sud); }
 .gcard table { font-size: 13.5px; }
 .gcard td, .gcard th { padding: 6px 8px; }
 .gcard .pcell { font-weight: 700; }
@@ -1723,7 +1752,7 @@ function goalSim(team, goal, target) {
   };
   const fixed = {}; for (const m of MATCHES) if (results[m.id]) fixed[m.id] = results[m.id];
   const mine = MATCHES.filter(m => m.h === team || m.a === team);
-  const agg = { n: 0, w: 0, routes: {}, pts: {}, rec: {}, match: {}, split: null, ptsSplit: {} };
+  const agg = { n: 0, w: 0, routes: {}, pts: {}, rec: {}, match: {}, split: null, ptsSplit: {}, rd: {} };
   if (goal === "lib" || goal === "sud") agg.split = [0, 0, 0, 0]; // Lib. directo / Lib. fase previa / Sudamericana / sin copa
   for (const [m] of pending) agg.match[m.id] = [[0, 0], [0, 0], [0, 0]];
   const add = (o, k, w) => { const x = o[k] || (o[k] = [0, 0]); x[0]++; x[1] += w; };
@@ -1741,15 +1770,25 @@ function goalSim(team, goal, target) {
     const pz = poList(st, z).findIndex(r => r.id === team), zpos = pz < 0 ? 99 : pz + 1; // puesto a efectos de playoffs (14.1.2)
     const an = st.AN.map(r => r.id), arank = an.indexOf(team);
     let w = 0;
-    const routes = {};
-    const rt = (k, v) => { routes[k] = (routes[k] || 0) + v; w += v; };
+    const routes = {}, ctx = {};
+    // x: detalle del escenario para explicar el camino (campeón del Clausura, quiénes liberan el cupo, rival de octavos)
+    const rt = (k, v, x) => {
+      routes[k] = (routes[k] || 0) + v; w += v;
+      if (!x) return;
+      const c = ctx[k] || (ctx[k] = { champ: {}, free: {}, rival: {} });
+      if (x.champ) c.champ[x.champ] = (c.champ[x.champ] || 0) + v;
+      if (x.rival) c.rival[x.rival] = (c.rival[x.rival] || 0) + v;
+      for (const f of x.free || []) c.free[f] = (c.free[f] || 0) + v;
+    };
     if (goal === "po") { if (zpos <= 8) rt(`Terminar ${zpos}° de la Zona ${z}`, 1); }
     else if (goal === "first") { if (zr[0].id === team) rt("Terminar 1° de la zona", 1); }
     else if (goal === "liga") { if (an[0] === team) rt("Terminar 1° de la Tabla Anual", 1); }
     else if (goal === "safe") { if (!relegated(st).includes(team)) rt(`Terminar ${arank + 1}° en la Anual`, 1); }
     else {
       const cups = randomCups();
-      if (goal === "champ") { if (zpos <= 8) { const p = bracketDist(st, cups).get(team) || 0; if (p) rt(`Entrando ${zpos}° de la Zona ${z}`, p); } }
+      if (goal === "champ") { if (zpos <= 8) { const p = bracketDist(st, cups).get(team) || 0;
+        const rival = (poList(st, z === "A" ? "B" : "A")[8 - zpos] || {}).id;
+        if (p) rt(`Entrando ${zpos}° de la Zona ${z}`, p, { rival }); } }
       else {
         split = [0, 0, 0, 0];
         // Quién sale campeón del Clausura cambia los cupos, entre o no a playoffs.
@@ -1760,9 +1799,12 @@ function goalSim(team, goal, target) {
           split[k] += pc;
           // Objetivo "jugar una copa": cuenta Libertadores o Sudamericana, y el camino dice cuál.
           const pre = goal === "sud" ? "Libertadores · " : "";
-          if (h) rt(pre + (h[1] === "campeón Clausura" ? "Salir campeón del Clausura" : /^(subcampeón|semifinalista)/.test(h[1]) ? "Por la Copa Argentina (el campeón ya tenía plaza)" : "Por título: " + h[1]), pc);
-          else if (cu.lib.includes(team)) rt(pre + (arank < 3 ? "Terminar entre los 3 primeros de la Anual" : `Terminar ${arank + 1}° en la Anual y que se liberen cupos`) + (cu.pre === team ? " (fase previa)" : ""), pc);
-          else if (goal === "sud" && cu.sud.includes(team)) rt("Sudamericana · " + (arank < 9 ? "Terminar entre el 4° y el 9° de la Anual" : `Terminar ${arank + 1}° en la Anual y que se liberen cupos`), pc);
+          // Los que terminan arriba en la Anual pero ya tienen plaza por un título: le dejan libre su lugar.
+          const free = an.slice(0, arank).filter(id => cu.champs.includes(id)).map(id => id + "|" + ((cu.holders.find(x => x[0] === id && !x[2]) || [])[1] || "título"));
+          const x = { champ: c, free };
+          if (h) rt(pre + (h[1] === "campeón Clausura" ? "Salir campeón del Clausura" : /^(subcampeón|semifinalista)/.test(h[1]) ? "Por la Copa Argentina (el campeón ya tenía plaza)" : "Por título: " + h[1]), pc, x);
+          else if (cu.lib.includes(team)) rt(pre + (arank < 3 ? "Terminar entre los 3 primeros de la Anual" : `Terminar ${arank + 1}° en la Anual y que se liberen cupos`) + (cu.pre === team ? " (fase previa)" : ""), pc, x);
+          else if (goal === "sud" && cu.sud.includes(team)) rt("Sudamericana · " + (arank < 9 ? "Terminar entre el 4° y el 9° de la Anual" : `Terminar ${arank + 1}° en la Anual y que se liberen cupos`), pc, x);
         }
       }
     }
@@ -1776,6 +1818,15 @@ function goalSim(team, goal, target) {
       if (gf > gc) { pts += 3; W++; } else if (gf === gc) { pts += 1; D++; } else L++;
     }
     add(agg.pts, pts, w); add(agg.rec, `${W}-${D}-${L}`, w);
+    // Detalle de cada camino: cómo le fue al equipo, en qué puesto terminó y qué resultados se dieron.
+    const ownRes = mine.map(m => { const r = res[m.id]; return r[0] > r[1] ? 0 : r[0] === r[1] ? 1 : 2; }).join("");
+    for (const k in routes) {
+      const v = routes[k], d = agg.rd[k] || (agg.rd[k] = { w: 0, rec: {}, own: {}, pos: {}, zpos: {}, champ: {}, free: {}, rival: {}, match: {} });
+      const inc = (o, key, by) => { o[key] = (o[key] || 0) + by; };
+      d.w += v; inc(d.rec, `${W}-${D}-${L}`, v); inc(d.own, ownRes, v); inc(d.pos, arank + 1, v); inc(d.zpos, zpos, v);
+      const c = ctx[k]; if (c) for (const f of ["champ", "free", "rival"]) for (const id in c[f]) inc(d[f], id, c[f][id]);
+      for (const [m] of pending) { const a = d.match[m.id] || (d.match[m.id] = [0, 0, 0]); a[outc[m.id]] += v; }
+    }
     if (agg.split && split) { const ps = agg.ptsSplit[pts] || (agg.ptsSplit[pts] = [0, 0, 0, 0, 0]); for (let i = 0; i < 4; i++) ps[i] += split[i]; ps[4]++; }
     if (combo) { combo.n++; combo.w += w; }
     for (const [m] of pending) { const x = agg.match[m.id][outc[m.id]]; x[0]++; x[1] += w; }
@@ -1865,7 +1916,7 @@ function goalHTML(G) {
   // Caminos
   const routes = Object.entries(agg.routes).map(([k, v]) => [k, v / agg.n]).filter(r => r[1] > 0.00005).sort((a, b) => b[1] - a[1]).slice(0, 8);
   const routesCard = `<div class="gcard"><h4>Caminos</h4><p class="hint">Por dónde llega cuando lo logra (sobre el total de escenarios).</p>
-    ${routes.length ? `<ul class="list">${routes.map(([k, v]) => `<li><span>${esc(k)}</span><b class="v">${pctP(v)}</b><span class="bar"><i style="width:${Math.max(1, v / Math.max(P, 1e-9) * 100)}%"></i></span></li>`).join("")}</ul>` : `<p class="hint">No aparece ningún camino en las simulaciones.</p>`}</div>`;
+    ${routes.length ? routeList(routes, P) : `<p class="hint">No aparece ningún camino en las simulaciones.</p>`}</div>`;
   // Puntos
   const sp = k => { const x = agg.ptsSplit[k]; return x ? [x[0] / x[4], x[1] / x[4], x[2] / x[4], x[3] / x[4]] : null; };
   const ptsCard = agg.split
@@ -1954,7 +2005,7 @@ function goalHTMLPts(G) {
     <span class="verdict ${vc}">${verdict}</span>${splitBlock(agg)}</div></div>`;
   const routes = Object.entries(agg.routes).map(([k, v]) => [k, v / agg.n]).filter(r => r[1] > 0.00005).sort((a, b) => b[1] - a[1]).slice(0, 8);
   const routesCard = `<div class="gcard"><h4>Caminos</h4><p class="hint">Cómo llega cuando lo logra, sumando ${ptx(target)}.</p>
-    ${routes.length ? `<ul class="list">${routes.map(([k, v]) => `<li><span>${esc(k)}</span><b class="v">${pctP(v)}</b><span class="bar"><i style="width:${Math.max(1, v / Math.max(P, 1e-9) * 100)}%"></i></span></li>`).join("")}</ul>` : '<p class="hint">No aparece ningún camino.</p>'}</div>`;
+    ${routes.length ? routeList(routes, P) : '<p class="hint">No aparece ningún camino.</p>'}</div>`;
   // Cómo sumar esos puntos
   const own = combos.own;
   const desc = c => own.map((x, i) => { const o = c.outs[i], opp = T(x.home ? x.m.a : x.m.h).n;
@@ -1967,6 +2018,84 @@ function goalHTMLPts(G) {
   return hero + `<div class="goal-grid">${othersCard}<div style="display:grid;gap:16px">${routesCard}${combosCard}</div></div>`;
 }
 
+/* ===================== CAMINOS: EXPLICACIÓN ===================== */
+// Lista de caminos con un botón que abre el detalle de cómo se da cada uno.
+function routeList(routes, P) {
+  return `<ul class="list routes">${routes.map(([k, v]) => `<li><span>${esc(k)}</span><b class="v">${pctP(v)}</b>
+    <button type="button" class="route-btn" data-route="${esc(k)}" title="Cómo se da este camino" aria-label="Cómo se da: ${esc(k)}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>Cómo</button>
+    <span class="bar"><i style="width:${Math.max(1, v / Math.max(P, 1e-9) * 100)}%"></i></span></li>`).join("")}</ul>`;
+}
+// Qué significa el camino según el reglamento (texto fijo según el tipo de camino).
+function routeRule(k, team) {
+  const z = T(team).z, oz = z === "A" ? "B" : "A";
+  let m;
+  const base = k.replace(/^(Libertadores|Sudamericana) · /, "");
+  const prev = / \(fase previa\)$/.test(base) ? " Entra como el último de los que clasifican por la Tabla Anual, así que juega la <b>fase previa</b> de la Libertadores." : "";
+  if ((m = base.match(/^Terminar (\d+)° de la Zona/))) { const n = +m[1];
+    return `Los 8 primeros de cada zona van a los playoffs. Terminando <b>${n}°</b> entra y en octavos cruza con el <b>${9 - n}° de la Zona ${oz}</b> (local el mejor ubicado).`; }
+  if ((m = base.match(/^Entrando (\d+)° de la Zona/))) { const n = +m[1];
+    return `Entra a los playoffs como <b>${n}° de la Zona ${z}</b> y gana los cuatro cruces a partido único: octavos contra el <b>${9 - n}° de la Zona ${oz}</b>, después cuartos, semifinal y final. En cada cruce es local el mejor ubicado; la final es en cancha neutral.`; }
+  if (/^Salir campeón del Clausura/.test(base)) return `Entra a los playoffs (8 primeros de su zona) y gana octavos, cuartos, semifinal y final. El campeón del Clausura tiene lugar fijo en la Libertadores 2027 (fase de grupos), sin importar la Tabla Anual.`;
+  if (/^Por título: /.test(base)) return `Gana la ${esc(base.replace(/^Por título: campeón /, ""))} y eso le da su propio lugar en la Libertadores 2027, sin depender de la Tabla Anual.`;
+  if (/^Por la Copa Argentina/.test(base)) return `No gana la Copa Argentina, pero el campeón ya tenía lugar por otra vía. Entonces la plaza pasa al subcampeón y, si también la tiene, a los semifinalistas (el mejor ubicado en la Tabla Anual).`;
+  if (/^Terminar entre los 3 primeros de la Anual/.test(base)) return `Por la Tabla Anual entran a la Libertadores los 3 mejores que no tengan ya lugar por un título. Terminando entre los 3 primeros entra aunque no se libere nada.${prev}`;
+  if (/^Terminar entre el 4° y el 9°/.test(base)) return `Después de los que van a la Libertadores, los 6 siguientes de la Tabla Anual (sin contar a los que ya tienen lugar por título) van a la Sudamericana. Del 4° al 9° entra aunque no se libere nada.`;
+  if ((m = base.match(/^Terminar (\d+)° en la Anual y que se liberen cupos/))) { const n = +m[1], sud = /^Sudamericana/.test(k), last = sud ? 9 : 3, need = n - last;
+    return `Por la Tabla Anual ${sud ? "van a la Sudamericana los 6 que siguen a los de Libertadores" : "entran a la Libertadores los 3 mejores"} que no tengan ya lugar por un título (Apertura, Clausura, Copa Argentina, Libertadores o Sudamericana). Terminando <b>${n}°</b>, necesita que <b>${need === 1 ? "al menos 1 de los que terminan arriba" : `al menos ${need} de los que terminan arriba`}</b> ya ${need === 1 ? "esté clasificado" : "estén clasificados"} por título: esos lugares se liberan y bajan hasta él.${prev}`; }
+  if (/^Terminar 1° de la zona/.test(base)) return `Termina primero de la Zona ${z} al cabo de la fecha 16.`;
+  if (/^Terminar 1° de la Tabla Anual/.test(base)) return `Termina primero de la Tabla Anual (Apertura + Clausura, sin contar playoffs): es el Campeón de Liga.`;
+  if ((m = base.match(/^Terminar (\d+)° en la Anual$/))) return `Termina <b>${m[1]}°</b> en la Tabla Anual y no queda con el peor promedio: no desciende. Descienden el último de la Anual y el peor promedio (si es el mismo equipo, el anteúltimo de la Anual).`;
+  return "";
+}
+function openRoute(k) {
+  const G = goalRes; if (!G) return;
+  const d = G.agg.rd[k]; if (!d || !d.w) return;
+  const team = G.team, t = T(team), n = G.agg.n, P = d.w / n;
+  const top = (o, lim) => Object.entries(o).map(([key, v]) => [key, v / d.w]).filter(x => x[1] >= 0.005).sort((a, b) => b[1] - a[1]).slice(0, lim);
+  const row = (label, v) => `<li><span>${label}</span><b>${pctP(v)}</b><span class="bar"><i style="width:${Math.max(1, v * 100)}%"></i></span></li>`;
+  const sec = (title, hint, body) => body ? `<section><h5>${title}</h5>${hint ? `<p class="hint">${hint}</p>` : ""}${body}</section>` : "";
+  // Sus partidos: combinaciones de resultados más comunes en este camino.
+  const ownTxt = seq => G.mine.map((m, i) => { const o = +seq[i], home = m.h === team, r = home ? o : 2 - o, opp = T(home ? m.a : m.h).n;
+    return `<span class="res r${r}">${r === 0 ? "G" : r === 1 ? "E" : "P"}</span> ${home ? "vs" : "en cancha de"} ${esc(opp)}`; }).join("<br>");
+  const ownBody = G.mine.length ? `<ul class="rlist">${top(d.own, 4).map(([seq, v]) => row(ownTxt(seq), v)).join("")}</ul>` : "";
+  const recBody = `<p class="kv">${top(d.rec, 3).map(([r, v]) => { const [W, D, L] = r.split("-"); return `<span><b>${W}G ${D}E ${L}P</b> ${pctP(v)}</span>`; }).join("")}</p>`;
+  // Quiénes le liberan el lugar
+  // Un renglón por equipo, con los títulos por los que libera (el más frecuente primero).
+  const byTeam = {};
+  for (const [key, v] of Object.entries(d.free)) { const [id, why] = key.split("|"), x = byTeam[id] || (byTeam[id] = { v: 0, why: [] }); x.v += v; x.why.push([why.replace(/^campeón /, "").replace(/^Copa (Libertadores|Sudamericana)/, "$1"), v]); }
+  const free = Object.entries(byTeam).map(([id, x]) => [id, x.v / d.w, x.why.sort((a, b) => b[1] - a[1]).map(w => w[0])]).filter(x => x[1] >= 0.005).sort((a, b) => b[1] - a[1]).slice(0, 8)
+    .map(([id, v, why]) => row(`${tn(id)} <small>por ${esc(why.join(", ").replace(/, ([^,]*)$/, " o $1"))}</small>`, v)).join("");
+  const champ = top(d.champ, 5).map(([id, v]) => row(tn(id), v)).join("");
+  const rival = top(d.rival, 4).map(([id, v]) => row(tn(id), v)).join("");
+  const pos = /Anual/.test(k) && !/^(Libertadores · |Sudamericana · )?Terminar (\d+)°/.test(k) ? top(d.pos, 5).map(([p, v]) => row(`${p}° en la Anual`, v)).join("") : "";
+  // Otros resultados que más se repiten en este camino comparado con lo normal.
+  const lifts = [];
+  for (const m of MATCHES) {
+    const c = d.match[m.id]; if (!c || m.h === team || m.a === team) continue;
+    for (let o = 0; o < 3; o++) { const cond = c[o] / d.w, baseP = G.agg.match[m.id][o][0] / n; if (cond - baseP >= 0.04) lifts.push({ m, o, cond, baseP, d: cond - baseP }); }
+  }
+  lifts.sort((a, b) => b.d - a.d);
+  const sent = (m, o) => o === 0 ? `Gana <b>${esc(T(m.h).n)}</b> a ${esc(T(m.a).n)}` : o === 2 ? `Gana <b>${esc(T(m.a).n)}</b> en cancha de ${esc(T(m.h).n)}` : `Empatan ${esc(T(m.h).n)} y ${esc(T(m.a).n)}`;
+  const liftBody = lifts.length ? `<ul class="lifts">${lifts.slice(0, 6).sort((a, b) => a.m.f - b.m.f).map(x => `<li><span>${sent(x.m, x.o)} <small>fecha ${x.m.f}</small></span><span class="cmp"><b>${pctP(x.cond)}</b> <small>en este camino · ${pctP(x.baseP)} en general</small></span></li>`).join("")}</ul>` : "";
+  const html = `<div class="rd-head"><div><div class="rd-kick">${tn(team)}</div><h3>${esc(k)}</h3></div>
+      <button type="button" class="btn ghost icon rd-close" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <p class="rd-p">Pasa en <b>${pctP(P)}</b> de los escenarios simulados.</p>
+    ${sec("Qué significa", "", `<p class="rd-rule">${routeRule(k, team)}</p>`)}
+    ${G.mine.length ? sec(`Lo que tiene que hacer ${esc(t.n)}`, "Cómo le va en sus partidos cuando llega por este camino.", recBody + ownBody) : ""}
+    ${sec("Rival en octavos", "Con quién cruza más seguido cuando sale campeón entrando así.", rival ? `<ul class="rlist">${rival}</ul>` : "")}
+    ${sec("Quiénes le liberan el lugar", "Equipos que terminan arriba en la Anual pero ya tienen plaza por un título (cuántas veces pasa en este camino).", free ? `<ul class="rlist">${free}</ul>` : "")}
+    ${sec("Campeón del Clausura en este camino", "Quién gana los playoffs cuando se da este camino: si es alguien de arriba en la Anual, libera un lugar.", /campeón del Clausura/.test(k) ? "" : champ ? `<ul class="rlist">${champ}</ul>` : "")}
+    ${sec("Puesto en la Anual", "", pos ? `<ul class="rlist">${pos}</ul>` : "")}
+    ${sec("Otros resultados que lo ayudan", "Resultados que se dan bastante más seguido en este camino que en general.", liftBody)}`;
+  let dlg = document.getElementById("route-dlg");
+  if (!dlg) {
+    dlg = document.createElement("dialog"); dlg.id = "route-dlg"; dlg.className = "route-dlg"; document.body.append(dlg);
+    dlg.addEventListener("click", e => { if (e.target === dlg || e.target.closest(".rd-close")) dlg.close(); });
+  }
+  dlg.innerHTML = `<div class="rd-body">${html}</div>`;
+  dlg.showModal();
+}
 // Reparto Libertadores / Sudamericana / sin copa, para que el % de una copa no se lea como "queda afuera".
 function splitBlock(agg) {
   if (!agg.split || !agg.n) return "";
@@ -2152,6 +2281,7 @@ document.addEventListener("click", e => {
     projection = null; save(); renderTables(); return;
   }
   if (e.target.closest("#btn-theme")) return toggleTheme();
+  const rb = e.target.closest("[data-route]"); if (rb) { openRoute(rb.dataset.route); return; }
   const gb = e.target.closest("[data-goal]"); if (gb) { goalKind = gb.dataset.goal; renderGoal(); return; }
   if (e.target.closest("#btn-focus-off")) { focusTeam = ""; save(); renderFocusSelect(); renderFixture(); applyFocus(); return; }
   if (e.target.closest("#btn-focus-proj")) { renderProjection(); applyFocus(); return; }
