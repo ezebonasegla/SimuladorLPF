@@ -588,7 +588,7 @@ const CUPS = [
          { id: "lib2", h: "pal", a: "flu", agg: 1, info: "Ida: Fluminense 1-2 Palmeiras. Vuelta en casa de Palmeiras: a Fluminense le sirve ganar por 2 (por 1, penales)." }],
     fin: "lib3" },
   { id: "sud", n: "Copa Sudamericana", meta: "Final: sábado 21/11 en Barranquilla. El campeón va a la Libertadores 2027.",
-    sf: [{ id: "sud1", h: "vas", a: "boc", agg: 1, info: "Ida: Boca 0-1 Vasco. Vuelta: martes 20/10 en Río. Boca necesita ganar." },
+    sf: [{ id: "sud1", h: "vas", a: "boc", agg: 1, won: "boc", info: "Jugada. Ida: Boca 0-1 Vasco · Vuelta: Vasco 1-3 Boca · Global 3-2: Boca a la final." },
          { id: "sud2", h: "ctq", a: "cam", agg: -3, info: "Ida: Atlético Mineiro 3-0 City Torque. Vuelta en Montevideo: City Torque necesita ganar por 4 (por 3, penales)." }],
     fin: "sud3" },
   { id: "ca", n: "Copa Argentina", meta: "Partido único en cancha neutral. Final: miércoles 2/12. El campeón va a la Libertadores 2027.",
@@ -892,6 +892,7 @@ function advanceProbRaw(hId, aId, neutral, cups) {
 }
 // Llave de copa: ida y vuelta con resultado de ida (agg), o partido único neutral.
 function cupTieProb(tie, h, a) {
+  if (tie.won) return tie.won === h ? 1 : 0;
   // Igual que en playoffs, en eliminación directa las diferencias se achican.
   const sh = cupStr(h), sa = cupStr(a), mid = (sh + sa) / 2, half = KO_SHRINK * (sh - sa) / 2;
   if (tie.neutral || h !== tie.h) { const m = modelS(mid + half, mid - half, true); return m.ph + m.pd * 0.5; }
@@ -903,7 +904,8 @@ function cupTieProb(tie, h, a) {
 function resolveCups(pick) {
   const out = { ties: [], champ: {}, finalists: new Set() };
   for (const c of CUPS) {
-    const w = c.sf.map(t => { const tt = Object.assign({}, t, { cup: c.id }); tt.w = pick(tt, tt.h, tt.a); out.ties.push(tt); return tt.w; });
+    // "won": llave ya jugada, el ganador queda fijo.
+    const w = c.sf.map(t => { const tt = Object.assign({}, t, { cup: c.id }); tt.w = t.won || pick(tt, tt.h, tt.a); out.ties.push(tt); return tt.w; });
     const fin = { id: c.fin, cup: c.id, h: w[0] || null, a: w[1] || null, neutral: true, info: "Final" };
     fin.w = fin.h && fin.a ? pick(fin, fin.h, fin.a) : null;
     out.ties.push(fin);
@@ -1280,6 +1282,8 @@ function renderCups(cups) {
   const tieBox = t => {
     const row = (id, other) => {
       if (!id) return `<button type="button" disabled><span class="seed"></span><span class="nm">A definir</span><span class="pr"></span></button>`;
+      if (t.won) return `<button type="button" class="${t.won === id ? "win" : "lose"}" disabled>
+        <span class="seed">${isLocal(id) ? "ARG" : ""}</span><span class="nm">${tn(id)}</span><span class="pr">${t.won === id ? "Pasó" : "Eliminado"}</span></button>`;
       const p = other ? (id === t.h ? cupTieProb(t, t.h, t.a) : 1 - cupTieProb(t, t.h, t.a)) : null;
       const cls = t.w ? (t.w === id ? "win" : "lose") : "";
       return `<button type="button" class="${cls}" data-cuptie="${t.id}" data-team="${id}" ${other ? "" : "disabled"}>
