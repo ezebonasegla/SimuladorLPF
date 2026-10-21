@@ -256,7 +256,11 @@ tr.in td.pos { color: var(--accent); }
 .pct span { position: relative; }
 
 /* Escudos (dibujados con los colores de cada club) */
-.crest { width: 1.15em; height: 1.35em; flex: none; vertical-align: -0.28em; margin-right: 6px; }
+.crest { display: inline-block; position: relative; width: 1.15em; height: 1.35em; flex: none; vertical-align: -0.28em; margin-right: 6px; }
+.crest-svg { display: block; width: 100%; height: 100%; }
+.crest-img { position: absolute; left: 50%; top: 50%; width: 1.4em; height: 1.4em; transform: translate(-50%, -50%); object-fit: contain; opacity: 0; }
+.crest.ok .crest-img { opacity: 1; }
+.crest.ok .crest-svg { visibility: hidden; }
 .team-n .crest { margin: 0 6px; }
 .tie .nm, .team-n { display: block; }
 
@@ -648,6 +652,26 @@ const grand = id => GRANDEZA[id] ?? 0.2;
 const G_LEAGUE = 0.08, G_KO = 0.42;
 const koBonus = id => G_KO * (grand(id) - 0.4);
 
+/* Escudos oficiales: imágenes de football-logos.cc. Si no cargan (sin conexión), queda la insignia dibujada. */
+const LOGO_BASE = "https://assets.football-logos.cc/logos";
+const LOGO = {
+  ald: "argentina/aldosivi.6a2fb242", arg: "argentina/argeninos-juniors.b2780d67", atu: "argentina/atletico-tucuman.10ddf6b8",
+  ban: "argentina/banfield.b34d0f03", bar: "argentina/barracas-central.20586205", bel: "argentina/belgrano.6b246ab5",
+  boc: "argentina/boca-juniors.ea01d4a3", hur: "argentina/ca-huracan.97fa4461", cco: "argentina/central-cordoba.2ebcc2c9",
+  pla: "argentina/club-atletico-platanense.cb5c762c", dyj: "argentina/defensa-y-justicia.1a8311a2", rie: "argentina/deportivo-riestra.b03ac726",
+  est: "argentina/estudiantes-de-la-plata.51f54156", glp: "argentina/gimnasia-lp.953a0a50", ind: "argentina/independiente.fd959dab",
+  irv: "argentina/independiente-rivadavia.55b639a5", ins: "argentina/instituto-cordoba.186b2667", lan: "argentina/lanus.479fce96",
+  new: "argentina/newells-old-boys.b60acb78", rac: "argentina/racing-club.b31447c6", riv: "argentina/river-plate.01acb6fc",
+  cen: "argentina/rosario-central.028c4599", slo: "argentina/san-lorenzo-de-almagro.55e6a0bf", sar: "argentina/sarmiento.cce0f83b",
+  tal: "argentina/talleres.d1c887d7", tig: "argentina/tigre.c5af188f", uni: "argentina/union.4d3d12f2",
+  vel: "argentina/velez-sarsfield.1f962690", gim: "argentina/gimnasia-y-esgrima.841ab8fe", erc: "argentina/estudiantes-de-rio-cuarto.93c28336",
+  fla: "brazil/flamengo.0ec2cd2d", pal: "brazil/palmeiras.cd04fee3", flu: "brazil/fluminense.7b0d1eec",
+  vas: "brazil/vasco-da-gama.2d89e86d", cam: "brazil/atletico-mineiro.da10887f", ctq: "uruguay/montevideo-city-torque.8b2ca0dc",
+};
+const logoUrl = id => { const l = LOGO[id]; if (!l) return ""; const [c, f] = l.split("/"); return `${LOGO_BASE}/${c}/512x512/${f}.png`; };
+// La imagen se muestra recién cuando carga; si falla se borra y queda la insignia
+document.addEventListener("load", e => { if (e.target.classList?.contains("crest-img")) e.target.parentNode.classList.add("ok"); }, true);
+document.addEventListener("error", e => { if (e.target.classList?.contains("crest-img")) e.target.remove(); }, true);
 /* Escudos: no son los oficiales, son insignias con los colores y el diseño de cada camiseta.
    p: s = lisa, v = bastones, h = franja horizontal, d = banda diagonal, m = mitades, c = V, r = rayas horizontales */
 const CREST = {
@@ -674,7 +698,9 @@ function crest(id) {
   if (pt === "m") fill += `<rect x="12" width="12" height="28" fill="${b}"/>`;
   if (pt === "c") fill += `<path d="M2 3 L12 18 L22 3 L22 8 L12 23 L2 8z" fill="${b}"/>`;
   if (pt === "s" && b) fill += `<rect x="5" y="9" width="14" height="3" fill="${b}"/>`;
-  return `<svg class="crest" viewBox="0 0 24 28" aria-hidden="true"><g clip-path="url(#crest-shield)">${fill}</g><path d="${SHIELD}" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width="1.2"/></svg>`;
+  const svg = `<svg class="crest-svg" viewBox="0 0 24 28" aria-hidden="true"><g clip-path="url(#crest-shield)">${fill}</g><path d="${SHIELD}" fill="none" stroke="currentColor" stroke-opacity=".45" stroke-width="1.2"/></svg>`;
+  const u = logoUrl(id);
+  return `<span class="crest">${svg}${u ? `<img class="crest-img" src="${u}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : ""}</span>`;
 }
 // Nombre con escudo
 const tn = id => `<span class="tn" data-t="${id}">${crest(id)}${esc(T(id).n)}</span>`;
