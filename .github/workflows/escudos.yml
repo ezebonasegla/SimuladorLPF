@@ -3,6 +3,8 @@ name: Bajar escudos
 # para que la página los sirva desde el mismo sitio y se puedan usar al exportar la imagen.
 on:
   workflow_dispatch:
+  push:
+    paths: [".github/workflows/escudos.yml"]
 permissions:
   contents: write
 jobs:
