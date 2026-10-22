@@ -234,9 +234,11 @@ tr.in td.pos { color: var(--accent); }
 .po-row:last-of-type { border-bottom: 0; }
 .po-row.win { background: var(--accent-soft); }
 .tie button {
-  display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 6px; align-items: center; flex: 1; min-width: 0; text-align: left;
-  background: none; border: 0; padding: 7px 4px 7px 9px;
+  display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 6px; align-items: center; width: 100%; text-align: left;
+  background: none; border: 0; padding: 7px 9px; border-bottom: 1px solid var(--line);
 }
+.tie button:last-child { border-bottom: 0; }
+.po-row button { flex: 1; width: auto; min-width: 0; padding-right: 4px; border-bottom: 0; }
 .po-row input { width: 30px; height: 28px; flex: none; text-align: center; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); color: var(--ink);
   font: 700 16px/1 var(--font-display); }
 .po-row input.po-p { width: 30px; font-size: 13px; color: var(--muted); border-style: dashed; }
@@ -664,7 +666,7 @@ const CUP_BOOST = { est: { v: 0.35, txt: "rinde más en copa que en la liga, don
 const CUPS = [
   { id: "lib", n: "Copa Libertadores", meta: "Final: sábado 28/11 en el Centenario de Montevideo. El campeón va a la Libertadores 2027.",
     sf: [{ id: "lib1", h: "fla", a: "est", agg: 0, info: "Ida: Estudiantes 0-0 Flamengo. Vuelta: jueves 22/10 en el Maracaná." },
-         { id: "lib2", h: "pal", a: "flu", agg: 1, info: "Ida: Fluminense 1-2 Palmeiras. Vuelta en casa de Palmeiras: a Fluminense le sirve ganar por 2 (por 1, penales)." }],
+         { id: "lib2", h: "pal", a: "flu", agg: 1, won: "pal", info: "Jugada. Ida: Fluminense 1-2 Palmeiras · Vuelta: Palmeiras 0-1 Fluminense · Global 2-2 y Palmeiras ganó 5-3 por penales: Palmeiras a la final." }],
     fin: "lib3" },
   { id: "sud", n: "Copa Sudamericana", meta: "Final: sábado 21/11 en Barranquilla. El campeón va a la Libertadores 2027.",
     sf: [{ id: "sud1", h: "vas", a: "boc", agg: 1, won: "boc", info: "Jugada. Ida: Boca 0-1 Vasco · Vuelta: Vasco 1-3 Boca · Global 3-2: Boca a la final." },
