@@ -385,6 +385,7 @@ tr.in td.pos { color: var(--accent); }
 .ptable.full tr.grp th { padding: 9px 3px 4px; }
 .ptable.full td.num { text-align: center; font: 600 16px/1 var(--font-display); }
 .ptable.full .pill { height: 32px; font-size: 17px; }
+#pane-promedios tr.gone td { color: var(--muted); opacity: .75; }
 .proj-note { margin: 10px 2px 0; color: var(--muted); font-size: 12.5px; }
 
 /* ¿Qué tiene que pasar? */
@@ -1348,31 +1349,61 @@ function renderAnnual(st, br, cups) {
       <tbody>${rows}</tbody></table></div>
     <div class="legend"><span style="--c:var(--lib)">Libertadores (grupos)</span><span style="--c:var(--pre)">Libertadores fase previa</span><span style="--c:var(--sud)">Sudamericana</span><span style="--c:var(--danger)">Descenso: último de la Anual y peor promedio (si es el mismo, el anteúltimo de la Anual)</span></div>`;
 }
+// Promedio que arrastraría cada equipo al empezar 2027: se va la temporada 2024 y quedan 2025 + 2026.
+const PJ_2025 = 32; // Apertura 16 + Clausura 16
+const pj2025 = t => Math.min(PJ_2025, (t.pr || [0, 0])[1]);
+function promedio2027(row) { const t = T(row.id), py = t.py || [0, 0]; return ((+py[1] || 0) + row.pts) / Math.max(1, pj2025(t) + row.pj); }
+let promYear = "2026";
 function renderPromedios(st) {
-  const rel = new Set(relegated(st)), last = st.AN[st.AN.length - 1].id;
-  const rows = st.AN.slice().sort((a, b) => promedio(b) - promedio(a) || b.pts - a.pts);
-  const worst = rows[rows.length - 1].id, base = baseOrderProm();
-  const html = rows.map((r, i) => {
-    const t = T(r.id), pr = t.pr || [0, 0], py = t.py || ["–", "–"], pos = i + 1;
+  const rel = new Set(relegated(st)), last = st.AN[st.AN.length - 1].id, next = promYear === "2027";
+  const prom = next ? promedio2027 : promedio;
+  const rows = st.AN.slice().sort((a, b) => prom(b) - prom(a) || b.pts - a.pts);
+  const worst = rows[rows.length - 1].id, base = next ? baseOrderProm2027() : baseOrderProm();
+  let pos = 0;
+  const gone = []; // 2027: los que descienden este año van al final, sin puesto
+  const html = rows.map(r => {
+    const t = T(r.id), pr = t.pr || [0, 0], py = t.py || ["–", "–"];
     let tag = "";
+    if (next) {
+      // En 2027 no juegan los que descienden este año: se muestran aparte, sin puesto.
+      if (rel.has(r.id)) return gone.push(`<tr class="gone"><td class="pos">–</td><td class="l team">${tn(r.id)}<span class="tag desc">Desciende en 2026</span></td>
+        <td class="pts">${prom(r).toFixed(3).replace(".", ",")}</td><td>${(+py[1] || 0) + r.pts}</td><td>${pj2025(t) + r.pj}</td><td class="num">${pj2025(t) ? py[1] : "–"}</td><td>${r.pts}</td></tr>`), "";
+      pos++;
+      return `<tr>
+        <td class="pos">${pos}</td>
+        <td class="l team">${tn(r.id)}${moveTag(r.id, pos, base)}${pj2025(t) ? "" : '<span class="tag">solo 2026</span>'}</td>
+        <td class="pts">${prom(r).toFixed(3).replace(".", ",")}</td>
+        <td>${(+py[1] || 0) + r.pts}</td><td>${pj2025(t) + r.pj}</td>
+        <td class="num">${pj2025(t) ? py[1] : "–"}</td>
+        <td>${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
+      </tr>`;
+    }
+    pos++;
     if (r.id === worst) tag = `<span class="tag desc">${r.id === last ? "Peor promedio y último de la Anual" : "Desciende por promedio"}</span>`;
     else if (rel.has(r.id)) tag = `<span class="tag desc">Desciende por Tabla Anual</span>`;
     return `<tr class="${rel.has(r.id) ? "rowband-desc" : ""}">
       <td class="pos">${pos}</td>
       <td class="l team">${tn(r.id)}${moveTag(r.id, pos, base)}${tag}</td>
-      <td class="pts">${promedio(r).toFixed(3).replace(".", ",")}</td>
+      <td class="pts">${prom(r).toFixed(3).replace(".", ",")}</td>
       <td>${pr[0] + r.pts}</td><td>${pr[1] + r.pj}</td>
       <td class="num">${py[0]}</td><td class="num">${py[1]}</td>
       <td>${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
     </tr>`;
   }).join("");
+  const seg = `<div class="seg" role="group" aria-label="Temporada"><button type="button" data-prom="2026" aria-pressed="${!next}">Este año (2026)</button><button type="button" data-prom="2027" aria-pressed="${next}">El año que viene (2027)</button></div>`;
   document.getElementById("pane-promedios").innerHTML = `
-    <div class="panel-h"><h2>Promedios</h2><span class="sub">Temporadas 2024, 2025 y 2026 · puntos ÷ partidos jugados</span></div>
-    <p class="rule">Desciende el peor promedio y el último de la Tabla Anual. Si son el mismo equipo, desciende también el anteúltimo de la Anual. Los puntos de 2026 suman lo que cargues o simules.</p>
+    <div class="panel-h"><h2>Promedios</h2>${seg}</div>
+    ${next
+      ? `<p class="rule"><b>Cómo arrancaría el promedio de 2027:</b> sale la temporada 2024 y quedan 2025 + 2026 (puntos ÷ partidos). Los puntos de 2026 suman lo que cargues o simules. Los que descienden este año no juegan 2027 y van al final; los que ascienden de la Primera Nacional arrancan sin promedio y no están en la tabla. «Solo 2026»: equipos que no jugaron 2025 en Primera.</p>`
+      : `<p class="rule">Temporadas 2024, 2025 y 2026 · puntos ÷ partidos jugados. Desciende el peor promedio y el último de la Tabla Anual. Si son el mismo equipo, desciende también el anteúltimo de la Anual. Los puntos de 2026 suman lo que cargues o simules.</p>`}
     <div class="tbl-wrap"><table>
-      <thead><tr><th>#</th><th class="l">Equipo</th><th>Prom.</th><th>Pts</th><th>PJ</th><th>2024</th><th>2025</th><th>2026</th></tr></thead>
-      <tbody>${html}</tbody></table></div>
-    <div class="legend"><span style="--c:var(--danger)">Desciende</span><span>▲▼ cambio respecto a los promedios actuales</span><span>+N puntos sumados en lo que falta</span></div>`;
+      <thead><tr><th>#</th><th class="l">Equipo</th><th>Prom.</th><th>Pts</th><th>PJ</th>${next ? "" : "<th>2024</th>"}<th>2025</th><th>2026</th></tr></thead>
+      <tbody>${html}${gone.join("")}</tbody></table></div>
+    <div class="legend">${next ? "" : '<span style="--c:var(--danger)">Desciende</span>'}<span>▲▼ cambio respecto a los promedios ${next ? "2027 con la tabla actual" : "actuales"}</span><span>+N puntos sumados en lo que falta</span></div>`;
+}
+function baseOrderProm2027() {
+  const rows = teams.map(t => emptyRow(t, "an"));
+  return rows.sort((a, b) => promedio2027(b) - promedio2027(a) || b.pts - a.pts).map(r => r.id);
 }
 function baseOrderProm() {
   const rows = teams.map(t => emptyRow(t, "an"));
@@ -2442,6 +2473,8 @@ function fillRandom() {
 
 document.addEventListener("click", e => {
   const tab = e.target.closest(".tab"); if (tab) return showTab(tab.dataset.tab);
+  const py = e.target.closest("[data-prom]");
+  if (py) { promYear = py.dataset.prom; renderPromedios(standings(results)); applyFocus(); return; }
   const pc = e.target.closest("[data-proj]");
   if (pc) { projCompact = pc.dataset.proj === "compact"; save(); renderProjection(); applyFocus(); return; }
   const chip = e.target.closest(".chip"); if (chip) { fechaFilter = chip.dataset.f; renderChips(); renderFixture(); return; }
