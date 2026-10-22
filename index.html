@@ -1525,7 +1525,6 @@ function projJob(N) {
   const step = k => { const end = Math.min(N, done + k); for (; done < end; done++) simOnce(); return done >= N; };
   const finish = () => {
     for (const id of ids) for (const k in acc[id]) acc[id][k] /= N;
-    for (const id of ids) acc[id].cupT = (acc[id].libT || 0) + (acc[id].sudT || 0) + (acc[id].caT || 0);
     projection = { acc, N, at: new Date() };
   };
   function simOnce() {
@@ -1537,6 +1536,8 @@ function projJob(N) {
     acc[st.AN[0].id].liga++; // Campeón de Liga: 1° de la Tabla Anual (art. 24.2)
     const cups = randomCups();
     for (const k of ["lib", "sud", "ca"]) if (cups.champ[k] && acc[cups.champ[k]]) acc[cups.champ[k]][k + "T"] = (acc[cups.champ[k]][k + "T"] || 0) + 1;
+    // "Gana alguna copa": una vez por simulación aunque gane dos (no se suman las chances de cada copa).
+    for (const id of new Set(["lib", "sud", "ca"].map(k => cups.champ[k]))) if (id && acc[id]) acc[id].cupT = (acc[id].cupT || 0) + 1;
     const an = st.AN.map(r => r.id);
     // Playoffs calculados de forma exacta (no sorteados): así hasta un 8° tiene su chance real de campeón.
     for (const [champ, pc] of bracketDist(st, cups)) {
@@ -1579,17 +1580,17 @@ function renderProjection() {
       </div>
     </div>
     ${projTable()}
-    <p class="proj-note">Cuanto más fuerte el color, más probable. «Libertadores directo» es fase de grupos; «Lib. fase previa» es el último que entra por la Tabla Anual. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana). Las chances chicas van con un decimal; «—» es que no pasó en ninguna simulación.</p>
+    <p class="proj-note">Cuanto más fuerte el color, más probable. «Libertadores directo» es fase de grupos; «Lib. fase previa» es el último que entra por la Tabla Anual. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana). Las chances chicas van con un decimal; «—» es que no pasó en ninguna simulación.${projCompact ? "" : " «Gana alguna copa» es la chance de ganar la Libertadores, la Sudamericana o la Copa Argentina de este año (pasando el mouse se ve cada una)."}</p>
   </div>`;
 }
 const heatAlpha = v => Math.round(Math.max(0.07, Math.min(1, Math.sqrt(v))) * 100);
 function projTable() {
   const { acc } = projection;
   // Mapa de calor: cuanto más alto el %, más fuerte el color; números grandes. Un color por columna.
-  const heat = (v, c) => {
+  const heat = (v, c, title) => {
     if (v <= 1e-9) return `<td class="hm"><div class="pill nil">—</div></td>`;
     const a = heatAlpha(v);
-    return `<td class="hm"><div class="pill${a >= 74 ? " hi" : ""}" style="--c:${c};--a:${a}%">${pctP(v)}</div></td>`;
+    return `<td class="hm"${title ? ` title="${esc(title)}"` : ""}><div class="pill${a >= 74 ? " hi" : ""}" style="--c:${c};--a:${a}%">${pctP(v)}</div></td>`;
   };
   const team = (t, i) => `<td class="rk">${i + 1}</td><td class="l team">${tn(t.id)}<span class="zb">${t.z}</span></td>`;
   if (projCompact) {
@@ -1610,14 +1611,14 @@ function projTable() {
   const FULL = [["Playoffs", t => acc[t].po, "var(--accent)"], ["1° zona", t => acc[t].first, "var(--accent)"], ["Campeón", t => acc[t].champ, "var(--champ)"],
     ["Campeón de Liga", t => acc[t].liga, "var(--liga)"], ["Desc.", t => acc[t].desc, "var(--danger)"],
     ["Lib. directo", t => acc[t].lib - acc[t].pre, "var(--lib)"], ["Lib. fase previa", t => acc[t].pre, "var(--pre)"], ["Sudamericana", t => acc[t].sud, "var(--sud)"],
-    ["Gana copa", t => acc[t].cupT || 0, "var(--lib)"]];
+    ["Gana alguna copa", t => acc[t].cupT || 0, "var(--lib)", t => ["libT", "sudT", "caT"].map((k, i) => acc[t][k] ? `${["Libertadores", "Sudamericana", "Copa Argentina"][i]} ${pctP(acc[t][k])}` : "").filter(Boolean).join(" · ")]];
   return `<div class="tbl-wrap ptable heat full"><table class="fixed">
       <colgroup><col class="c-rk"><col class="c-team"><col class="c-pts">${"<col class=\"c-pc\">".repeat(FULL.length)}</colgroup>
       <thead>
-        <tr class="grp"><th colspan="3"></th><th colspan="3">Clausura</th><th colspan="2">Tabla Anual</th><th colspan="4">Copas 2027</th></tr>
+        <tr class="grp"><th colspan="3"></th><th colspan="3">Clausura</th><th colspan="2">Tabla Anual</th><th colspan="3">Copas 2027</th><th>Copas 2026</th></tr>
         <tr><th></th><th class="l">Equipo</th><th>Pts Anual</th>${FULL.map(h => `<th><i style="background:${h[2]}"></i>${h[0]}</th>`).join("")}</tr>
       </thead>
-      <tbody>${rows.map((t, i) => `<tr>${team(t, i)}<td class="num">${acc[t.id].pts.toFixed(1)}</td>${FULL.map(h => heat(h[1](t.id), h[2])).join("")}</tr>`).join("")}</tbody>
+      <tbody>${rows.map((t, i) => `<tr>${team(t, i)}<td class="num">${acc[t.id].pts.toFixed(1)}</td>${FULL.map(h => heat(h[1](t.id), h[2], h[3] && h[3](t.id))).join("")}</tr>`).join("")}</tbody>
     </table></div>`;
 }
 // Las probabilidades se recalculan solas un momento después del último cambio.
