@@ -110,7 +110,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
 /* Tablas a un ancho cómodo de leer, centradas */
-#pane-zona-a, #pane-zona-b, #pane-anual, #pane-promedios { max-width: 1080px; margin-inline: auto; }
+#pane-zona-a, #pane-zona-b, #pane-anual { max-width: 1080px; margin-inline: auto; }
+#pane-promedios { max-width: 800px; margin-inline: auto; }
+#pane-promedios td.team { width: 1%; white-space: nowrap; padding-right: 24px; }
 /* Partidos: en pantallas anchas, los partidos de cada grupo en grilla */
 .mgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr)); gap: 6px 10px; }
 .mgrid .match { margin-bottom: 0; }
