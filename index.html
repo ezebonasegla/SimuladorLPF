@@ -225,16 +225,25 @@ tr.in td.pos { color: var(--accent); }
 .rule { font-size: 13px; color: var(--muted); margin: 0 0 12px; }
 
 /* Playoffs */
-.bracket { display: grid; grid-template-columns: repeat(4, minmax(160px, 1fr)); gap: 14px; overflow-x: auto; padding-bottom: 6px; }
+.bracket { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: 14px; overflow-x: auto; padding-bottom: 6px; }
 .round h3 { font: 700 15px/1 var(--font-display); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 8px; }
 .round { display: flex; flex-direction: column; }
 .round .ties { flex: 1; display: flex; flex-direction: column; justify-content: space-around; gap: 10px; }
 .tie { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.po-row { display: flex; align-items: center; gap: 4px; padding-right: 6px; border-bottom: 1px solid var(--line); }
+.po-row:last-of-type { border-bottom: 0; }
+.po-row.win { background: var(--accent-soft); }
 .tie button {
-  display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 6px; align-items: center; width: 100%; text-align: left;
-  background: none; border: 0; padding: 7px 9px; border-bottom: 1px solid var(--line);
+  display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 6px; align-items: center; flex: 1; min-width: 0; text-align: left;
+  background: none; border: 0; padding: 7px 4px 7px 9px;
 }
-.tie button:last-child { border-bottom: 0; }
+.po-row input { width: 30px; height: 28px; flex: none; text-align: center; border: 1px solid var(--line); border-radius: 6px; background: var(--surface-2); color: var(--ink);
+  font: 700 16px/1 var(--font-display); }
+.po-row input.po-p { width: 30px; font-size: 13px; color: var(--muted); border-style: dashed; }
+.po-row input.ai { border-color: var(--accent); background: var(--accent-soft); }
+.po-sc { font: 700 16px/1 var(--font-display); min-width: 18px; text-align: right; }
+.po-sc small { font-size: 11px; color: var(--muted); margin-left: 2px; }
+.pen-note { font-size: 11.5px; color: var(--muted); padding: 4px 9px; border-top: 1px dashed var(--line); background: var(--surface-2); }
 .tie button:hover:not(:disabled) { background: var(--surface-2); }
 .tie button:disabled { cursor: default; color: var(--muted); }
 .tie .seed { font: 700 13px/1 var(--font-display); color: var(--muted); }
@@ -762,6 +771,7 @@ let teams = structuredClone(BASE_TEAMS);
 let results = {};   // matchId -> [gl, gv]
 let aiFilled = {};  // matchId -> true si lo puso la IA
 let poWinners = {}; // tieId -> teamId
+let poScores = {};  // tieId -> { h, a, g: [gl, gv], p: [pen l, pen v] | null, ai } marcador de la llave de playoffs
 let cupPicks = {};  // tieId de copa -> teamId
 let aiCupPicks = {}; // llaves de copa que eligió la IA (se vuelven a pensar)
 let fechaFilter = "all";
@@ -787,14 +797,14 @@ function load() {
       teams = s.teams;
       teams.forEach(t => { if (!t.pr) t.pr = BASE_TEAMS.find(b => b.id === t.id).pr.slice(); }); // datos guardados antes de sumar promedios
     }
-    results = s.results || {}; aiFilled = s.aiFilled || {}; poWinners = s.poWinners || {}; cupPicks = s.cupPicks || {}; aiCupPicks = s.aiCupPicks || {};
+    results = s.results || {}; aiFilled = s.aiFilled || {}; poWinners = s.poWinners || {}; poScores = s.poScores || {}; cupPicks = s.cupPicks || {}; aiCupPicks = s.aiCupPicks || {};
     if (s.activeTab) activeTab = s.activeTab;
     projCompact = !!s.projCompact;
     if (s.focusTeam && BASE_TEAMS.some(t => t.id === s.focusTeam)) focusTeam = s.focusTeam;
   } catch (e) {}
 }
 function save() {
-  try { localStorage.setItem(LS_KEY, JSON.stringify({ dv: DATA_VERSION, teams, results, aiFilled, poWinners, cupPicks, aiCupPicks, activeTab, focusTeam, projCompact })); } catch (e) {}
+  try { localStorage.setItem(LS_KEY, JSON.stringify({ dv: DATA_VERSION, teams, results, aiFilled, poWinners, poScores, cupPicks, aiCupPicks, activeTab, focusTeam, projCompact })); } catch (e) {}
 }
 const T = id => teams.find(t => t.id === id) || { id, n: EXT[id].n };
 const isLocal = id => teams.some(t => t.id === id);
@@ -985,6 +995,48 @@ function advanceProbRaw(hId, aId, neutral, cups) {
   const mid = (sh + sa) / 2, half = KO_SHRINK * (sh - sa) / 2;
   const m = modelS(mid + half, mid - half, neutral);
   return m.ph + m.pd * 0.5;
+}
+// Marcador de un partido de playoffs: mismo modelo que advanceProb, pero con goles.
+function koModel(hId, aId, neutral, cups) {
+  const sh = teamStr(hId) + koBonus(hId) - playoffFatigue(hId, cups), sa = teamStr(aId) + koBonus(aId) - playoffFatigue(aId, cups);
+  const mid = (sh + sa) / 2, half = KO_SHRINK * (sh - sa) / 2;
+  return modelS(mid + half, mid - half, neutral);
+}
+// Tanda de penales: 5 cada uno alternados (se corta cuando ya no se puede alcanzar) y después muerte súbita.
+function shootout(homeWins) {
+  for (;;) {
+    let h = 0, a = 0, k = 0;
+    const conv = () => Math.random() < 0.76;
+    for (; k < 5; k++) {
+      if (conv()) h++;
+      if (h > a + 5 - k || a > h + 4 - k) break;
+      if (conv()) a++;
+      if (h > a + 4 - k || a > h + 4 - k) break;
+    }
+    while (h === a) { if (conv()) h++; if (conv()) a++; }
+    if ((h > a) === homeWins) return [h, a];
+  }
+}
+// Marcador para una llave cuyo ganador ya se eligió (gana en los 90 o empata y gana por penales).
+function koScoreFor(m, homeWins) {
+  const opts = m.cum.map(([i, j, q]) => [i, j, i === j ? q * 0.5 : (i > j) === homeWins ? q : 0]);
+  let u = Math.random() * opts.reduce((x, o) => x + o[2], 0);
+  for (const [i, j, w] of opts) { u -= w; if (u <= 0) return { g: [i, j], p: i === j ? shootout(homeWins) : null }; }
+  return { g: homeWins ? [1, 0] : [0, 1], p: null };
+}
+// Marcador al azar: si empatan, penales 50/50.
+function koScoreRandom(m) {
+  const [i, j] = sample(m);
+  return { g: [i, j], p: i === j ? shootout(Math.random() < 0.5) : null };
+}
+const isSet = v => v !== "" && v != null;
+// Ganador según el marcador cargado (null si falta algo o si empatan sin penales).
+function scoreWinner(sc) {
+  if (!sc || !isSet(sc.g[0]) || !isSet(sc.g[1])) return null;
+  const [x, y] = sc.g.map(Number);
+  if (x !== y) return x > y ? sc.h : sc.a;
+  if (!sc.p || !isSet(sc.p[0]) || !isSet(sc.p[1]) || +sc.p[0] === +sc.p[1]) return null;
+  return +sc.p[0] > +sc.p[1] ? sc.h : sc.a;
 }
 // Llave de copa: ida y vuelta con resultado de ida (agg), o partido único neutral.
 function cupTieProb(tie, h, a) {
@@ -1314,27 +1366,36 @@ function renderPlayoffs(st, br, cups) {
   const cols = bracketCols(br, cups);
   const filled = MATCHES.filter(m => results[m.id]).length;
   document.getElementById("pane-playoffs").innerHTML = `
-    <div class="panel-h"><h2>Playoffs Clausura</h2><span class="sub">${filled < MATCHES.length ? `Proyección con ${filled}/${MATCHES.length} resultados cargados` : "Con todos los resultados cargados"} · tocá un equipo para hacerlo avanzar</span></div>
+    <div class="panel-h"><h2>Playoffs Clausura</h2><span class="sub">${filled < MATCHES.length ? `Proyección con ${filled}/${MATCHES.length} resultados cargados` : "Con todos los resultados cargados"} · cargá el resultado (y los penales si empatan) o tocá un equipo para hacerlo avanzar</span></div>
     <p class="rule">Partido único, local el mejor ubicado. 1° vs 8° de la otra zona, 2° vs 7°, 3° vs 6°, 4° vs 5°. El % es la chance de pasar la llave (si empatan, penales 50/50). La final es en cancha neutral. Los equipos que llegan a una final de copa en noviembre o diciembre restan un poco por cansancio. La jerarquía (historia ganando títulos) pesa en cada llave.</p>
     <div class="bracket">${cols}</div>
     ${br.champ ? `<div class="champion"><div><div class="lbl">Campeón del Clausura</div><div class="big">${tn(br.champ)}</div></div><span class="cross">Clasifica a la Libertadores por título${br.champ === APERTURA_CHAMP ? " (ya lo tenía por el Apertura, así que no libera un cupo nuevo)" : ""}.</span></div>` : ""}`;
 }
-function bracketCols(br, cups) {
+function bracketCols(br, cups, ro) {
   const names = ["Octavos", "Cuartos", "Semifinales", "Final"];
   return [0, 1, 2, 3].map(round => {
     const ts = br.ties.filter(t => t.round === round);
-    return `<div class="round"><h3>${names[round]}</h3><div class="ties">${ts.map(t => tieHTML(t, br.seeds, cups)).join("")}</div></div>`;
+    return `<div class="round"><h3>${names[round]}</h3><div class="ties">${ts.map(t => tieHTML(t, br.seeds, cups, ro)).join("")}</div></div>`;
   }).join("");
 }
-function tieHTML(t, s, cups) {
-  const row = (id, other) => {
-    if (!id) return `<button type="button" disabled><span class="seed"></span><span class="nm">A definir</span><span class="pr"></span></button>`;
+function tieHTML(t, s, cups, ro) { // ro: solo lectura (Resumen), sin casilleros
+  const sc = poScores[t.id] && poScores[t.id].h === t.h && poScores[t.id].a === t.a ? poScores[t.id] : null;
+  const both = t.h && t.a;
+  const tiedG = sc && isSet(sc.g[0]) && isSet(sc.g[1]) && +sc.g[0] === +sc.g[1];
+  const row = (id, other, side) => {
+    if (!id) return `<div class="po-row"><button type="button" disabled><span class="seed"></span><span class="nm">A definir</span><span class="pr"></span></button></div>`;
     const p = other ? (id === t.h ? advanceProb(t.h, t.a, t.neutral, cups) : 1 - advanceProb(t.h, t.a, t.neutral, cups)) : null;
     const cls = t.w ? (t.w === id ? "win" : "lose") : "";
-    return `<button type="button" class="${cls}" data-tie="${t.id}" data-team="${id}" ${other ? "" : "disabled"}>
-      <span class="seed">${s[id].p}${s[id].z}</span><span class="nm">${tn(id)}</span><span class="pr">${p == null ? "" : bataTag(t.w === id, p) + pct(p)}</span></button>`;
+    const ai = sc && sc.ai ? " ai" : "";
+    const g = sc ? sc.g[side] : "", pen = sc && sc.p ? sc.p[side] : "";
+    return `<div class="po-row ${cls}"><button type="button" class="${cls}" data-tie="${t.id}" data-team="${id}" ${other ? "" : "disabled"}>
+      <span class="seed">${s[id].p}${s[id].z}</span><span class="nm">${tn(id)}</span><span class="pr">${p == null ? "" : bataTag(t.w === id, p) + pct(p)}</span></button>
+      ${both && ro ? (isSet(g) ? `<span class="po-sc">${g}${tiedG && isSet(pen) ? `<small>(${pen})</small>` : ""}</span>` : "") : ""}
+      ${both && !ro ? `<input class="po-g${ai}" id="po-${t.id}-g${side}" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(T(id).n)}" value="${g ?? ""}" data-potie="${t.id}" data-side="${side}" data-k="g">
+      ${tiedG ? `<input class="po-p${ai}" id="po-${t.id}-p${side}" inputmode="numeric" maxlength="2" aria-label="Penales ${esc(T(id).n)}" title="Penales" placeholder="pen" value="${pen ?? ""}" data-potie="${t.id}" data-side="${side}" data-k="p">` : ""}` : ""}
+    </div>`;
   };
-  return `<div class="tie">${row(t.h, t.a)}${row(t.a, t.h)}</div>`;
+  return `<div class="tie${tiedG ? " pens" : ""}">${row(t.h, t.a, 0)}${row(t.a, t.h, 1)}${tiedG && !ro ? `<div class="pen-note">Empate: ${sc.p && isSet(sc.p[0]) && isSet(sc.p[1]) ? `penales ${sc.p[0]}-${sc.p[1]}` : "cargá los penales"}</div>` : ""}</div>`;
 }
 
 /* ===================== RENDER: RESUMEN ===================== */
@@ -1374,7 +1435,7 @@ function renderSummary(st, br, cups) {
       <div class="sum-card desc"><div class="lbl">Descienden</div><ul>${relegated(st).map(id => li(id)).join("")}</ul></div>
     </div>
     <div class="sum-grid three">${zoneT(st.A, "A")}${zoneT(st.B, "B")}${anT}</div>
-    <div class="sum-sec"><h3>Playoffs</h3><div class="bracket">${bracketCols(br, cups)}</div></div>`;
+    <div class="sum-sec"><h3>Playoffs</h3><div class="bracket">${bracketCols(br, cups, true)}</div></div>`;
 }
 
 /* ===================== RENDER: COPAS ===================== */
@@ -2259,6 +2320,9 @@ function renderTables() {
   const cups = userCups();
   // Limpia ganadores que ya no corresponden a la llave
   for (const t of br.ties) if (poWinners[t.id] && poWinners[t.id] !== t.h && poWinners[t.id] !== t.a) delete poWinners[t.id];
+  // Marcadores de llaves que ya no tienen esos dos equipos (cambió la tabla): se descartan.
+  const tieIds = new Map(br.ties.map(t => [t.id, t]));
+  for (const id of Object.keys(poScores)) { const t = tieIds.get(id); if (!t || poScores[id].h !== t.h || poScores[id].a !== t.a) delete poScores[id]; }
   for (const t of cups.ties) if (cupPicks[t.id] && cupPicks[t.id] !== t.h && cupPicks[t.id] !== t.a) delete cupPicks[t.id];
   renderZone("A", st); renderZone("B", st); renderAnnual(st, br, cups); renderPlayoffs(st, br, cups); renderCups(cups, st); renderSummary(st, br, cups); renderPromedios(st);
   if (activeTab === "proyeccion") renderProjection();
@@ -2316,13 +2380,25 @@ function fillAI() {
   const pickTie = (p, h, a) => { const w = Math.random() < sharpen(p) ? h : a; if ((w === h ? p : 1 - p) < 0.4) surprises++; return w; };
   const cups = resolveCups((t, h, a) => (cupPicks[t.id] === h || cupPicks[t.id] === a) ? cupPicks[t.id] : pickTie(cupTieProb(t, h, a), h, a));
   for (const t of cups.ties) if (t.w && !cupPicks[t.id]) { cupPicks[t.id] = t.w; aiCupPicks[t.id] = true; }
-  poWinners = {};
   const st = standings(results);
-  const br = bracket(st, t => pickTie(advanceProb(t.h, t.a, t.neutral, cups), t.h, t.a));
-  for (const t of br.ties) if (t.w) poWinners[t.id] = t.w;
+  const br = bracket(st, t => {
+    const mine = poScores[t.id];
+    if (mine && !mine.ai && mine.h === t.h && mine.a === t.a && scoreWinner(mine)) return scoreWinner(mine); // lo cargado a mano se respeta
+    const w = pickTie(advanceProb(t.h, t.a, t.neutral, cups), t.h, t.a);
+    poScores[t.id] = Object.assign({ h: t.h, a: t.a, ai: true }, koScoreFor(koModel(t.h, t.a, t.neutral, cups), w === t.h));
+    return w;
+  });
+  keepPlayoff(br);
   projection = null; save(); renderAll();
   const bata = plan.items.filter(([m, r]) => isUpset(matchModel(m), r)).length;
   toast(`IA: ${plan.items.length} partidos, ${plan.draws} empates, ${plan.upsets} triunfos del no favorito (${bata} batacazos) y ${surprises} batacazos en playoffs y copas`);
+}
+// Después de completar: ganadores según los marcadores; se borran marcadores de llaves que ya no existen.
+function keepPlayoff(br) {
+  const ids = new Set(br.ties.filter(t => t.w).map(t => t.id));
+  for (const id of Object.keys(poScores)) if (!ids.has(id)) delete poScores[id];
+  poWinners = {};
+  for (const t of br.ties) if (t.w) poWinners[t.id] = t.w;
 }
 function fillRandom() {
   for (const m of MATCHES) if (!results[m.id] || aiFilled[m.id]) { results[m.id] = sample(matchModel(m)); aiFilled[m.id] = true; }
@@ -2330,10 +2406,14 @@ function fillRandom() {
   aiCupPicks = {};
   const cups = randomCups();
   for (const t of cups.ties) if (t.w && !cupPicks[t.id]) { cupPicks[t.id] = t.w; aiCupPicks[t.id] = true; }
-  poWinners = {};
   const st = standings(results);
-  const br = bracket(st, t => Math.random() < advanceProb(t.h, t.a, t.neutral, cups) ? t.h : t.a);
-  for (const t of br.ties) if (t.w) poWinners[t.id] = t.w;
+  const br = bracket(st, t => {
+    const mine = poScores[t.id];
+    if (mine && !mine.ai && mine.h === t.h && mine.a === t.a && scoreWinner(mine)) return scoreWinner(mine);
+    poScores[t.id] = Object.assign({ h: t.h, a: t.a, ai: true }, koScoreRandom(koModel(t.h, t.a, t.neutral, cups)));
+    return scoreWinner(poScores[t.id]);
+  });
+  keepPlayoff(br);
   projection = null; save(); renderAll();
   toast("Simulación al azar según las probabilidades");
 }
@@ -2355,6 +2435,7 @@ document.addEventListener("click", e => {
     const id = tieBtn.dataset.tie;
     poWinners[id] = poWinners[id] === tieBtn.dataset.team ? undefined : tieBtn.dataset.team;
     if (!poWinners[id]) delete poWinners[id];
+    if (poScores[id] && scoreWinner(poScores[id]) !== poWinners[id]) delete poScores[id]; // el marcador ya no coincide
     projection = null; save(); renderTables(); return;
   }
   if (e.target.closest("#btn-theme")) return toggleTheme();
@@ -2365,7 +2446,7 @@ document.addEventListener("click", e => {
   if (e.target.closest("#btn-ia")) return fillAI();
   if (e.target.closest("#btn-rand")) return fillRandom();
   if (e.target.closest("#btn-clear")) {
-    results = {}; aiFilled = {}; poWinners = {}; cupPicks = {}; aiCupPicks = {}; projection = null; save(); renderAll(); toast("Resultados borrados"); return;
+    results = {}; aiFilled = {}; poWinners = {}; poScores = {}; cupPicks = {}; aiCupPicks = {}; projection = null; save(); renderAll(); toast("Resultados borrados"); return;
   }
   if (e.target.closest("#btn-proj-img")) { exportProjImage(e.target.closest("#btn-proj-img")); return; }
   if (e.target.closest("#btn-proj")) { projection = null; renderProjection(); toast("Recalculando 10.000 simulaciones…"); return; }
@@ -2382,6 +2463,27 @@ document.addEventListener("change", e => {
 });
 document.addEventListener("input", e => {
   const inp = e.target;
+  if (inp.matches("input[data-potie]")) {
+    // Marcador de playoffs: con goles distintos define al ganador; si empatan, definen los penales.
+    inp.value = inp.value.replace(/\D/g, "").slice(0, 2);
+    const id = inp.dataset.potie, side = +inp.dataset.side, k = inp.dataset.k;
+    const t = currentBracket(standings(results)).ties.find(x => x.id === id); if (!t) return;
+    let sc = poScores[id];
+    if (!sc || sc.h !== t.h || sc.a !== t.a) sc = poScores[id] = { h: t.h, a: t.a, g: ["", ""], p: null, ai: false };
+    sc.ai = false; // si lo había puesto la IA, pasa a ser tuyo
+    sc.g = sc.g.map(String); if (sc.p) sc.p = sc.p.map(String);
+    if (k === "g") sc.g[side] = inp.value; else { sc.p = sc.p || ["", ""]; sc.p[side] = inp.value; }
+    if (!(isSet(sc.g[0]) && isSet(sc.g[1]) && +sc.g[0] === +sc.g[1])) sc.p = null;
+    const w = scoreWinner(sc);
+    if (w) poWinners[id] = w; else delete poWinners[id];
+    if (!isSet(sc.g[0]) && !isSet(sc.g[1])) delete poScores[id];
+    projection = null; save(); renderTables();
+    // El cuadro se redibuja: se vuelve al mismo casillero (o al siguiente).
+    const next = side === 0 && inp.value !== "" ? `po-${id}-${k}1` : side === 1 && k === "g" && inp.value !== "" && poScores[id] && +poScores[id].g[0] === +poScores[id].g[1] ? `po-${id}-p0` : inp.id;
+    const el = document.getElementById(next) || document.getElementById(inp.id);
+    if (el) { el.focus(); if (el.id !== inp.id) el.select(); else el.setSelectionRange(el.value.length, el.value.length); }
+    return;
+  }
   if (inp.matches(".score input")) {
     inp.value = inp.value.replace(/\D/g, "").slice(0, 2);
     const box = inp.closest(".match"), id = box.dataset.m;
