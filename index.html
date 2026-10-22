@@ -418,13 +418,27 @@ tr.in td.pos { color: var(--accent); }
 .route-btn { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--line); background: var(--surface-2); color: var(--accent); border-radius: 999px; padding: 3px 9px 3px 6px; font: 600 12px/1 var(--font-body); }
 .route-btn:hover { border-color: var(--accent); background: var(--accent-soft); }
 .route-btn svg { width: 14px; height: 14px; }
-.route-dlg { border: 0; padding: 0; border-radius: 14px; width: min(640px, calc(100vw - 24px)); max-height: calc(100vh - 40px); background: var(--surface); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+.route-dlg { border: 0; padding: 0; border-radius: 14px; width: min(640px, calc(100vw - 24px)); max-width: none; max-height: calc(100vh - 40px); max-height: calc(100dvh - 40px);
+  background: var(--surface); color: var(--ink); box-shadow: 0 20px 60px rgba(0,0,0,.35); overflow: hidden; }
+.route-dlg[open] { display: flex; flex-direction: column; }
 .route-dlg::backdrop { background: rgba(10, 20, 16, .55); }
-.rd-body { padding: 18px 20px 20px; display: grid; gap: 14px; }
-.rd-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+html.dlg-open, html.dlg-open body { overflow: hidden; }
+.rd-head { flex: none; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 14px 16px 12px 20px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.rd-head .rd-close { flex: none; width: 40px; height: 40px; display: grid; place-items: center; padding: 0; }
+.rd-head .rd-close svg { width: 20px; height: 20px; }
+.rd-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 16px 20px 24px; display: grid; gap: 14px; align-content: start; }
+.rd-body .tbl-wrap { overflow-x: auto; }
+@media (max-width: 640px) {
+  /* En el celular: pantalla completa, con el encabezado y la X arriba siempre a la vista */
+  .route-dlg { width: 100vw; height: 100vh; height: 100dvh; max-height: none; margin: 0; border-radius: 0; inset: 0; }
+  .rd-head { padding: calc(10px + env(safe-area-inset-top, 0px)) 10px 10px 16px; }
+  .rd-head h3 { font-size: 19px; }
+  .rd-body { padding: 14px 16px calc(28px + env(safe-area-inset-bottom, 0px)); }
+  .route-dlg .ex-champs li > span:first-child { min-width: 140px; }
+}
 .rd-kick { font-size: 13px; font-weight: 600; color: var(--muted); }
 .rd-head h3 { margin: 4px 0 0; font: 700 22px/1.15 var(--font-display); text-transform: uppercase; letter-spacing: .02em; }
-.rd-p { margin: -6px 0 0; color: var(--muted); font-size: 14px; }
+.rd-p { margin: 0; color: var(--muted); font-size: 14px; }
 .rd-p b { color: var(--accent); font-size: 16px; }
 .route-dlg section { border-top: 1px solid var(--line); padding-top: 12px; }
 .route-dlg h5 { margin: 0 0 4px; font: 700 15px/1.1 var(--font-display); text-transform: uppercase; letter-spacing: .06em; }
@@ -2221,9 +2235,10 @@ function openRoute(k) {
   lifts.sort((a, b) => b.d - a.d);
   const sent = (m, o) => o === 0 ? `Gana <b>${esc(T(m.h).n)}</b> a ${esc(T(m.a).n)}` : o === 2 ? `Gana <b>${esc(T(m.a).n)}</b> en cancha de ${esc(T(m.h).n)}` : `Empatan ${esc(T(m.h).n)} y ${esc(T(m.a).n)}`;
   const liftBody = lifts.length ? `<ul class="lifts">${lifts.slice(0, 6).sort((a, b) => a.m.f - b.m.f).map(x => `<li><span>${sent(x.m, x.o)} <small>fecha ${x.m.f}</small></span><span class="cmp"><b>${pctP(x.cond)}</b> <small>en este camino · ${pctP(x.baseP)} en general</small></span></li>`).join("")}</ul>` : "";
-  const html = `<div class="rd-head"><div><div class="rd-kick">${tn(team)}</div><h3>${esc(k)}</h3></div>
-      <button type="button" class="btn ghost icon rd-close" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
-    <p class="rd-p">Pasa en <b>${pctP(P)}</b> de los escenarios simulados.</p>
+  // Encabezado fijo (con la X siempre visible); el resto se desliza.
+  const head = `<div class="rd-head"><div><div class="rd-kick">${tn(team)}</div><h3>${esc(k)}</h3></div>
+      <button type="button" class="btn ghost icon rd-close" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>`;
+  const html = `<p class="rd-p">Pasa en <b>${pctP(P)}</b> de los escenarios simulados.</p>
     ${sec("Qué significa", "", `<p class="rd-rule">${routeRule(k, team)}</p>`)}
     ${routeExample(G, k, d)}
     ${G.mine.length ? sec(`Lo que tiene que hacer ${esc(t.n)}`, "Cómo le va en sus partidos cuando llega por este camino.", recBody + ownBody) : ""}
@@ -2236,9 +2251,13 @@ function openRoute(k) {
   if (!dlg) {
     dlg = document.createElement("dialog"); dlg.id = "route-dlg"; dlg.className = "route-dlg"; document.body.append(dlg);
     dlg.addEventListener("click", e => { if (e.target === dlg || e.target.closest(".rd-close")) dlg.close(); });
+    // Mientras está abierto, la página de atrás no se mueve (en el celular el deslizamiento se lo lleva el modal).
+    dlg.addEventListener("close", () => document.documentElement.classList.remove("dlg-open"));
   }
-  dlg.innerHTML = `<div class="rd-body">${html}</div>`;
+  dlg.innerHTML = `${head}<div class="rd-body">${html}</div>`;
+  document.documentElement.classList.add("dlg-open");
   dlg.showModal();
+  dlg.querySelector(".rd-close").blur();
 }
 // Reparto Libertadores / Sudamericana / sin copa, para que el % de una copa no se lea como "queda afuera".
 function splitBlock(agg) {
