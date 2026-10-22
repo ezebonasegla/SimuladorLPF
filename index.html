@@ -385,6 +385,10 @@ tr.in td.pos { color: var(--accent); }
 .ptable.full tr.grp th { padding: 9px 3px 4px; }
 .ptable.full td.num { text-align: center; font: 600 16px/1 var(--font-display); }
 .ptable.full .pill { height: 32px; font-size: 17px; }
+#pane-promedios td.chg { white-space: nowrap; text-align: left; }
+#pane-promedios td.chg .mv { display: inline-block; min-width: 30px; margin: 0 6px 0 0; font-size: 12.5px; }
+#pane-promedios td.chg .mv.eq { color: var(--muted); }
+#pane-promedios td.chg small { color: var(--muted); font-size: 11.5px; }
 #pane-promedios tr.gone td { color: var(--muted); opacity: .75; }
 .proj-note { margin: 10px 2px 0; color: var(--muted); font-size: 12.5px; }
 
@@ -1359,6 +1363,10 @@ function renderPromedios(st) {
   const prom = next ? promedio2027 : promedio;
   const rows = st.AN.slice().sort((a, b) => prom(b) - prom(a) || b.pts - a.pts);
   const worst = rows[rows.length - 1].id, base = next ? baseOrderProm2027() : baseOrderProm();
+  // 2027: puesto que tenía en el promedio de 2026 (con los mismos resultados) para mostrar cuánto sube o baja.
+  const pos26 = next ? Object.fromEntries(st.AN.slice().sort((a, b) => promedio(b) - promedio(a) || b.pts - a.pts).map((r, i) => [r.id, i + 1])) : {};
+  const change = (id, p) => { const d = pos26[id] - p;
+    return `<td class="chg"><span class="mv ${d > 0 ? "up" : d < 0 ? "down" : "eq"}">${d > 0 ? "▲" + d : d < 0 ? "▼" + -d : "="}</span><small>era ${pos26[id]}°</small></td>`; };
   let pos = 0;
   const gone = []; // 2027: los que descienden este año van al final, sin puesto
   const html = rows.map(r => {
@@ -1366,12 +1374,12 @@ function renderPromedios(st) {
     let tag = "";
     if (next) {
       // En 2027 no juegan los que descienden este año: se muestran aparte, sin puesto.
-      if (rel.has(r.id)) return gone.push(`<tr class="gone"><td class="pos">–</td><td class="l team">${tn(r.id)}<span class="tag desc">Desciende en 2026</span></td>
+      if (rel.has(r.id)) return gone.push(`<tr class="gone"><td class="pos">–</td><td class="l team">${tn(r.id)}<span class="tag desc">Desciende en 2026</span></td><td class="chg"><small>era ${pos26[r.id]}°</small></td>
         <td class="pts">${prom(r).toFixed(3).replace(".", ",")}</td><td>${(+py[1] || 0) + r.pts}</td><td>${pj2025(t) + r.pj}</td><td class="num">${pj2025(t) ? py[1] : "–"}</td><td>${r.pts}</td></tr>`), "";
       pos++;
       return `<tr>
         <td class="pos">${pos}</td>
-        <td class="l team">${tn(r.id)}${moveTag(r.id, pos, base)}${pj2025(t) ? "" : '<span class="tag">solo 2026</span>'}</td>
+        <td class="l team">${tn(r.id)}${pj2025(t) ? "" : '<span class="tag">solo 2026</span>'}</td>${change(r.id, pos)}
         <td class="pts">${prom(r).toFixed(3).replace(".", ",")}</td>
         <td>${(+py[1] || 0) + r.pts}</td><td>${pj2025(t) + r.pj}</td>
         <td class="num">${pj2025(t) ? py[1] : "–"}</td>
@@ -1397,9 +1405,9 @@ function renderPromedios(st) {
       ? `<p class="rule"><b>Cómo arrancaría el promedio de 2027:</b> sale la temporada 2024 y quedan 2025 + 2026 (puntos ÷ partidos). Los puntos de 2026 suman lo que cargues o simules. Los que descienden este año no juegan 2027 y van al final; los que ascienden de la Primera Nacional arrancan sin promedio y no están en la tabla. «Solo 2026»: equipos que no jugaron 2025 en Primera.</p>`
       : `<p class="rule">Temporadas 2024, 2025 y 2026 · puntos ÷ partidos jugados. Desciende el peor promedio y el último de la Tabla Anual. Si son el mismo equipo, desciende también el anteúltimo de la Anual. Los puntos de 2026 suman lo que cargues o simules.</p>`}
     <div class="tbl-wrap"><table>
-      <thead><tr><th>#</th><th class="l">Equipo</th><th>Prom.</th><th>Pts</th><th>PJ</th>${next ? "" : "<th>2024</th>"}<th>2025</th><th>2026</th></tr></thead>
+      <thead><tr><th>#</th><th class="l">Equipo</th>${next ? '<th class="l" title="Puestos que sube o baja respecto del promedio de 2026">vs 2026</th>' : ""}<th>Prom.</th><th>Pts</th><th>PJ</th>${next ? "" : "<th>2024</th>"}<th>2025</th><th>2026</th></tr></thead>
       <tbody>${html}${gone.join("")}</tbody></table></div>
-    <div class="legend">${next ? "" : '<span style="--c:var(--danger)">Desciende</span>'}<span>▲▼ cambio respecto a los promedios ${next ? "2027 con la tabla actual" : "actuales"}</span><span>+N puntos sumados en lo que falta</span></div>`;
+    <div class="legend">${next ? "" : '<span style="--c:var(--danger)">Desciende</span>'}<span>▲▼ ${next ? "puestos que sube o baja respecto del promedio de 2026" : "cambio respecto a los promedios actuales"}</span><span>+N puntos sumados en lo que falta</span></div>`;
 }
 function baseOrderProm2027() {
   const rows = teams.map(t => emptyRow(t, "an"));
