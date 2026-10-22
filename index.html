@@ -1911,7 +1911,7 @@ function goalSim(team, goal, target) {
         }
       }
     }
-    agg.n++; agg.w += w;
+    agg.n++; agg.w += w; if (w > 0) agg.hits = (agg.hits || 0) + 1;
     if (agg.split && split) { for (let i = 0; i < 4; i++) agg.split[i] += split[i]; }
     for (const k in routes) routeAdd(k, routes[k]);
     // puntos y récord del equipo en lo que falta
@@ -2019,7 +2019,7 @@ function goalHTML(G) {
     <p>${lines.join(" ") || "Chances según el modelo, con los resultados que ya cargaste fijos."}</p>
     <span class="verdict ${vc}">${verdict}</span>${splitBlock(agg)}</div></div>`;
   // Caminos
-  const routes = Object.entries(agg.routes).map(([k, v]) => [k, v / agg.n]).filter(r => r[1] > 0.00005).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const routes = Object.entries(agg.routes).map(([k, v]) => [k, v / agg.n]).filter(r => r[1] > 0 && r[1] >= P * 0.005).sort((a, b) => b[1] - a[1]).slice(0, 8);
   const routesCard = `<div class="gcard"><h4>Caminos</h4><p class="hint">Por dónde llega cuando lo logra (sobre el total de escenarios).</p>
     ${routes.length ? routeList(routes, P) : `<p class="hint">No aparece ningún camino en las simulaciones.</p>`}</div>`;
   // Puntos
@@ -2048,7 +2048,7 @@ function goalHTML(G) {
     const v = pr.filter(p => p != null), swing = Math.max(...v) - Math.min(...v);
     const best = pr.indexOf(Math.max(...v)), worst = pr.indexOf(Math.min(...v));
     return { m, pr, swing, best, worst };
-  }).filter(o => o.swing > 0.0003).sort((a, b) => b.swing - a.swing).slice(0, 8);
+  }).filter(o => o.swing > Math.min(0.0003, P * 0.1)).sort((a, b) => b.swing - a.swing).slice(0, 8);
   const lab = (m, o) => o === 1 ? `que empaten ${T(m.h).n} y ${T(m.a).n}` : `que ${T(o === 0 ? m.h : m.a).n} le gane a ${T(o === 0 ? m.a : m.h).n}`;
   const othersCard = needsCard(others, P, team, "Qué le conviene en otros partidos", "Ningún otro resultado cambia mucho sus chances: depende de él.");
   return hero + `<div class="goal-grid">${routesCard}${ptsCard}${ownCard}${othersCard}</div>`;
@@ -2074,7 +2074,7 @@ function goalHTMLPts(G) {
     const x = agg.match[m.id], pr = [0, 1, 2].map(o => x[o][0] ? x[o][1] / x[o][0] : null);
     const v = pr.filter(p => p != null), swing = Math.max(...v) - Math.min(...v);
     return { m, pr, swing, best: pr.indexOf(Math.max(...v)), worst: pr.indexOf(Math.min(...v)) };
-  }).filter(o => o.swing > 0.0003).sort((a, b) => b.swing - a.swing);
+  }).filter(o => o.swing > Math.min(0.0003, P * 0.1)).sort((a, b) => b.swing - a.swing);
   const lab = (m, o) => o === 1 ? `que empaten ${T(m.h).n} y ${T(m.a).n}` : `que ${T(o === 0 ? m.h : m.a).n} le gane a ${T(o === 0 ? m.a : m.h).n}`;
   let verdict, vc;
   if (P >= 1) { verdict = `Con ${ptx(target)} lo logra seguro`; vc = "ok"; }
@@ -2106,9 +2106,9 @@ function goalHTMLPts(G) {
   const hero = `<div class="goal-hero"><div class="big">${pctP(P)}</div><div>
     <h3>${tn(team)}&nbsp;· ${esc(gname)} sumando ${ptx(target)}</h3>
     <p>${P >= 1 ? "Si suma esos puntos, no depende de nadie." : P <= 0 ? `En ninguna de las ${agg.n.toLocaleString("es-AR")} simulaciones le alcanza con esos puntos.`
-      : `${P < 0.01 ? `Pasa en ${Math.max(1, Math.round(agg.w)).toLocaleString("es-AR")} de ${agg.n.toLocaleString("es-AR")} escenarios simulados. ` : ""}${agg.w < 5 ? "Es un caso extremo: casi todos los rivales tienen que perder." : P > 0.995 ? "Prácticamente no depende de nadie: solo un combo muy raro de resultados lo dejaría afuera." : `Además de sumar ${ptx(target)}, lo que más lo ayuda: ${key.join(", ") || "nada en particular"}.`}`}${math ? ` ${math}` : ""}</p>
+      : `${goal === "champ" && P < 0.01 ? `Entra a los playoffs en ${(agg.hits || 0).toLocaleString("es-AR")} de ${agg.n.toLocaleString("es-AR")} escenarios simulados y, desde ahí, tiene que ganar los 4 cruces: por eso la chance total es tan chica. ` : P < 0.01 ? `Pasa en ${Math.max(1, Math.round(agg.w)).toLocaleString("es-AR")} de ${agg.n.toLocaleString("es-AR")} escenarios simulados. ` : ""}${(goal === "champ" ? (agg.hits || 0) < 5 : agg.w < 5) ? "Es un caso extremo: casi todos los rivales tienen que perder." : P > 0.995 ? "Prácticamente no depende de nadie: solo un combo muy raro de resultados lo dejaría afuera." : `Además de sumar ${ptx(target)}, lo que más lo ayuda: ${key.join(", ") || "nada en particular"}.`}`}${math ? ` ${math}` : ""}</p>
     <span class="verdict ${vc}">${verdict}</span>${splitBlock(agg)}</div></div>`;
-  const routes = Object.entries(agg.routes).map(([k, v]) => [k, v / agg.n]).filter(r => r[1] > 0.00005).sort((a, b) => b[1] - a[1]).slice(0, 8);
+  const routes = Object.entries(agg.routes).map(([k, v]) => [k, v / agg.n]).filter(r => r[1] > 0 && r[1] >= P * 0.005).sort((a, b) => b[1] - a[1]).slice(0, 8);
   const routesCard = `<div class="gcard"><h4>Caminos</h4><p class="hint">Cómo llega cuando lo logra, sumando ${ptx(target)}.</p>
     ${routes.length ? routeList(routes, P) : '<p class="hint">No aparece ningún camino.</p>'}</div>`;
   // Cómo sumar esos puntos
@@ -2283,7 +2283,7 @@ function needsCard(list, P, team, title, empty) {
       <p class="hint" style="margin-top:10px">Para quedar afuera tendrían que darse varios de estos resultados juntos, y aun así es muy raro.</p>` : ""}</div>`;
   }
   // Se eligen los que más le importan y después se ordenan por fecha (la más próxima primero).
-  list = list.filter(o => o.swing >= 0.015 || (P < 0.05 && o.swing > Math.max(0.0005, P * 0.25)))
+  list = list.filter(o => o.swing >= 0.015 || (P < 0.05 && o.swing > Math.max(1e-7, P * 0.25)))
     .slice().sort((a, b) => a.m.f - b.m.f || b.swing - a.swing);
   const sentence = (m, o) => o === 0 ? `Que <b>${esc(T(m.h).n)}</b> le gane a <b>${esc(T(m.a).n)}</b>`
     : o === 2 ? `Que <b>${esc(T(m.a).n)}</b> le gane a <b>${esc(T(m.h).n)}</b>` : `Que <b>${esc(T(m.h).n)}</b> y <b>${esc(T(m.a).n)}</b> empaten`;
