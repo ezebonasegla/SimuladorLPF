@@ -3,7 +3,7 @@ name: Promiedos (exploración)
 on:
   workflow_dispatch:
   push:
-    paths: [".github/workflows/promiedos-debug.yml"]
+    paths: [".github/workflows/promiedos-debug.yml"]  # exploración 2
 permissions:
   contents: write
 jobs:
@@ -18,13 +18,18 @@ jobs:
           while read -r name url; do
             [ -z "$name" ] && continue
             code=$(curl -sSL -A "$UA" -H "Accept-Language: es-AR,es;q=0.9" -o "debug/$name" -w "%{http_code}" "$url" || echo ERR)
-            echo "$name $code $(wc -c < debug/$name 2>/dev/null) $url" | tee -a debug/_index.txt
+            echo "$name $code $(wc -c < debug/$name 2>/dev/null) $url" | tee -a debug/_index2.txt
           done <<'LISTA'
-          home.html https://www.promiedos.com.ar/
-          liga.html https://www.promiedos.com.ar/league/liga-profesional/hc
-          primera.html https://www.promiedos.com.ar/primera
-          api-tf.json https://api.promiedos.com.ar/league/tables_and_fixtures/hc
-          api-today.json https://api.promiedos.com.ar/games/today
+          app.js https://www.promiedos.com.ar/_next/static/chunks/pages/_app-0515be223a30775e.js
+          leaguepage.js https://www.promiedos.com.ar/_next/static/chunks/pages/league/%5BurlName%5D/%5Bid%5D-9c7f9e8318459022.js
+          c180.js https://www.promiedos.com.ar/_next/static/chunks/180-1dce3fc83867c970.js
+          c192.js https://www.promiedos.com.ar/_next/static/chunks/192-5502c26d5630236b.js
+          c549.js https://www.promiedos.com.ar/_next/static/chunks/549-b81b2b042a0642f2.js
+          c814.js https://www.promiedos.com.ar/_next/static/chunks/814-7d16922b0388384f.js
+          g1.json https://api.promiedos.com.ar/league/games/hc/72_228_8_14
+          g2.json https://api.promiedos.com.ar/league/hc/games/72_228_8_14
+          g3.json https://api.promiedos.com.ar/games/league/hc/72_228_8_14
+          ayer.html https://www.promiedos.com.ar/?date=22-10-2026
           LISTA
       - name: Commit
         run: |
