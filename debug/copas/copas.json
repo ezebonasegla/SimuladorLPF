@@ -1,0 +1,7668 @@
+{
+ "bac": {
+  "filters": [
+   {
+    "name": "Partidos actuales",
+    "key": "latest"
+   },
+   {
+    "name": "Primera Fase",
+    "key": "102_69_1_-1"
+   },
+   {
+    "name": "Segunda Fase",
+    "key": "102_69_2_-1"
+   },
+   {
+    "name": "Tercera Fase",
+    "key": "102_69_3_-1"
+   },
+   {
+    "name": "Fecha 1",
+    "key": "102_69_4_1"
+   },
+   {
+    "name": "Fecha 2",
+    "key": "102_69_4_2"
+   },
+   {
+    "name": "Fecha 3",
+    "key": "102_69_4_3"
+   },
+   {
+    "name": "Fecha 4",
+    "key": "102_69_4_4"
+   },
+   {
+    "name": "Fecha 5",
+    "key": "102_69_4_5"
+   },
+   {
+    "name": "Fecha 6",
+    "key": "102_69_4_6"
+   },
+   {
+    "name": "Octavos de Final",
+    "key": "102_69_5_-1"
+   },
+   {
+    "name": "Cuartos de Final",
+    "key": "102_69_6_-1"
+   },
+   {
+    "name": "Semifinales",
+    "key": "102_69_7_-1",
+    "selected": true,
+    "games": [
+     {
+      "id": "eifhdej",
+      "winner": 2,
+      "teams": [
+       {
+        "name": "Fluminense",
+        "short_name": "Fluminense",
+        "url_name": "fluminense",
+        "id": "bcbg",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#6E202E",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Wesley Natã",
+          "player_sname": "W. Natã",
+          "time": 90,
+          "time_to_display": "90'+3"
+         }
+        ]
+       },
+       {
+        "name": "Palmeiras",
+        "short_name": "Palmeiras",
+        "url_name": "palmeiras",
+        "id": "bccc",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#225638",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "José Manuel López",
+          "player_sname": "López",
+          "time": 45,
+          "time_to_display": "45'"
+         },
+         {
+          "player_name": "Marlon Freitas",
+          "player_sname": "Marlon",
+          "time": 85,
+          "time_to_display": "85'"
+         }
+        ]
+       }
+      ],
+      "url_name": "fluminense-vs-palmeiras",
+      "scores": [
+       1,
+       2
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "14-10-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eifiieh",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Estudiantes de La Plata",
+        "short_name": "Estudiantes",
+        "url_name": "estudiantes-de-la-plata",
+        "id": "igh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FAFAFA",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Flamengo",
+        "short_name": "Flamengo",
+        "url_name": "flamengo",
+        "id": "bcbf",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#AB1B10",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "estudiantes-de-la-plata-vs-flamengo",
+      "scores": [
+       0,
+       0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "15-10-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eifhdfa",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Palmeiras",
+        "short_name": "Palmeiras",
+        "url_name": "palmeiras",
+        "id": "bccc",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#225638",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Fluminense",
+        "short_name": "Fluminense",
+        "url_name": "fluminense",
+        "id": "bcbg",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#6E202E",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Hércules",
+          "player_sname": "Hércules",
+          "time": 82,
+          "time_to_display": "82'"
+         }
+        ]
+       }
+      ],
+      "url_name": "palmeiras-vs-fluminense",
+      "scores": [
+       0,
+       1
+      ],
+      "penalties": [
+       5,
+       3
+      ],
+      "agg_scores": [
+       2,
+       2
+      ],
+      "description": "Global 2 - 2",
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "21-10-2026 19:30",
+      "game_time": 125,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "eifiiei",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Flamengo",
+        "short_name": "Flamengo",
+        "url_name": "flamengo",
+        "id": "bcbf",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#AB1B10",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Estudiantes de La Plata",
+        "short_name": "Estudiantes",
+        "url_name": "estudiantes-de-la-plata",
+        "id": "igh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FAFAFA",
+         "text_color": "#000000"
+        },
+        "red_cards": 1
+       }
+      ],
+      "url_name": "flamengo-vs-estudiantes-de-la-plata",
+      "scores": [
+       0,
+       0
+      ],
+      "penalties": [
+       2,
+       3
+      ],
+      "agg_scores": [
+       0,
+       0
+      ],
+      "description": "Global 0 - 0",
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "22-10-2026 19:30",
+      "game_time": 125,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     }
+    ]
+   },
+   {
+    "name": "Final",
+    "key": "102_69_8_-1"
+   }
+  ],
+  "games": {
+   "102_69_5_-1 Octavos de Final": {
+    "TTL": 300,
+    "games": [
+     {
+      "id": "ehciafh",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Fluminense",
+        "short_name": "Fluminense",
+        "url_name": "fluminense",
+        "id": "bcbg",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#6E202E",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Independiente Rivadavia",
+        "short_name": "Independiente Riv.",
+        "url_name": "independiente-rivadavia",
+        "id": "hcch",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#14163F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "fluminense-vs-independiente-rivadavia",
+      "scores": [
+       0.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "11-08-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehciafd",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Estudiantes de La Plata",
+        "short_name": "Estudiantes",
+        "url_name": "estudiantes-de-la-plata",
+        "id": "igh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FAFAFA",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Joaquín Tobio Burgos",
+          "player_sname": "Joaquín Tobio Burgos",
+          "time": 4.0,
+          "time_to_display": "4'"
+         }
+        ]
+       },
+       {
+        "name": "Universidad Católica",
+        "short_name": "U. Católica",
+        "url_name": "u.-catolica",
+        "id": "bcef",
+        "country_id": "ci",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Fernando Zampedri",
+          "player_sname": "Zampedri",
+          "time": 80.0,
+          "time_to_display": "80'"
+         }
+        ]
+       }
+      ],
+      "url_name": "estudiantes-de-la-plata-vs-u.-catolica",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "11-08-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehciagd",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Platense",
+        "short_name": "Platense",
+        "url_name": "platense",
+        "id": "hcah",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#5C3918",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Luciano Giménez",
+          "player_sname": "Giménez",
+          "time": 35.0,
+          "time_to_display": "35'"
+         }
+        ]
+       },
+       {
+        "name": "Coquimbo Unido",
+        "short_name": "Coquimbo",
+        "url_name": "coquimbo-unido",
+        "id": "igcf",
+        "country_id": "ci",
+        "allow_open": true,
+        "colors": {
+         "color": "#F6D473",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Guido Vadalá",
+          "player_sname": "Guido Vadalá",
+          "time": 90.0,
+          "time_to_display": "90'+4"
+         }
+        ]
+       }
+      ],
+      "url_name": "platense-vs-coquimbo-unido",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "12-08-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehciagf",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Palmeiras",
+        "short_name": "Palmeiras",
+        "url_name": "palmeiras",
+        "id": "bccc",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#225638",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 1,
+        "goals": [
+         {
+          "player_name": "José Manuel López",
+          "player_sname": "López",
+          "time": 82.0,
+          "time_to_display": "82'"
+         }
+        ]
+       },
+       {
+        "name": "Cerro Porteño",
+        "short_name": "Cerro Porteño",
+        "url_name": "cerro-porteno",
+        "id": "bcje",
+        "country_id": "bai",
+        "allow_open": true,
+        "colors": {
+         "color": "#0032AF",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Carlos Miguel",
+          "player_sname": "Carlos Miguel",
+          "time": 90.0,
+          "time_to_display": "90'+3",
+          "goal_type": "E.C"
+         }
+        ]
+       }
+      ],
+      "url_name": "palmeiras-vs-cerro-porteno",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "12-08-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehciagb",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Cruzeiro",
+        "short_name": "Cruzeiro",
+        "url_name": "cruzeiro",
+        "id": "bcbd",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#0455A3",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Keny Arroyo",
+          "player_sname": "Arroyo",
+          "time": 53.0,
+          "time_to_display": "53'"
+         }
+        ]
+       },
+       {
+        "name": "Flamengo",
+        "short_name": "Flamengo",
+        "url_name": "flamengo",
+        "id": "bcbf",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#AB1B10",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Lucas Paquetá",
+          "player_sname": "Lucas Paquetá",
+          "time": 67.0,
+          "time_to_display": "67'"
+         }
+        ]
+       }
+      ],
+      "url_name": "cruzeiro-vs-flamengo",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "12-08-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehciaff",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Mirassol",
+        "short_name": "Mirassol",
+        "url_name": "mirassol",
+        "id": "bcgj",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFF00",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Eduardo",
+          "player_sname": "Eduardo",
+          "time": 15.0,
+          "time_to_display": "15'"
+         }
+        ]
+       },
+       {
+        "name": "Liga de Quito",
+        "short_name": "LDU",
+        "url_name": "ldu",
+        "id": "bcic",
+        "country_id": "fb",
+        "allow_open": false,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Michael Estrada",
+          "player_sname": "Estrada",
+          "time": 82.0,
+          "time_to_display": "82'"
+         }
+        ]
+       }
+      ],
+      "url_name": "mirassol-vs-ldu",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "13-08-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehciagh",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Rosario Central",
+        "short_name": "Central",
+        "url_name": "rosario-central",
+        "id": "ihf",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#004080",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Corinthians",
+        "short_name": "Corinthians",
+        "url_name": "corinthians",
+        "id": "bcgh",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FCFBEE",
+         "text_color": "#000000"
+        },
+        "red_cards": 1
+       }
+      ],
+      "url_name": "rosario-central-vs-corinthians",
+      "scores": [
+       0.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "13-08-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehciafi",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Independiente Rivadavia",
+        "short_name": "Independiente Riv.",
+        "url_name": "independiente-rivadavia",
+        "id": "hcch",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#14163F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Álex Arce",
+          "player_sname": "Arce",
+          "time": 90.0,
+          "time_to_display": "90'+7",
+          "goal_type": "Pen"
+         }
+        ]
+       },
+       {
+        "name": "Fluminense",
+        "short_name": "Fluminense",
+        "url_name": "fluminense",
+        "id": "bcbg",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#6E202E",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 1,
+        "goals": [
+         {
+          "player_name": "Kevin Serna",
+          "player_sname": "Serna",
+          "time": 75.0,
+          "time_to_display": "75'"
+         }
+        ]
+       }
+      ],
+      "url_name": "independiente-rivadavia-vs-fluminense",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "penalties": [
+       4.0,
+       5.0
+      ],
+      "agg_scores": [
+       1.0,
+       1.0
+      ],
+      "description": "Global 1 - 1",
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "18-08-2026 17:00",
+      "game_time": 120,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "ehciafe",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Universidad Católica",
+        "short_name": "U. Católica",
+        "url_name": "u.-catolica",
+        "id": "bcef",
+        "country_id": "ci",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Estudiantes de La Plata",
+        "short_name": "Estudiantes",
+        "url_name": "estudiantes-de-la-plata",
+        "id": "igh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FAFAFA",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Joaquin Correa",
+          "player_sname": "Correa",
+          "time": 44.0,
+          "time_to_display": "44'"
+         },
+         {
+          "player_name": "Guido Carrillo",
+          "player_sname": "Carrillo",
+          "time": 53.0,
+          "time_to_display": "53'"
+         },
+         {
+          "player_name": "Guido Carrillo",
+          "player_sname": "Carrillo",
+          "time": 83.0,
+          "time_to_display": "83'"
+         }
+        ]
+       }
+      ],
+      "url_name": "u.-catolica-vs-estudiantes-de-la-plata",
+      "scores": [
+       0.0,
+       3.0
+      ],
+      "agg_scores": [
+       1.0,
+       4.0
+      ],
+      "description": "Global 1 - 4",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "18-08-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehciafj",
+      "winner": 2,
+      "teams": [
+       {
+        "name": "Deportes Tolima",
+        "short_name": "Tolima",
+        "url_name": "deportes-tolima",
+        "id": "hgdf",
+        "country_id": "baj",
+        "allow_open": true,
+        "colors": {
+         "color": "#800000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Independiente Del Valle",
+        "short_name": "IDV",
+        "url_name": "independiente-del-valle",
+        "id": "jbec",
+        "country_id": "fb",
+        "allow_open": false,
+        "colors": {
+         "color": "#1C1B1F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Aron Rodriguez",
+          "player_sname": "Aron Rodriguez",
+          "time": 11.0,
+          "time_to_display": "11'"
+         }
+        ]
+       }
+      ],
+      "url_name": "deportes-tolima-vs-independiente-del-valle",
+      "scores": [
+       0.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "18-08-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehciage",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Coquimbo Unido",
+        "short_name": "Coquimbo",
+        "url_name": "coquimbo-unido",
+        "id": "igcf",
+        "country_id": "ci",
+        "allow_open": true,
+        "colors": {
+         "color": "#F6D473",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Platense",
+        "short_name": "Platense",
+        "url_name": "platense",
+        "id": "hcah",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#5C3918",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "coquimbo-unido-vs-platense",
+      "scores": [
+       0.0,
+       0.0
+      ],
+      "penalties": [
+       6.0,
+       7.0
+      ],
+      "agg_scores": [
+       1.0,
+       1.0
+      ],
+      "description": "Global 1 - 1",
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "19-08-2026 17:00",
+      "game_time": 120,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "ehciagg",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Cerro Porteño",
+        "short_name": "Cerro Porteño",
+        "url_name": "cerro-porteno",
+        "id": "bcje",
+        "country_id": "bai",
+        "allow_open": true,
+        "colors": {
+         "color": "#0032AF",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Palmeiras",
+        "short_name": "Palmeiras",
+        "url_name": "palmeiras",
+        "id": "bccc",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#225638",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Gustavo Gómez",
+          "player_sname": "Gómez",
+          "time": 41.0,
+          "time_to_display": "41'"
+         }
+        ]
+       }
+      ],
+      "url_name": "cerro-porteno-vs-palmeiras",
+      "scores": [
+       0.0,
+       1.0
+      ],
+      "agg_scores": [
+       1.0,
+       2.0
+      ],
+      "description": "Global 1 - 2",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "19-08-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehciagc",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Flamengo",
+        "short_name": "Flamengo",
+        "url_name": "flamengo",
+        "id": "bcbf",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#AB1B10",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Giorgian de Arrascaeta",
+          "player_sname": "De Arrascaeta",
+          "time": 35.0,
+          "time_to_display": "35'"
+         },
+         {
+          "player_name": "Samuel Lino",
+          "player_sname": "Lino",
+          "time": 62.0,
+          "time_to_display": "62'"
+         }
+        ]
+       },
+       {
+        "name": "Cruzeiro",
+        "short_name": "Cruzeiro",
+        "url_name": "cruzeiro",
+        "id": "bcbd",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#0455A3",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Lucas Romero",
+          "player_sname": "Romero",
+          "time": 51.0,
+          "time_to_display": "51'"
+         }
+        ]
+       }
+      ],
+      "url_name": "flamengo-vs-cruzeiro",
+      "scores": [
+       2.0,
+       1.0
+      ],
+      "agg_scores": [
+       3.0,
+       2.0
+      ],
+      "description": "Global 3 - 2",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "19-08-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehciafg",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Liga de Quito",
+        "short_name": "LDU",
+        "url_name": "ldu",
+        "id": "bcic",
+        "country_id": "fb",
+        "allow_open": false,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Mirassol",
+        "short_name": "Mirassol",
+        "url_name": "mirassol",
+        "id": "bcgj",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFF00",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "ldu-vs-mirassol",
+      "scores": [
+       0.0,
+       0.0
+      ],
+      "penalties": [
+       5.0,
+       4.0
+      ],
+      "agg_scores": [
+       1.0,
+       1.0
+      ],
+      "description": "Global 1 - 1",
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "20-08-2026 17:00",
+      "game_time": 120,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "ehciagi",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Corinthians",
+        "short_name": "Corinthians",
+        "url_name": "corinthians",
+        "id": "bcgh",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FCFBEE",
+         "text_color": "#000000"
+        },
+        "red_cards": 1,
+        "goals": [
+         {
+          "player_name": "Breno Bidon",
+          "player_sname": "Breno Bidon",
+          "time": 80.0,
+          "time_to_display": "80'"
+         }
+        ]
+       },
+       {
+        "name": "Rosario Central",
+        "short_name": "Central",
+        "url_name": "rosario-central",
+        "id": "ihf",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#004080",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "corinthians-vs-rosario-central",
+      "scores": [
+       1.0,
+       0.0
+      ],
+      "agg_scores": [
+       1.0,
+       0.0
+      ],
+      "description": "Global 1 - 0",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "20-08-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehciaga",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Independiente Del Valle",
+        "short_name": "IDV",
+        "url_name": "independiente-del-valle",
+        "id": "jbec",
+        "country_id": "fb",
+        "allow_open": false,
+        "colors": {
+         "color": "#1C1B1F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Daykol Romero",
+          "player_sname": "Romero",
+          "time": 59.0,
+          "time_to_display": "59'"
+         },
+         {
+          "player_name": "Carlos Gonzalez",
+          "player_sname": "Gonzalez",
+          "time": 70.0,
+          "time_to_display": "70'"
+         },
+         {
+          "player_name": "Matías Perello",
+          "player_sname": "Perello",
+          "time": 90.0,
+          "time_to_display": "90'+5"
+         }
+        ]
+       },
+       {
+        "name": "Deportes Tolima",
+        "short_name": "Tolima",
+        "url_name": "deportes-tolima",
+        "id": "hgdf",
+        "country_id": "baj",
+        "allow_open": true,
+        "colors": {
+         "color": "#800000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Junior Hernández",
+          "player_sname": "Junior Hernández",
+          "time": 84.0,
+          "time_to_display": "84'"
+         }
+        ]
+       }
+      ],
+      "url_name": "independiente-del-valle-vs-deportes-tolima",
+      "scores": [
+       3.0,
+       1.0
+      ],
+      "agg_scores": [
+       4.0,
+       1.0
+      ],
+      "description": "Global 4 - 1",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "25-08-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     }
+    ]
+   },
+   "102_69_6_-1 Cuartos de Final": {
+    "TTL": 300,
+    "games": [
+     {
+      "id": "eibjfaj",
+      "winner": 1,
+      "teams": [
+       {
+        "name": "Fluminense",
+        "short_name": "Fluminense",
+        "url_name": "fluminense",
+        "id": "bcbg",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#6E202E",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Nonato",
+          "player_sname": "Nonato",
+          "time": 21.0,
+          "time_to_display": "21'"
+         },
+         {
+          "player_name": "Hulk",
+          "player_sname": "Hulk",
+          "time": 31.0,
+          "time_to_display": "31'"
+         }
+        ]
+       },
+       {
+        "name": "Platense",
+        "short_name": "Platense",
+        "url_name": "platense",
+        "id": "hcah",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#5C3918",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "fluminense-vs-platense",
+      "scores": [
+       2.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "08-09-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eicadga",
+      "winner": 1,
+      "teams": [
+       {
+        "name": "Palmeiras",
+        "short_name": "Palmeiras",
+        "url_name": "palmeiras",
+        "id": "bccc",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#225638",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Agustín Giay",
+          "player_sname": "Giay",
+          "time": 26.0,
+          "time_to_display": "26'"
+         }
+        ]
+       },
+       {
+        "name": "Liga de Quito",
+        "short_name": "LDU",
+        "url_name": "ldu",
+        "id": "bcic",
+        "country_id": "fb",
+        "allow_open": false,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "palmeiras-vs-ldu",
+      "scores": [
+       1.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "09-09-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eicadhg",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Estudiantes de La Plata",
+        "short_name": "Estudiantes",
+        "url_name": "estudiantes-de-la-plata",
+        "id": "igh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FAFAFA",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Alexis Castro",
+          "player_sname": "Castro",
+          "time": 4.0,
+          "time_to_display": "4'"
+         }
+        ]
+       },
+       {
+        "name": "Corinthians",
+        "short_name": "Corinthians",
+        "url_name": "corinthians",
+        "id": "bcgh",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FCFBEE",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Kaio César",
+          "player_sname": "Kaio",
+          "time": 49.0,
+          "time_to_display": "49'"
+         }
+        ]
+       }
+      ],
+      "url_name": "estudiantes-de-la-plata-vs-corinthians",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "09-09-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eicdiia",
+      "winner": 2,
+      "teams": [
+       {
+        "name": "Independiente Del Valle",
+        "short_name": "IDV",
+        "url_name": "independiente-del-valle",
+        "id": "jbec",
+        "country_id": "fb",
+        "allow_open": false,
+        "colors": {
+         "color": "#1C1B1F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Flamengo",
+        "short_name": "Flamengo",
+        "url_name": "flamengo",
+        "id": "bcbf",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#AB1B10",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Bruno Henrique",
+          "player_sname": "Bruno Henrique",
+          "time": 61.0,
+          "time_to_display": "61'"
+         },
+         {
+          "player_name": "Leo Pereira",
+          "player_sname": "Pereira",
+          "time": 75.0,
+          "time_to_display": "75'"
+         }
+        ]
+       }
+      ],
+      "url_name": "independiente-del-valle-vs-flamengo",
+      "scores": [
+       0.0,
+       2.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "10-09-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eibjfba",
+      "winner": 1,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Platense",
+        "short_name": "Platense",
+        "url_name": "platense",
+        "id": "hcah",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#5C3918",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Guido Mainero",
+          "player_sname": "Mainero",
+          "time": 30.0,
+          "time_to_display": "30'"
+         },
+         {
+          "player_name": "Bruno Sepúlveda",
+          "player_sname": "Sepúlveda",
+          "time": 45.0,
+          "time_to_display": "45'+2"
+         }
+        ]
+       },
+       {
+        "name": "Fluminense",
+        "short_name": "Fluminense",
+        "url_name": "fluminense",
+        "id": "bcbg",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#6E202E",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Agustín Canobbio",
+          "player_sname": "Canobbio",
+          "time": 57.0,
+          "time_to_display": "57'"
+         }
+        ]
+       }
+      ],
+      "url_name": "platense-vs-fluminense",
+      "scores": [
+       2.0,
+       1.0
+      ],
+      "agg_scores": [
+       2.0,
+       3.0
+      ],
+      "description": "Global 2 - 3",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "15-09-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eicadgb",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Liga de Quito",
+        "short_name": "LDU",
+        "url_name": "ldu",
+        "id": "bcic",
+        "country_id": "fb",
+        "allow_open": false,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Luis Segovia",
+          "player_sname": "Segovia",
+          "time": 15.0,
+          "time_to_display": "15'"
+         },
+         {
+          "player_name": "Michael Estrada",
+          "player_sname": "Estrada",
+          "time": 90.0,
+          "time_to_display": "90'"
+         },
+         {
+          "player_name": "Michael Estrada",
+          "player_sname": "Estrada",
+          "time": 90.0,
+          "time_to_display": "90'+3"
+         }
+        ]
+       },
+       {
+        "name": "Palmeiras",
+        "short_name": "Palmeiras",
+        "url_name": "palmeiras",
+        "id": "bccc",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#225638",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Marlon Freitas",
+          "player_sname": "Marlon",
+          "time": 10.0,
+          "time_to_display": "10'"
+         },
+         {
+          "player_name": "Vitor Roque",
+          "player_sname": "Vitor Roque",
+          "time": 73.0,
+          "time_to_display": "73'",
+          "goal_type": "Pen"
+         }
+        ]
+       }
+      ],
+      "url_name": "ldu-vs-palmeiras",
+      "scores": [
+       3.0,
+       2.0
+      ],
+      "penalties": [
+       3.0,
+       4.0
+      ],
+      "agg_scores": [
+       3.0,
+       3.0
+      ],
+      "description": "Global 3 - 3",
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "16-09-2026 17:00",
+      "game_time": 120,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "eicadhh",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Corinthians",
+        "short_name": "Corinthians",
+        "url_name": "corinthians",
+        "id": "bcgh",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FCFBEE",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Estudiantes de La Plata",
+        "short_name": "Estudiantes",
+        "url_name": "estudiantes-de-la-plata",
+        "id": "igh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FAFAFA",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Alexis Castro",
+          "player_sname": "Castro",
+          "time": 87.0,
+          "time_to_display": "87'"
+         }
+        ]
+       }
+      ],
+      "url_name": "corinthians-vs-estudiantes-de-la-plata",
+      "scores": [
+       0.0,
+       1.0
+      ],
+      "agg_scores": [
+       1.0,
+       2.0
+      ],
+      "description": "Global 1 - 2",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "16-09-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eicdiib",
+      "winner": -1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Flamengo",
+        "short_name": "Flamengo",
+        "url_name": "flamengo",
+        "id": "bcbf",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#AB1B10",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 1,
+        "goals": [
+         {
+          "player_name": "Giorgian de Arrascaeta",
+          "player_sname": "De Arrascaeta",
+          "time": 83.0,
+          "time_to_display": "83'"
+         }
+        ]
+       },
+       {
+        "name": "Independiente Del Valle",
+        "short_name": "IDV",
+        "url_name": "independiente-del-valle",
+        "id": "jbec",
+        "country_id": "fb",
+        "allow_open": false,
+        "colors": {
+         "color": "#1C1B1F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Djorkaeff Reasco",
+          "player_sname": "Reasco",
+          "time": 31.0,
+          "time_to_display": "31'"
+         }
+        ]
+       }
+      ],
+      "url_name": "flamengo-vs-independiente-del-valle",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "agg_scores": [
+       3.0,
+       1.0
+      ],
+      "description": "Global 3 - 1",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "17-09-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     }
+    ]
+   },
+   "102_69_7_-1 Semifinales": {
+    "TTL": 300,
+    "games": [
+     {
+      "id": "eifhdej",
+      "winner": 2,
+      "teams": [
+       {
+        "name": "Fluminense",
+        "short_name": "Fluminense",
+        "url_name": "fluminense",
+        "id": "bcbg",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#6E202E",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Wesley Natã",
+          "player_sname": "W. Natã",
+          "time": 90.0,
+          "time_to_display": "90'+3"
+         }
+        ]
+       },
+       {
+        "name": "Palmeiras",
+        "short_name": "Palmeiras",
+        "url_name": "palmeiras",
+        "id": "bccc",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#225638",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "José Manuel López",
+          "player_sname": "López",
+          "time": 45.0,
+          "time_to_display": "45'"
+         },
+         {
+          "player_name": "Marlon Freitas",
+          "player_sname": "Marlon",
+          "time": 85.0,
+          "time_to_display": "85'"
+         }
+        ]
+       }
+      ],
+      "url_name": "fluminense-vs-palmeiras",
+      "scores": [
+       1.0,
+       2.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "14-10-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eifiieh",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Estudiantes de La Plata",
+        "short_name": "Estudiantes",
+        "url_name": "estudiantes-de-la-plata",
+        "id": "igh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FAFAFA",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Flamengo",
+        "short_name": "Flamengo",
+        "url_name": "flamengo",
+        "id": "bcbf",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#AB1B10",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "estudiantes-de-la-plata-vs-flamengo",
+      "scores": [
+       0.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "15-10-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eifhdfa",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Palmeiras",
+        "short_name": "Palmeiras",
+        "url_name": "palmeiras",
+        "id": "bccc",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#225638",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Fluminense",
+        "short_name": "Fluminense",
+        "url_name": "fluminense",
+        "id": "bcbg",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#6E202E",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Hércules",
+          "player_sname": "Hércules",
+          "time": 82.0,
+          "time_to_display": "82'"
+         }
+        ]
+       }
+      ],
+      "url_name": "palmeiras-vs-fluminense",
+      "scores": [
+       0.0,
+       1.0
+      ],
+      "penalties": [
+       5.0,
+       3.0
+      ],
+      "agg_scores": [
+       2.0,
+       2.0
+      ],
+      "description": "Global 2 - 2",
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "21-10-2026 19:30",
+      "game_time": 125,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "eifiiei",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Flamengo",
+        "short_name": "Flamengo",
+        "url_name": "flamengo",
+        "id": "bcbf",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#AB1B10",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Estudiantes de La Plata",
+        "short_name": "Estudiantes",
+        "url_name": "estudiantes-de-la-plata",
+        "id": "igh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FAFAFA",
+         "text_color": "#000000"
+        },
+        "red_cards": 1
+       }
+      ],
+      "url_name": "flamengo-vs-estudiantes-de-la-plata",
+      "scores": [
+       0.0,
+       0.0
+      ],
+      "penalties": [
+       2.0,
+       3.0
+      ],
+      "agg_scores": [
+       0.0,
+       0.0
+      ],
+      "description": "Global 0 - 0",
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "22-10-2026 19:30",
+      "game_time": 125,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     }
+    ]
+   },
+   "102_69_8_-1 Final": {
+    "TTL": 300,
+    "games": [
+     {
+      "id": "eiidibb",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Palmeiras",
+        "short_name": "Palmeiras",
+        "url_name": "palmeiras",
+        "id": "bccc",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#225638",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Estudiantes de La Plata",
+        "short_name": "Estudiantes",
+        "url_name": "estudiantes-de-la-plata",
+        "id": "igh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FAFAFA",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "palmeiras-vs-estudiantes-de-la-plata",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "28-11-2026 11:00",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     }
+    ]
+   }
+  }
+ },
+ "dij": {
+  "filters": [
+   {
+    "name": "Partidos actuales",
+    "key": "latest"
+   },
+   {
+    "name": "Primera Fase",
+    "key": "389_25_1_-1"
+   },
+   {
+    "name": "Fecha 1",
+    "key": "389_25_2_1"
+   },
+   {
+    "name": "Fecha 2",
+    "key": "389_25_2_2"
+   },
+   {
+    "name": "Fecha 3",
+    "key": "389_25_2_3"
+   },
+   {
+    "name": "Fecha 4",
+    "key": "389_25_2_4"
+   },
+   {
+    "name": "Fecha 5",
+    "key": "389_25_2_5"
+   },
+   {
+    "name": "Fecha 6",
+    "key": "389_25_2_6"
+   },
+   {
+    "name": "Playoffs",
+    "key": "389_25_3_-1"
+   },
+   {
+    "name": "Octavos de Final",
+    "key": "389_25_4_-1"
+   },
+   {
+    "name": "Cuartos de Final",
+    "key": "389_25_5_-1"
+   },
+   {
+    "name": "Semifinales",
+    "key": "389_25_6_-1",
+    "selected": true,
+    "games": [
+     {
+      "id": "eifgijh",
+      "winner": 2,
+      "teams": [
+       {
+        "name": "Boca Juniors",
+        "short_name": "Boca Jrs.",
+        "url_name": "boca-juniors",
+        "id": "igg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#2D2E58",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Vasco Da Gama",
+        "short_name": "Vasco Da Gama",
+        "url_name": "vasco-da-gama",
+        "id": "bcch",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 1,
+        "goals": [
+         {
+          "player_name": "Adson",
+          "player_sname": "Adson",
+          "time": 25,
+          "time_to_display": "25'"
+         }
+        ]
+       }
+      ],
+      "url_name": "boca-juniors-vs-vasco-da-gama",
+      "scores": [
+       0,
+       1
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "13-10-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eifiiga",
+      "winner": 1,
+      "teams": [
+       {
+        "name": "Atlético Mineiro",
+        "short_name": "Atlético Mineiro",
+        "url_name": "atletico-mineiro",
+        "id": "bcaj",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Reinier",
+          "player_sname": "Reinier",
+          "time": 37,
+          "time_to_display": "37'"
+         },
+         {
+          "player_name": "Bernard",
+          "player_sname": "Bernard",
+          "time": 42,
+          "time_to_display": "42'"
+         },
+         {
+          "player_name": "Thiago Borbas",
+          "player_sname": "Thiago Borbas",
+          "time": 80,
+          "time_to_display": "80'"
+         }
+        ]
+       },
+       {
+        "name": "Montevideo City Torque",
+        "short_name": "City Torque",
+        "url_name": "montevideo-city-torque",
+        "id": "bcghf",
+        "country_id": "bbb",
+        "allow_open": true,
+        "colors": {
+         "color": "#66CCFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "atletico-mineiro-vs-montevideo-city-torque",
+      "scores": [
+       3,
+       0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "14-10-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eifgiji",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Vasco Da Gama",
+        "short_name": "Vasco Da Gama",
+        "url_name": "vasco-da-gama",
+        "id": "bcch",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "José Luis Rodríguez",
+          "player_sname": "Rodríguez",
+          "time": 66,
+          "time_to_display": "66'"
+         }
+        ]
+       },
+       {
+        "name": "Boca Juniors",
+        "short_name": "Boca Jrs.",
+        "url_name": "boca-juniors",
+        "id": "igg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#2D2E58",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Lautaro Di Lollo",
+          "player_sname": "Di Lollo",
+          "time": 4,
+          "time_to_display": "4'"
+         },
+         {
+          "player_name": "Miguel Merentiel",
+          "player_sname": "Merentiel",
+          "time": 34,
+          "time_to_display": "34'"
+         },
+         {
+          "player_name": "Leandro Paredes",
+          "player_sname": "Paredes",
+          "time": 88,
+          "time_to_display": "88'"
+         }
+        ]
+       }
+      ],
+      "url_name": "vasco-da-gama-vs-boca-juniors",
+      "scores": [
+       1,
+       3
+      ],
+      "agg_scores": [
+       2,
+       3
+      ],
+      "description": "Global 2 - 3",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "20-10-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eifiigb",
+      "winner": 1,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Montevideo City Torque",
+        "short_name": "City Torque",
+        "url_name": "montevideo-city-torque",
+        "id": "bcghf",
+        "country_id": "bbb",
+        "allow_open": true,
+        "colors": {
+         "color": "#66CCFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Kevin Silva",
+          "player_sname": "Silva",
+          "time": 89,
+          "time_to_display": "89'"
+         },
+         {
+          "player_name": "Gary Kagelmacher",
+          "player_sname": "Kagelmacher",
+          "time": 90,
+          "time_to_display": "90'+3"
+         }
+        ]
+       },
+       {
+        "name": "Atlético Mineiro",
+        "short_name": "Atlético Mineiro",
+        "url_name": "atletico-mineiro",
+        "id": "bcaj",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 1
+       }
+      ],
+      "url_name": "montevideo-city-torque-vs-atletico-mineiro",
+      "scores": [
+       2,
+       0
+      ],
+      "agg_scores": [
+       2,
+       3
+      ],
+      "description": "Global 2 - 3",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "21-10-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     }
+    ]
+   },
+   {
+    "name": "Final",
+    "key": "389_25_7_-1"
+   }
+  ],
+  "games": {
+   "389_25_4_-1 Octavos de Final": {
+    "TTL": 300,
+    "games": [
+     {
+      "id": "eiaafei",
+      "winner": 1,
+      "teams": [
+       {
+        "name": "Boca Juniors",
+        "short_name": "Boca Jrs.",
+        "url_name": "boca-juniors",
+        "id": "igg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#2D2E58",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Santiago Ascacibar",
+          "player_sname": "Ascacibar",
+          "time": 49.0,
+          "time_to_display": "49'"
+         },
+         {
+          "player_name": "Milton Delgado",
+          "player_sname": "Delgado",
+          "time": 51.0,
+          "time_to_display": "51'"
+         },
+         {
+          "player_name": "Leonel Flores",
+          "player_sname": "Flores",
+          "time": 62.0,
+          "time_to_display": "62'"
+         }
+        ]
+       },
+       {
+        "name": "Recoleta FC",
+        "short_name": "Recoleta FC",
+        "url_name": "cd-recoleta",
+        "id": "fdcaj",
+        "country_id": "bai",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFDE05",
+         "text_color": "#000000"
+        },
+        "red_cards": 2,
+        "goals": [
+         {
+          "player_name": "Pedro Ríos",
+          "player_sname": "Ríos",
+          "time": 5.0,
+          "time_to_display": "5'"
+         }
+        ]
+       }
+      ],
+      "url_name": "boca-juniors-vs-cd-recoleta",
+      "scores": [
+       3.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "11-08-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eiaafad",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Bolívar",
+        "short_name": "Bolívar",
+        "url_name": "bolivar",
+        "id": "hchi",
+        "country_id": "bbd",
+        "allow_open": false,
+        "colors": {
+         "color": "#9CE8FF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Carlos Melgar",
+          "player_sname": "Melgar",
+          "time": 63.0,
+          "time_to_display": "63'"
+         }
+        ]
+       },
+       {
+        "name": "São Paulo",
+        "short_name": "São Paulo",
+        "url_name": "sao-paulo",
+        "id": "bccf",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Robert Arboleda",
+          "player_sname": "Arboleda",
+          "time": 23.0,
+          "time_to_display": "23'"
+         }
+        ]
+       }
+      ],
+      "url_name": "bolivar-vs-sao-paulo",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "11-08-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehjghji",
+      "winner": 2,
+      "teams": [
+       {
+        "name": "Tigre",
+        "short_name": "Tigre",
+        "url_name": "tigre",
+        "id": "iid",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#263142",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Montevideo City Torque",
+        "short_name": "City Torque",
+        "url_name": "montevideo-city-torque",
+        "id": "bcghf",
+        "country_id": "bbb",
+        "allow_open": true,
+        "colors": {
+         "color": "#66CCFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Franco Pizzichillo",
+          "player_sname": "Pizzichillo",
+          "time": 53.0,
+          "time_to_display": "53'"
+         }
+        ]
+       }
+      ],
+      "url_name": "tigre-vs-montevideo-city-torque",
+      "scores": [
+       0.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "12-08-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehjibjg",
+      "winner": 2,
+      "teams": [
+       {
+        "name": "Bragantino",
+        "short_name": "Bragantino",
+        "url_name": "rb-bragantino",
+        "id": "bchd",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FCFCFC",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Atlético Mineiro",
+        "short_name": "Atlético Mineiro",
+        "url_name": "atletico-mineiro",
+        "id": "bcaj",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Tomas Cuello",
+          "player_sname": "Cuello",
+          "time": 73.0,
+          "time_to_display": "73'"
+         }
+        ]
+       }
+      ],
+      "url_name": "rb-bragantino-vs-atletico-mineiro",
+      "scores": [
+       0.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "12-08-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehjgicf",
+      "winner": 1,
+      "teams": [
+       {
+        "name": "Santos",
+        "short_name": "Santos",
+        "url_name": "santos",
+        "id": "bcce",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Gabriel Barbosa",
+          "player_sname": "Gabi",
+          "time": 44.0,
+          "time_to_display": "44'"
+         },
+         {
+          "player_name": "Willian Arão",
+          "player_sname": "Arao",
+          "time": 76.0,
+          "time_to_display": "76'"
+         }
+        ]
+       },
+       {
+        "name": "Macara",
+        "short_name": "Macara",
+        "url_name": "macara",
+        "id": "jbea",
+        "country_id": "fb",
+        "allow_open": false,
+        "colors": {
+         "color": "#66C4FF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Franco Posse",
+          "player_sname": "Franco Posse",
+          "time": 5.0,
+          "time_to_display": "5'"
+         }
+        ]
+       }
+      ],
+      "url_name": "santos-vs-macara",
+      "scores": [
+       2.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "13-08-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehjibfj",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Vasco Da Gama",
+        "short_name": "Vasco Da Gama",
+        "url_name": "vasco-da-gama",
+        "id": "bcch",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Olimpia",
+        "short_name": "Olimpia",
+        "url_name": "olimpia",
+        "id": "ifei",
+        "country_id": "bai",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "vasco-da-gama-vs-olimpia",
+      "scores": [
+       0.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "13-08-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehjibje",
+      "winner": 1,
+      "teams": [
+       {
+        "name": "Cienciano",
+        "short_name": "Cienciano",
+        "url_name": "cienciano",
+        "id": "iebc",
+        "country_id": "bbc",
+        "allow_open": false,
+        "colors": {
+         "color": "#FF0000",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Matias Succar",
+          "player_sname": "Succar",
+          "time": 18.0,
+          "time_to_display": "18'"
+         },
+         {
+          "player_name": "Neri Bandiera",
+          "player_sname": "Bandiera",
+          "time": 20.0,
+          "time_to_display": "20'"
+         },
+         {
+          "player_name": "Matias Succar",
+          "player_sname": "Succar",
+          "time": 30.0,
+          "time_to_display": "30'"
+         },
+         {
+          "player_name": "Marcos Martinich",
+          "player_sname": "Martinich",
+          "time": 35.0,
+          "time_to_display": "35'"
+         },
+         {
+          "player_name": "Neri Bandiera",
+          "player_sname": "Bandiera",
+          "time": 62.0,
+          "time_to_display": "62'"
+         },
+         {
+          "player_name": "Matias Succar",
+          "player_sname": "Succar",
+          "time": 78.0,
+          "time_to_display": "78'"
+         }
+        ]
+       },
+       {
+        "name": "Botafogo",
+        "short_name": "Botafogo",
+        "url_name": "botafogo",
+        "id": "bcbb",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#F7F7F7",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Matheus Martins",
+          "player_sname": "Matheus Martins",
+          "time": 49.0,
+          "time_to_display": "49'"
+         }
+        ]
+       }
+      ],
+      "url_name": "cienciano-vs-botafogo",
+      "scores": [
+       6.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "13-08-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eiaafej",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Recoleta FC",
+        "short_name": "Recoleta FC",
+        "url_name": "cd-recoleta",
+        "id": "fdcaj",
+        "country_id": "bai",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFDE05",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Boca Juniors",
+        "short_name": "Boca Jrs.",
+        "url_name": "boca-juniors",
+        "id": "igg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#2D2E58",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Santiago Ascacibar",
+          "player_sname": "Ascacibar",
+          "time": 30.0,
+          "time_to_display": "30'"
+         },
+         {
+          "player_name": "Sebastián Villa",
+          "player_sname": "Villa",
+          "time": 43.0,
+          "time_to_display": "43'"
+         },
+         {
+          "player_name": "Miguel Merentiel",
+          "player_sname": "Merentiel",
+          "time": 52.0,
+          "time_to_display": "52'"
+         },
+         {
+          "player_name": "Alan Velasco",
+          "player_sname": "Alan Velasco",
+          "time": 77.0,
+          "time_to_display": "77'"
+         }
+        ]
+       }
+      ],
+      "url_name": "cd-recoleta-vs-boca-juniors",
+      "scores": [
+       0.0,
+       4.0
+      ],
+      "agg_scores": [
+       1.0,
+       7.0
+      ],
+      "description": "Global 1 - 7",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "18-08-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eiaafae",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "São Paulo",
+        "short_name": "São Paulo",
+        "url_name": "sao-paulo",
+        "id": "bccf",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Luciano",
+          "player_sname": "Luciano",
+          "time": 18.0,
+          "time_to_display": "18'"
+         },
+         {
+          "player_name": "Jonathan Calleri",
+          "player_sname": "Calleri",
+          "time": 68.0,
+          "time_to_display": "68'",
+          "goal_type": "Pen"
+         },
+         {
+          "player_name": "José Sabino",
+          "player_sname": "Sabino",
+          "time": 76.0,
+          "time_to_display": "76'"
+         }
+        ]
+       },
+       {
+        "name": "Bolívar",
+        "short_name": "Bolívar",
+        "url_name": "bolivar",
+        "id": "hchi",
+        "country_id": "bbd",
+        "allow_open": false,
+        "colors": {
+         "color": "#9CE8FF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Dairon Asprilla ",
+          "player_sname": "Asprilla",
+          "time": 61.0,
+          "time_to_display": "61'"
+         }
+        ]
+       }
+      ],
+      "url_name": "sao-paulo-vs-bolivar",
+      "scores": [
+       3.0,
+       1.0
+      ],
+      "agg_scores": [
+       4.0,
+       2.0
+      ],
+      "description": "Global 4 - 2",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "18-08-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehjibjh",
+      "winner": -1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Atlético Mineiro",
+        "short_name": "Atlético Mineiro",
+        "url_name": "atletico-mineiro",
+        "id": "bcaj",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Maycon",
+          "player_sname": "Maycon",
+          "time": 52.0,
+          "time_to_display": "52'"
+         },
+         {
+          "player_name": "Tomas Cuello",
+          "player_sname": "Cuello",
+          "time": 90.0,
+          "time_to_display": "90'+3"
+         }
+        ]
+       },
+       {
+        "name": "Bragantino",
+        "short_name": "Bragantino",
+        "url_name": "rb-bragantino",
+        "id": "bchd",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FCFCFC",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Eric Ramires",
+          "player_sname": "Ramires",
+          "time": 45.0,
+          "time_to_display": "45'+8"
+         },
+         {
+          "player_name": "Eduardo Sasha",
+          "player_sname": "Eduardo Sasha",
+          "time": 81.0,
+          "time_to_display": "81'"
+         }
+        ]
+       }
+      ],
+      "url_name": "atletico-mineiro-vs-rb-bragantino",
+      "scores": [
+       2.0,
+       2.0
+      ],
+      "agg_scores": [
+       3.0,
+       2.0
+      ],
+      "description": "Global 3 - 2",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "19-08-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehjghjj",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Montevideo City Torque",
+        "short_name": "City Torque",
+        "url_name": "montevideo-city-torque",
+        "id": "bcghf",
+        "country_id": "bbb",
+        "allow_open": true,
+        "colors": {
+         "color": "#66CCFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Salomón Rodriguez",
+          "player_sname": "Salomón Rodriguez",
+          "time": 39.0,
+          "time_to_display": "39'"
+         },
+         {
+          "player_name": "Salomón Rodriguez",
+          "player_sname": "Salomón Rodriguez",
+          "time": 45.0,
+          "time_to_display": "45'+4",
+          "goal_type": "Pen"
+         }
+        ]
+       },
+       {
+        "name": "Tigre",
+        "short_name": "Tigre",
+        "url_name": "tigre",
+        "id": "iid",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#263142",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 1,
+        "goals": [
+         {
+          "player_name": "Valentin Moreno",
+          "player_sname": "Moreno",
+          "time": 41.0,
+          "time_to_display": "41'"
+         }
+        ]
+       }
+      ],
+      "url_name": "montevideo-city-torque-vs-tigre",
+      "scores": [
+       2.0,
+       1.0
+      ],
+      "agg_scores": [
+       3.0,
+       1.0
+      ],
+      "description": "Global 3 - 1",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "19-08-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eiaafeg",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Independiente Santa Fe",
+        "short_name": "Santa Fe",
+        "url_name": "independiente-santa-fe",
+        "id": "hgee",
+        "country_id": "baj",
+        "allow_open": true,
+        "colors": {
+         "color": "#DD0000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "River Plate",
+        "short_name": "River",
+        "url_name": "river-plate",
+        "id": "igi",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "independiente-santa-fe-vs-river-plate",
+      "scores": [
+       0.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "19-08-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehjgicg",
+      "winner": -1,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Macara",
+        "short_name": "Macara",
+        "url_name": "macara",
+        "id": "jbea",
+        "country_id": "fb",
+        "allow_open": false,
+        "colors": {
+         "color": "#66C4FF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Santos",
+        "short_name": "Santos",
+        "url_name": "santos",
+        "id": "bcce",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "macara-vs-santos",
+      "scores": [
+       0.0,
+       0.0
+      ],
+      "agg_scores": [
+       1.0,
+       2.0
+      ],
+      "description": "Global 1 - 2",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "20-08-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehjibga",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Olimpia",
+        "short_name": "Olimpia",
+        "url_name": "olimpia",
+        "id": "ifei",
+        "country_id": "bai",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Esteban Matus",
+          "player_sname": "Matus",
+          "time": 15.0,
+          "time_to_display": "15'"
+         }
+        ]
+       },
+       {
+        "name": "Vasco Da Gama",
+        "short_name": "Vasco Da Gama",
+        "url_name": "vasco-da-gama",
+        "id": "bcch",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Thiago Mendes",
+          "player_sname": "T. Mendes",
+          "time": 29.0,
+          "time_to_display": "29'"
+         },
+         {
+          "player_name": "David",
+          "player_sname": "David",
+          "time": 36.0,
+          "time_to_display": "36'"
+         },
+         {
+          "player_name": "Adson",
+          "player_sname": "Adson",
+          "time": 70.0,
+          "time_to_display": "70'"
+         },
+         {
+          "player_name": "Claudio Spinelli",
+          "player_sname": "Spinelli",
+          "time": 84.0,
+          "time_to_display": "84'"
+         }
+        ]
+       }
+      ],
+      "url_name": "olimpia-vs-vasco-da-gama",
+      "scores": [
+       1.0,
+       4.0
+      ],
+      "agg_scores": [
+       1.0,
+       4.0
+      ],
+      "description": "Global 1 - 4",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "20-08-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehjibjf",
+      "winner": 1,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Botafogo",
+        "short_name": "Botafogo",
+        "url_name": "botafogo",
+        "id": "bcbb",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#F7F7F7",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Danilo Pereira",
+          "player_sname": "D. Pereira",
+          "time": 8.0,
+          "time_to_display": "8'"
+         }
+        ]
+       },
+       {
+        "name": "Cienciano",
+        "short_name": "Cienciano",
+        "url_name": "cienciano",
+        "id": "iebc",
+        "country_id": "bbc",
+        "allow_open": false,
+        "colors": {
+         "color": "#FF0000",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "botafogo-vs-cienciano",
+      "scores": [
+       1.0,
+       0.0
+      ],
+      "agg_scores": [
+       2.0,
+       6.0
+      ],
+      "description": "Global 2 - 6",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "20-08-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eiaafeh",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "River Plate",
+        "short_name": "River",
+        "url_name": "river-plate",
+        "id": "igi",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Sebastián Driussi",
+          "player_sname": "Driussi",
+          "time": 52.0,
+          "time_to_display": "52'"
+         }
+        ]
+       },
+       {
+        "name": "Independiente Santa Fe",
+        "short_name": "Santa Fe",
+        "url_name": "independiente-santa-fe",
+        "id": "hgee",
+        "country_id": "baj",
+        "allow_open": true,
+        "colors": {
+         "color": "#DD0000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Franco Fagúndez",
+          "player_sname": "Fagúndez",
+          "time": 80.0,
+          "time_to_display": "80'",
+          "goal_type": "Pen"
+         }
+        ]
+       }
+      ],
+      "url_name": "river-plate-vs-independiente-santa-fe",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "penalties": [
+       7.0,
+       8.0
+      ],
+      "agg_scores": [
+       1.0,
+       1.0
+      ],
+      "description": "Global 1 - 1",
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "26-08-2026 19:30",
+      "game_time": 131,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     }
+    ]
+   },
+   "389_25_5_-1 Cuartos de Final": {
+    "TTL": 300,
+    "games": [
+     {
+      "id": "eicgfga",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Independiente Santa Fe",
+        "short_name": "Santa Fe",
+        "url_name": "independiente-santa-fe",
+        "id": "hgee",
+        "country_id": "baj",
+        "allow_open": true,
+        "colors": {
+         "color": "#DD0000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Vasco Da Gama",
+        "short_name": "Vasco Da Gama",
+        "url_name": "vasco-da-gama",
+        "id": "bcch",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "independiente-santa-fe-vs-vasco-da-gama",
+      "scores": [
+       0.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "08-09-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eibiiia",
+      "winner": 1,
+      "teams": [
+       {
+        "name": "Boca Juniors",
+        "short_name": "Boca Jrs.",
+        "url_name": "boca-juniors",
+        "id": "igg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#2D2E58",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Miguel Merentiel",
+          "player_sname": "Merentiel",
+          "time": 52.0,
+          "time_to_display": "52'"
+         }
+        ]
+       },
+       {
+        "name": "São Paulo",
+        "short_name": "São Paulo",
+        "url_name": "sao-paulo",
+        "id": "bccf",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "boca-juniors-vs-sao-paulo",
+      "scores": [
+       1.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "08-09-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eicadfe",
+      "winner": 1,
+      "teams": [
+       {
+        "name": "Santos",
+        "short_name": "Santos",
+        "url_name": "santos",
+        "id": "bcce",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Willian Arão",
+          "player_sname": "Arao",
+          "time": 31.0,
+          "time_to_display": "31'"
+         },
+         {
+          "player_name": "Christian Oliva",
+          "player_sname": "Oliva",
+          "time": 68.0,
+          "time_to_display": "68'"
+         }
+        ]
+       },
+       {
+        "name": "Atlético Mineiro",
+        "short_name": "Atlético Mineiro",
+        "url_name": "atletico-mineiro",
+        "id": "bcaj",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "santos-vs-atletico-mineiro",
+      "scores": [
+       2.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "09-09-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eicadhi",
+      "winner": 1,
+      "teams": [
+       {
+        "name": "Cienciano",
+        "short_name": "Cienciano",
+        "url_name": "cienciano",
+        "id": "iebc",
+        "country_id": "bbc",
+        "allow_open": false,
+        "colors": {
+         "color": "#FF0000",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Cristian Souza",
+          "player_sname": "Souza",
+          "time": 28.0,
+          "time_to_display": "28'"
+         },
+         {
+          "player_name": "Maximiliano Amondarain",
+          "player_sname": "Amondarain",
+          "time": 42.0,
+          "time_to_display": "42'"
+         }
+        ]
+       },
+       {
+        "name": "Montevideo City Torque",
+        "short_name": "City Torque",
+        "url_name": "montevideo-city-torque",
+        "id": "bcghf",
+        "country_id": "bbb",
+        "allow_open": true,
+        "colors": {
+         "color": "#66CCFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "cienciano-vs-montevideo-city-torque",
+      "scores": [
+       2.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "10-09-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eicgfgj",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Vasco Da Gama",
+        "short_name": "Vasco Da Gama",
+        "url_name": "vasco-da-gama",
+        "id": "bcch",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Bruno Duarte",
+          "player_sname": "Duarte",
+          "time": 37.0,
+          "time_to_display": "37'"
+         },
+         {
+          "player_name": "David",
+          "player_sname": "David",
+          "time": 65.0,
+          "time_to_display": "65'"
+         }
+        ]
+       },
+       {
+        "name": "Independiente Santa Fe",
+        "short_name": "Santa Fe",
+        "url_name": "independiente-santa-fe",
+        "id": "hgee",
+        "country_id": "baj",
+        "allow_open": true,
+        "colors": {
+         "color": "#DD0000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "vasco-da-gama-vs-independiente-santa-fe",
+      "scores": [
+       2.0,
+       0.0
+      ],
+      "agg_scores": [
+       2.0,
+       0.0
+      ],
+      "description": "Global 2 - 0",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "15-09-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eibiiib",
+      "winner": -1,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "São Paulo",
+        "short_name": "São Paulo",
+        "url_name": "sao-paulo",
+        "id": "bccf",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Domingos Duarte",
+          "player_sname": "Duarte",
+          "time": 89.0,
+          "time_to_display": "89'"
+         }
+        ]
+       },
+       {
+        "name": "Boca Juniors",
+        "short_name": "Boca Jrs.",
+        "url_name": "boca-juniors",
+        "id": "igg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#2D2E58",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Leandro Lozano",
+          "player_sname": "Lozano",
+          "time": 60.0,
+          "time_to_display": "60'"
+         }
+        ]
+       }
+      ],
+      "url_name": "sao-paulo-vs-boca-juniors",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "agg_scores": [
+       1.0,
+       2.0
+      ],
+      "description": "Global 1 - 2",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "15-09-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eicadff",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Atlético Mineiro",
+        "short_name": "Atlético Mineiro",
+        "url_name": "atletico-mineiro",
+        "id": "bcaj",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Bernard",
+          "player_sname": "Bernard",
+          "time": 1.0,
+          "time_to_display": "1'"
+         },
+         {
+          "player_name": "Reinier",
+          "player_sname": "Reinier",
+          "time": 20.0,
+          "time_to_display": "20'"
+         },
+         {
+          "player_name": "Reinier",
+          "player_sname": "Reinier",
+          "time": 41.0,
+          "time_to_display": "41'"
+         },
+         {
+          "player_name": "Tomas Cuello",
+          "player_sname": "Cuello",
+          "time": 90.0,
+          "time_to_display": "90'+2"
+         }
+        ]
+       },
+       {
+        "name": "Santos",
+        "short_name": "Santos",
+        "url_name": "santos",
+        "id": "bcce",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Lyanco",
+          "player_sname": "Lyanco",
+          "time": 28.0,
+          "time_to_display": "28'",
+          "goal_type": "E.C"
+         },
+         {
+          "player_name": "Gabriel Barbosa",
+          "player_sname": "Gabi",
+          "time": 72.0,
+          "time_to_display": "72'"
+         }
+        ]
+       }
+      ],
+      "url_name": "atletico-mineiro-vs-santos",
+      "scores": [
+       4.0,
+       2.0
+      ],
+      "penalties": [
+       3.0,
+       1.0
+      ],
+      "agg_scores": [
+       4.0,
+       4.0
+      ],
+      "description": "Global 4 - 4",
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "16-09-2026 17:00",
+      "game_time": 120,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "eicadhj",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Montevideo City Torque",
+        "short_name": "City Torque",
+        "url_name": "montevideo-city-torque",
+        "id": "bcghf",
+        "country_id": "bbb",
+        "allow_open": true,
+        "colors": {
+         "color": "#66CCFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Salomón Rodriguez",
+          "player_sname": "Salomón Rodriguez",
+          "time": 38.0,
+          "time_to_display": "38'"
+         },
+         {
+          "player_name": "Salomón Rodriguez",
+          "player_sname": "Salomón Rodriguez",
+          "time": 57.0,
+          "time_to_display": "57'"
+         },
+         {
+          "player_name": "Nahuel Da Silva",
+          "player_sname": "Da Silva",
+          "time": 90.0,
+          "time_to_display": "90'+2"
+         }
+        ]
+       },
+       {
+        "name": "Cienciano",
+        "short_name": "Cienciano",
+        "url_name": "cienciano",
+        "id": "iebc",
+        "country_id": "bbc",
+        "allow_open": false,
+        "colors": {
+         "color": "#FF0000",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "montevideo-city-torque-vs-cienciano",
+      "scores": [
+       3.0,
+       0.0
+      ],
+      "agg_scores": [
+       3.0,
+       2.0
+      ],
+      "description": "Global 3 - 2",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "17-09-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     }
+    ]
+   },
+   "389_25_6_-1 Semifinales": {
+    "TTL": 300,
+    "games": [
+     {
+      "id": "eifgijh",
+      "winner": 2,
+      "teams": [
+       {
+        "name": "Boca Juniors",
+        "short_name": "Boca Jrs.",
+        "url_name": "boca-juniors",
+        "id": "igg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#2D2E58",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Vasco Da Gama",
+        "short_name": "Vasco Da Gama",
+        "url_name": "vasco-da-gama",
+        "id": "bcch",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 1,
+        "goals": [
+         {
+          "player_name": "Adson",
+          "player_sname": "Adson",
+          "time": 25.0,
+          "time_to_display": "25'"
+         }
+        ]
+       }
+      ],
+      "url_name": "boca-juniors-vs-vasco-da-gama",
+      "scores": [
+       0.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "13-10-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eifiiga",
+      "winner": 1,
+      "teams": [
+       {
+        "name": "Atlético Mineiro",
+        "short_name": "Atlético Mineiro",
+        "url_name": "atletico-mineiro",
+        "id": "bcaj",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Reinier",
+          "player_sname": "Reinier",
+          "time": 37.0,
+          "time_to_display": "37'"
+         },
+         {
+          "player_name": "Bernard",
+          "player_sname": "Bernard",
+          "time": 42.0,
+          "time_to_display": "42'"
+         },
+         {
+          "player_name": "Thiago Borbas",
+          "player_sname": "Thiago Borbas",
+          "time": 80.0,
+          "time_to_display": "80'"
+         }
+        ]
+       },
+       {
+        "name": "Montevideo City Torque",
+        "short_name": "City Torque",
+        "url_name": "montevideo-city-torque",
+        "id": "bcghf",
+        "country_id": "bbb",
+        "allow_open": true,
+        "colors": {
+         "color": "#66CCFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "atletico-mineiro-vs-montevideo-city-torque",
+      "scores": [
+       3.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "14-10-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eifgiji",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Vasco Da Gama",
+        "short_name": "Vasco Da Gama",
+        "url_name": "vasco-da-gama",
+        "id": "bcch",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "José Luis Rodríguez",
+          "player_sname": "Rodríguez",
+          "time": 66.0,
+          "time_to_display": "66'"
+         }
+        ]
+       },
+       {
+        "name": "Boca Juniors",
+        "short_name": "Boca Jrs.",
+        "url_name": "boca-juniors",
+        "id": "igg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#2D2E58",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Lautaro Di Lollo",
+          "player_sname": "Di Lollo",
+          "time": 4.0,
+          "time_to_display": "4'"
+         },
+         {
+          "player_name": "Miguel Merentiel",
+          "player_sname": "Merentiel",
+          "time": 34.0,
+          "time_to_display": "34'"
+         },
+         {
+          "player_name": "Leandro Paredes",
+          "player_sname": "Paredes",
+          "time": 88.0,
+          "time_to_display": "88'"
+         }
+        ]
+       }
+      ],
+      "url_name": "vasco-da-gama-vs-boca-juniors",
+      "scores": [
+       1.0,
+       3.0
+      ],
+      "agg_scores": [
+       2.0,
+       3.0
+      ],
+      "description": "Global 2 - 3",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "20-10-2026 19:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eifiigb",
+      "winner": 1,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Montevideo City Torque",
+        "short_name": "City Torque",
+        "url_name": "montevideo-city-torque",
+        "id": "bcghf",
+        "country_id": "bbb",
+        "allow_open": true,
+        "colors": {
+         "color": "#66CCFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Kevin Silva",
+          "player_sname": "Silva",
+          "time": 89.0,
+          "time_to_display": "89'"
+         },
+         {
+          "player_name": "Gary Kagelmacher",
+          "player_sname": "Kagelmacher",
+          "time": 90.0,
+          "time_to_display": "90'+3"
+         }
+        ]
+       },
+       {
+        "name": "Atlético Mineiro",
+        "short_name": "Atlético Mineiro",
+        "url_name": "atletico-mineiro",
+        "id": "bcaj",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 1
+       }
+      ],
+      "url_name": "montevideo-city-torque-vs-atletico-mineiro",
+      "scores": [
+       2.0,
+       0.0
+      ],
+      "agg_scores": [
+       2.0,
+       3.0
+      ],
+      "description": "Global 2 - 3",
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "21-10-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     }
+    ]
+   },
+   "389_25_7_-1 Final": {
+    "TTL": 300,
+    "games": [
+     {
+      "id": "eiiddih",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Atlético Mineiro",
+        "short_name": "Atlético Mineiro",
+        "url_name": "atletico-mineiro",
+        "id": "bcaj",
+        "country_id": "cb",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Boca Juniors",
+        "short_name": "Boca Jrs.",
+        "url_name": "boca-juniors",
+        "id": "igg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#2D2E58",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "atletico-mineiro-vs-boca-juniors",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "21-11-2026 11:00",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     }
+    ]
+   }
+  }
+ },
+ "gea": {
+  "filters": [
+   {
+    "name": "Partidos actuales",
+    "key": "latest"
+   },
+   {
+    "name": "32avos de final",
+    "key": "640_16_1_-1"
+   },
+   {
+    "name": "16avos de final",
+    "key": "640_16_2_-1"
+   },
+   {
+    "name": "Octavos de Final",
+    "key": "640_16_3_-1"
+   },
+   {
+    "name": "Cuartos de Final",
+    "key": "640_16_4_-1",
+    "selected": true,
+    "games": [
+     {
+      "id": "eibjhac",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Deportivo Riestra",
+        "short_name": "Riestra",
+        "url_name": "riestra",
+        "id": "bbjea",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#28272C",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Ángel Stringa",
+          "player_sname": "Stringa",
+          "time": 45,
+          "time_to_display": "45'"
+         }
+        ]
+       },
+       {
+        "name": "Banfield",
+        "short_name": "Banfield",
+        "url_name": "banfield",
+        "id": "ihi",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Tomas Adoryan",
+          "player_sname": "Adoryan",
+          "time": 51,
+          "time_to_display": "51'"
+         }
+        ]
+       }
+      ],
+      "url_name": "riestra-vs-banfield",
+      "scores": [
+       1,
+       1
+      ],
+      "penalties": [
+       6,
+       7
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "09-09-2026 17:00",
+      "game_time": 127,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "eicgejh",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Independiente Rivadavia",
+        "short_name": "Independiente Riv.",
+        "url_name": "independiente-rivadavia",
+        "id": "hcch",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#14163F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Álex Arce",
+          "player_sname": "Arce",
+          "time": 45,
+          "time_to_display": "45'+2",
+          "goal_type": "Pen"
+         }
+        ]
+       },
+       {
+        "name": "Atlético Tucumán",
+        "short_name": "Atl. Tucumán",
+        "url_name": "atletico-tucuman",
+        "id": "gbfc",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Alexis Canelo",
+          "player_sname": "Canelo",
+          "time": 90,
+          "time_to_display": "90'+3"
+         }
+        ]
+       }
+      ],
+      "url_name": "independiente-rivadavia-vs-atletico-tucuman",
+      "scores": [
+       1,
+       1
+      ],
+      "penalties": [
+       2,
+       3
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "16-09-2026 17:00",
+      "game_time": 129,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "eiefbdg",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Racing Club",
+        "short_name": "Racing",
+        "url_name": "racing-club",
+        "id": "ihg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Gastón Lodico",
+          "player_sname": "Lodico",
+          "time": 19,
+          "time_to_display": "19'"
+         },
+         {
+          "player_name": "Adrian Martinez",
+          "player_sname": "Adrian Martinez",
+          "time": 47,
+          "time_to_display": "47'"
+         }
+        ]
+       },
+       {
+        "name": "Boca Juniors",
+        "short_name": "Boca Jrs.",
+        "url_name": "boca-juniors",
+        "id": "igg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#2D2E58",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Enner Valencia",
+          "player_sname": "Valencia",
+          "time": 72,
+          "time_to_display": "72'"
+         },
+         {
+          "player_name": "Enner Valencia",
+          "player_sname": "Valencia",
+          "time": 80,
+          "time_to_display": "80'"
+         },
+         {
+          "player_name": "Enner Valencia",
+          "player_sname": "Valencia",
+          "time": 90,
+          "time_to_display": "90'+5"
+         }
+        ]
+       }
+      ],
+      "url_name": "racing-club-vs-boca-juniors",
+      "scores": [
+       2,
+       3
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "27-09-2026 15:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eichiab",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Platense",
+        "short_name": "Platense",
+        "url_name": "platense",
+        "id": "hcah",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#5C3918",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Gonzalo Lencina",
+          "player_sname": "Lencina",
+          "time": 83,
+          "time_to_display": "83'"
+         }
+        ]
+       },
+       {
+        "name": "Estudiantes de La Plata",
+        "short_name": "Estudiantes",
+        "url_name": "estudiantes-de-la-plata",
+        "id": "igh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FAFAFA",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "platense-vs-estudiantes-de-la-plata",
+      "scores": [
+       1,
+       0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "01-10-2026 19:15",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     }
+    ]
+   },
+   {
+    "name": "Semifinales",
+    "key": "640_16_5_-1",
+    "selected": true,
+    "games": [
+     {
+      "id": "eibjhac",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Deportivo Riestra",
+        "short_name": "Riestra",
+        "url_name": "riestra",
+        "id": "bbjea",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#28272C",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Ángel Stringa",
+          "player_sname": "Stringa",
+          "time": 45,
+          "time_to_display": "45'"
+         }
+        ]
+       },
+       {
+        "name": "Banfield",
+        "short_name": "Banfield",
+        "url_name": "banfield",
+        "id": "ihi",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Tomas Adoryan",
+          "player_sname": "Adoryan",
+          "time": 51,
+          "time_to_display": "51'"
+         }
+        ]
+       }
+      ],
+      "url_name": "riestra-vs-banfield",
+      "scores": [
+       1,
+       1
+      ],
+      "penalties": [
+       6,
+       7
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "09-09-2026 17:00",
+      "game_time": 127,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "eicgejh",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Independiente Rivadavia",
+        "short_name": "Independiente Riv.",
+        "url_name": "independiente-rivadavia",
+        "id": "hcch",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#14163F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Álex Arce",
+          "player_sname": "Arce",
+          "time": 45,
+          "time_to_display": "45'+2",
+          "goal_type": "Pen"
+         }
+        ]
+       },
+       {
+        "name": "Atlético Tucumán",
+        "short_name": "Atl. Tucumán",
+        "url_name": "atletico-tucuman",
+        "id": "gbfc",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Alexis Canelo",
+          "player_sname": "Canelo",
+          "time": 90,
+          "time_to_display": "90'+3"
+         }
+        ]
+       }
+      ],
+      "url_name": "independiente-rivadavia-vs-atletico-tucuman",
+      "scores": [
+       1,
+       1
+      ],
+      "penalties": [
+       2,
+       3
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "16-09-2026 17:00",
+      "game_time": 129,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "eiefbdg",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Racing Club",
+        "short_name": "Racing",
+        "url_name": "racing-club",
+        "id": "ihg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Gastón Lodico",
+          "player_sname": "Lodico",
+          "time": 19,
+          "time_to_display": "19'"
+         },
+         {
+          "player_name": "Adrian Martinez",
+          "player_sname": "Adrian Martinez",
+          "time": 47,
+          "time_to_display": "47'"
+         }
+        ]
+       },
+       {
+        "name": "Boca Juniors",
+        "short_name": "Boca Jrs.",
+        "url_name": "boca-juniors",
+        "id": "igg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#2D2E58",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Enner Valencia",
+          "player_sname": "Valencia",
+          "time": 72,
+          "time_to_display": "72'"
+         },
+         {
+          "player_name": "Enner Valencia",
+          "player_sname": "Valencia",
+          "time": 80,
+          "time_to_display": "80'"
+         },
+         {
+          "player_name": "Enner Valencia",
+          "player_sname": "Valencia",
+          "time": 90,
+          "time_to_display": "90'+5"
+         }
+        ]
+       }
+      ],
+      "url_name": "racing-club-vs-boca-juniors",
+      "scores": [
+       2,
+       3
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "27-09-2026 15:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eichiab",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Platense",
+        "short_name": "Platense",
+        "url_name": "platense",
+        "id": "hcah",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#5C3918",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Gonzalo Lencina",
+          "player_sname": "Lencina",
+          "time": 83,
+          "time_to_display": "83'"
+         }
+        ]
+       },
+       {
+        "name": "Estudiantes de La Plata",
+        "short_name": "Estudiantes",
+        "url_name": "estudiantes-de-la-plata",
+        "id": "igh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FAFAFA",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "platense-vs-estudiantes-de-la-plata",
+      "scores": [
+       1,
+       0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "01-10-2026 19:15",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     }
+    ]
+   }
+  ],
+  "games": {
+   "640_16_3_-1 Octavos de Final": {
+    "TTL": 300,
+    "games": [
+     {
+      "id": "ehcgfbc",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Atlético Tucumán",
+        "short_name": "Atl. Tucumán",
+        "url_name": "atletico-tucuman",
+        "id": "gbfc",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Nicolás Laméndola",
+          "player_sname": "Laméndola",
+          "time": 31.0,
+          "time_to_display": "31'"
+         },
+         {
+          "player_name": "Manuel Brondo",
+          "player_sname": "Brondo",
+          "time": 49.0,
+          "time_to_display": "49'"
+         },
+         {
+          "player_name": "Franco Nicola",
+          "player_sname": "Franco Nicola",
+          "time": 54.0,
+          "time_to_display": "54'"
+         },
+         {
+          "player_name": "Nicolás Laméndola",
+          "player_sname": "Laméndola",
+          "time": 70.0,
+          "time_to_display": "70'"
+         }
+        ]
+       },
+       {
+        "name": "Independiente",
+        "short_name": "Independiente",
+        "url_name": "independiente",
+        "id": "ihe",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FF0000",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "atletico-tucuman-vs-independiente",
+      "scores": [
+       4.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "12-08-2026 17:15",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehhjbde",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Deportivo Riestra",
+        "short_name": "Riestra",
+        "url_name": "riestra",
+        "id": "bbjea",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#28272C",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Nicolás Benegas",
+          "player_sname": "Benegas",
+          "time": 38.0,
+          "time_to_display": "38'"
+         }
+        ]
+       },
+       {
+        "name": "Gimnasia La Plata",
+        "short_name": "Gimnasia",
+        "url_name": "gimnasia-la-plata",
+        "id": "iia",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 1,
+        "goals": [
+         {
+          "player_name": "Mateo Seoane",
+          "player_sname": "Seoane",
+          "time": 53.0,
+          "time_to_display": "53'"
+         }
+        ]
+       }
+      ],
+      "url_name": "riestra-vs-gimnasia-la-plata",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "penalties": [
+       4.0,
+       2.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "18-08-2026 15:00",
+      "game_time": 124,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "ehbchjj",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Banfield",
+        "short_name": "Banfield",
+        "url_name": "banfield",
+        "id": "ihi",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Alexander Machado",
+          "player_sname": "Machado",
+          "time": 15.0,
+          "time_to_display": "15'",
+          "goal_type": "Pen"
+         },
+         {
+          "player_name": "Tomas Adoryan",
+          "player_sname": "Adoryan",
+          "time": 22.0,
+          "time_to_display": "22'"
+         }
+        ]
+       },
+       {
+        "name": "Midland",
+        "short_name": "Midland",
+        "url_name": "ferrocarril-midland",
+        "id": "bbjcj",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#14145C",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Facundo Marin",
+          "player_sname": "Marin",
+          "time": 49.0,
+          "time_to_display": "49'"
+         },
+         {
+          "player_name": "Luciano Recalde",
+          "player_sname": "Recalde",
+          "time": 53.0,
+          "time_to_display": "53'"
+         }
+        ]
+       }
+      ],
+      "url_name": "banfield-vs-ferrocarril-midland",
+      "scores": [
+       2.0,
+       2.0
+      ],
+      "penalties": [
+       4.0,
+       3.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "18-08-2026 19:15",
+      "game_time": 125,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "ehhgjeb",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Racing Club",
+        "short_name": "Racing",
+        "url_name": "racing-club",
+        "id": "ihg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Tomas Conechny",
+          "player_sname": "Conechny",
+          "time": 4.0,
+          "time_to_display": "4'"
+         }
+        ]
+       },
+       {
+        "name": "Belgrano",
+        "short_name": "Belgrano",
+        "url_name": "belgrano",
+        "id": "fhid",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#358FC8",
+         "text_color": "#000000"
+        },
+        "red_cards": 1
+       }
+      ],
+      "url_name": "racing-club-vs-belgrano",
+      "scores": [
+       1.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "19-08-2026 17:15",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehhjbdf",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Aldosivi",
+        "short_name": "Aldosivi",
+        "url_name": "aldosivi",
+        "id": "hccd",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#133632",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Independiente Rivadavia",
+        "short_name": "Independiente Riv.",
+        "url_name": "independiente-rivadavia",
+        "id": "hcch",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#14163F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Gonzalo Rios",
+          "player_sname": "Ríos",
+          "time": 18.0,
+          "time_to_display": "18'"
+         },
+         {
+          "player_name": "Jose Florentín",
+          "player_sname": "Florentín",
+          "time": 90.0,
+          "time_to_display": "90'+5"
+         }
+        ]
+       }
+      ],
+      "url_name": "aldosivi-vs-independiente-rivadavia",
+      "scores": [
+       0.0,
+       2.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "26-08-2026 17:15",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehcjjgd",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Estudiantes de La Plata",
+        "short_name": "Estudiantes",
+        "url_name": "estudiantes-de-la-plata",
+        "id": "igh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FAFAFA",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Kevin Jappert",
+          "player_sname": "Jappert",
+          "time": 40.0,
+          "time_to_display": "40'",
+          "goal_type": "E.C"
+         },
+         {
+          "player_name": "Baltasar Rodríguez",
+          "player_sname": "Rodríguez",
+          "time": 51.0,
+          "time_to_display": "51'"
+         },
+         {
+          "player_name": "Guido Carrillo",
+          "player_sname": "Carrillo",
+          "time": 88.0,
+          "time_to_display": "88'"
+         }
+        ]
+       },
+       {
+        "name": "Barracas Central",
+        "short_name": "Barracas",
+        "url_name": "barracas-central",
+        "id": "jafb",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Leandro Gonzalez Pirez",
+          "player_sname": "Pirez",
+          "time": 84.0,
+          "time_to_display": "84'",
+          "goal_type": "E.C"
+         }
+        ]
+       }
+      ],
+      "url_name": "estudiantes-de-la-plata-vs-barracas-central",
+      "scores": [
+       3.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "27-08-2026 17:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehcihfb",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Platense",
+        "short_name": "Platense",
+        "url_name": "platense",
+        "id": "hcah",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#5C3918",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Tomás Silva",
+          "player_sname": "Silva",
+          "time": 53.0,
+          "time_to_display": "53'"
+         }
+        ]
+       },
+       {
+        "name": "Instituto",
+        "short_name": "Instituto",
+        "url_name": "instituto-ac-cordoba",
+        "id": "hchc",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FF0000",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Matías Tissera",
+          "player_sname": "Tissera",
+          "time": 28.0,
+          "time_to_display": "28'"
+         }
+        ]
+       }
+      ],
+      "url_name": "platense-vs-instituto-ac-cordoba",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "penalties": [
+       3.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "27-08-2026 19:15",
+      "game_time": 124,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     }
+    ]
+   },
+   "640_16_4_-1 Cuartos de Final": {
+    "TTL": 300,
+    "games": [
+     {
+      "id": "eibjhac",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Deportivo Riestra",
+        "short_name": "Riestra",
+        "url_name": "riestra",
+        "id": "bbjea",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#28272C",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Ángel Stringa",
+          "player_sname": "Stringa",
+          "time": 45.0,
+          "time_to_display": "45'"
+         }
+        ]
+       },
+       {
+        "name": "Banfield",
+        "short_name": "Banfield",
+        "url_name": "banfield",
+        "id": "ihi",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Tomas Adoryan",
+          "player_sname": "Adoryan",
+          "time": 51.0,
+          "time_to_display": "51'"
+         }
+        ]
+       }
+      ],
+      "url_name": "riestra-vs-banfield",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "penalties": [
+       6.0,
+       7.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "09-09-2026 17:00",
+      "game_time": 127,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "eicgejh",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Independiente Rivadavia",
+        "short_name": "Independiente Riv.",
+        "url_name": "independiente-rivadavia",
+        "id": "hcch",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#14163F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Álex Arce",
+          "player_sname": "Arce",
+          "time": 45.0,
+          "time_to_display": "45'+2",
+          "goal_type": "Pen"
+         }
+        ]
+       },
+       {
+        "name": "Atlético Tucumán",
+        "short_name": "Atl. Tucumán",
+        "url_name": "atletico-tucuman",
+        "id": "gbfc",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Alexis Canelo",
+          "player_sname": "Canelo",
+          "time": 90.0,
+          "time_to_display": "90'+3"
+         }
+        ]
+       }
+      ],
+      "url_name": "independiente-rivadavia-vs-atletico-tucuman",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "penalties": [
+       2.0,
+       3.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "16-09-2026 17:00",
+      "game_time": 129,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "eiefbdg",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Racing Club",
+        "short_name": "Racing",
+        "url_name": "racing-club",
+        "id": "ihg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Gastón Lodico",
+          "player_sname": "Lodico",
+          "time": 19.0,
+          "time_to_display": "19'"
+         },
+         {
+          "player_name": "Adrian Martinez",
+          "player_sname": "Adrian Martinez",
+          "time": 47.0,
+          "time_to_display": "47'"
+         }
+        ]
+       },
+       {
+        "name": "Boca Juniors",
+        "short_name": "Boca Jrs.",
+        "url_name": "boca-juniors",
+        "id": "igg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#2D2E58",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Enner Valencia",
+          "player_sname": "Valencia",
+          "time": 72.0,
+          "time_to_display": "72'"
+         },
+         {
+          "player_name": "Enner Valencia",
+          "player_sname": "Valencia",
+          "time": 80.0,
+          "time_to_display": "80'"
+         },
+         {
+          "player_name": "Enner Valencia",
+          "player_sname": "Valencia",
+          "time": 90.0,
+          "time_to_display": "90'+5"
+         }
+        ]
+       }
+      ],
+      "url_name": "racing-club-vs-boca-juniors",
+      "scores": [
+       2.0,
+       3.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "27-09-2026 15:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "eichiab",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Platense",
+        "short_name": "Platense",
+        "url_name": "platense",
+        "id": "hcah",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#5C3918",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Gonzalo Lencina",
+          "player_sname": "Lencina",
+          "time": 83.0,
+          "time_to_display": "83'"
+         }
+        ]
+       },
+       {
+        "name": "Estudiantes de La Plata",
+        "short_name": "Estudiantes",
+        "url_name": "estudiantes-de-la-plata",
+        "id": "igh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FAFAFA",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "platense-vs-estudiantes-de-la-plata",
+      "scores": [
+       1.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "01-10-2026 19:15",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     }
+    ]
+   },
+   "640_16_5_-1 Semifinales": {
+    "TTL": 300,
+    "games": [
+     {
+      "id": "eigjbai",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Atlético Tucumán",
+        "short_name": "Atl. Tucumán",
+        "url_name": "atletico-tucuman",
+        "id": "gbfc",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Platense",
+        "short_name": "Platense",
+        "url_name": "platense",
+        "id": "hcah",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#5C3918",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "atletico-tucuman-vs-platense",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "28-10-2026 17:00",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     }
+    ]
+   }
+  }
+ },
+ "hc": {
+  "filters": [
+   {
+    "name": "Partidos actuales",
+    "key": "latest"
+   },
+   {
+    "name": "Fecha 1",
+    "key": "72_228_3_1"
+   },
+   {
+    "name": "Fecha 2",
+    "key": "72_228_3_2"
+   },
+   {
+    "name": "Fecha 3",
+    "key": "72_228_3_3"
+   },
+   {
+    "name": "Fecha 4",
+    "key": "72_228_3_4"
+   },
+   {
+    "name": "Fecha 5",
+    "key": "72_228_3_5"
+   },
+   {
+    "name": "Fecha 6",
+    "key": "72_228_3_6"
+   },
+   {
+    "name": "Fecha 7",
+    "key": "72_228_3_7"
+   },
+   {
+    "name": "Fecha 8",
+    "key": "72_228_3_8"
+   },
+   {
+    "name": "Fecha 9",
+    "key": "72_228_3_9"
+   },
+   {
+    "name": "Fecha 10",
+    "key": "72_228_3_10"
+   },
+   {
+    "name": "Fecha 11",
+    "key": "72_228_3_11"
+   },
+   {
+    "name": "Fecha 12",
+    "key": "72_228_3_12"
+   },
+   {
+    "name": "Fecha 13",
+    "key": "72_228_3_13"
+   },
+   {
+    "name": "Fecha 14",
+    "key": "72_228_3_14"
+   },
+   {
+    "name": "Fecha 15",
+    "key": "72_228_3_15"
+   },
+   {
+    "name": "Fecha 16",
+    "key": "72_228_3_16"
+   },
+   {
+    "name": "Octavos de Final",
+    "key": "72_228_4_-1"
+   },
+   {
+    "name": "Cuartos de Final",
+    "key": "72_228_5_-1"
+   },
+   {
+    "name": "Semifinales",
+    "key": "72_228_6_-1"
+   },
+   {
+    "name": "Final",
+    "key": "72_228_7_-1"
+   },
+   {
+    "name": "Fecha 1",
+    "key": "72_228_8_1"
+   },
+   {
+    "name": "Fecha 2",
+    "key": "72_228_8_2"
+   },
+   {
+    "name": "Fecha 3",
+    "key": "72_228_8_3"
+   },
+   {
+    "name": "Fecha 4",
+    "key": "72_228_8_4"
+   },
+   {
+    "name": "Fecha 5",
+    "key": "72_228_8_5"
+   },
+   {
+    "name": "Fecha 6",
+    "key": "72_228_8_6"
+   },
+   {
+    "name": "Fecha 7",
+    "key": "72_228_8_7"
+   },
+   {
+    "name": "Fecha 8",
+    "key": "72_228_8_8"
+   },
+   {
+    "name": "Fecha 9",
+    "key": "72_228_8_9"
+   },
+   {
+    "name": "Fecha 10",
+    "key": "72_228_8_10"
+   },
+   {
+    "name": "Fecha 11",
+    "key": "72_228_8_11"
+   },
+   {
+    "name": "Fecha 12",
+    "key": "72_228_8_12"
+   },
+   {
+    "name": "Fecha 13",
+    "key": "72_228_8_13"
+   },
+   {
+    "name": "Fecha 14",
+    "key": "72_228_8_14",
+    "selected": true,
+    "games": [
+     {
+      "id": "egddcdb",
+      "stage_round_name": "Fecha 14",
+      "winner": 1,
+      "teams": [
+       {
+        "name": "Gimnasia La Plata",
+        "short_name": "Gimnasia",
+        "url_name": "gimnasia-la-plata",
+        "id": "iia",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Nacho Fernández",
+          "player_sname": "Fernandez",
+          "time": 13,
+          "time_to_display": "13'"
+         },
+         {
+          "player_name": "Franco Torres",
+          "player_sname": "Torres",
+          "time": 74,
+          "time_to_display": "74'"
+         }
+        ]
+       },
+       {
+        "name": "Sarmiento Junín",
+        "short_name": "Sarmiento",
+        "url_name": "sarmiento-junin",
+        "id": "hbbh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#4AA575",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "gimnasia-la-plata-vs-sarmiento-junin",
+      "scores": [
+       2,
+       0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "23-10-2026 16:00",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "egddceb",
+      "stage_round_name": "Fecha 14",
+      "winner": 2,
+      "teams": [
+       {
+        "name": "Gimnasia de Mendoza",
+        "short_name": "Gimnasia (M)",
+        "url_name": "gimnasia-mendoza",
+        "id": "bbjbf",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Agustin Modica",
+          "player_sname": "Modica",
+          "time": 10,
+          "time_to_display": "10'"
+         }
+        ]
+       },
+       {
+        "name": "Platense",
+        "short_name": "Platense",
+        "url_name": "platense",
+        "id": "hcah",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#5C3918",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Juan Carlos Gauto",
+          "player_sname": "Gauto",
+          "time": 79,
+          "time_to_display": "79'"
+         },
+         {
+          "player_name": "Bruno Sepúlveda",
+          "player_sname": "Sepúlveda",
+          "time": 90,
+          "time_to_display": "90'+3"
+         }
+        ]
+       }
+      ],
+      "url_name": "gimnasia-mendoza-vs-platense",
+      "scores": [
+       1,
+       2
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "23-10-2026 16:30",
+      "game_time": 90,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "egddcdd",
+      "stage_round_name": "Fecha 14",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Tigre",
+        "short_name": "Tigre",
+        "url_name": "tigre",
+        "id": "iid",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#263142",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Atlético Tucumán",
+        "short_name": "Atl. Tucumán",
+        "url_name": "atletico-tucuman",
+        "id": "gbfc",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "tigre-vs-atletico-tucuman",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "23-10-2026 19:15",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     },
+     {
+      "id": "egddcec",
+      "stage_round_name": "Fecha 14",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Banfield",
+        "short_name": "Banfield",
+        "url_name": "banfield",
+        "id": "ihi",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Lanús",
+        "short_name": "Lanús",
+        "url_name": "lanus",
+        "id": "igj",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#753E4A",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "banfield-vs-lanus",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "24-10-2026 12:45",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     },
+     {
+      "id": "egddcdg",
+      "stage_round_name": "Fecha 14",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Talleres de Córdoba",
+        "short_name": "Talleres",
+        "url_name": "talleres-cordoba",
+        "id": "jche",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Defensa y Justicia",
+        "short_name": "Defensa",
+        "url_name": "defensa-y-justicia",
+        "id": "hcbh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFF00",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "talleres-cordoba-vs-defensa-y-justicia",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "24-10-2026 15:00",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     },
+     {
+      "id": "egddcea",
+      "stage_round_name": "Fecha 14",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "San Lorenzo",
+        "short_name": "San Lorenzo",
+        "url_name": "san-lorenzo",
+        "id": "igf",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#293592",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Newell's Old Boys",
+        "short_name": "Newell's",
+        "url_name": "newell's-old-boys",
+        "id": "ihh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FD0808",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "san-lorenzo-vs-newell's-old-boys",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "24-10-2026 17:15",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     },
+     {
+      "id": "egddcdc",
+      "stage_round_name": "Fecha 14",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Rosario Central",
+        "short_name": "Central",
+        "url_name": "rosario-central",
+        "id": "ihf",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#004080",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Huracán",
+        "short_name": "Huracán",
+        "url_name": "huracan",
+        "id": "iie",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "rosario-central-vs-huracan",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "24-10-2026 19:30",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     },
+     {
+      "id": "egddccj",
+      "stage_round_name": "Fecha 14",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Aldosivi",
+        "short_name": "Aldosivi",
+        "url_name": "aldosivi",
+        "id": "hccd",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#133632",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Belgrano",
+        "short_name": "Belgrano",
+        "url_name": "belgrano",
+        "id": "fhid",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#358FC8",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "aldosivi-vs-belgrano",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "25-10-2026 12:45",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     },
+     {
+      "id": "egddcdf",
+      "stage_round_name": "Fecha 14",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Independiente",
+        "short_name": "Independiente",
+        "url_name": "independiente",
+        "id": "ihe",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FF0000",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Boca Juniors",
+        "short_name": "Boca Jrs.",
+        "url_name": "boca-juniors",
+        "id": "igg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#2D2E58",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "independiente-vs-boca-juniors",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "25-10-2026 15:00",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     },
+     {
+      "id": "egddcci",
+      "stage_round_name": "Fecha 14",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "River Plate",
+        "short_name": "River",
+        "url_name": "river-plate",
+        "id": "igi",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Racing Club",
+        "short_name": "Racing",
+        "url_name": "racing-club",
+        "id": "ihg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "river-plate-vs-racing-club",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "25-10-2026 17:15",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     },
+     {
+      "id": "egddcda",
+      "stage_round_name": "Fecha 14",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Barracas Central",
+        "short_name": "Barracas",
+        "url_name": "barracas-central",
+        "id": "jafb",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Estudiantes RC",
+        "short_name": "Estudiantes RC",
+        "url_name": "estudiantes-rio-cuarto",
+        "id": "bheaf",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#77B8F2",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "barracas-central-vs-estudiantes-rio-cuarto",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "25-10-2026 19:30",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     },
+     {
+      "id": "egddcdj",
+      "stage_round_name": "Fecha 14",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Central Córdoba SdE",
+        "short_name": "Central Córdoba",
+        "url_name": "central-cordoba-sde",
+        "id": "beafh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#000000",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Vélez Sarsfield",
+        "short_name": "Vélez",
+        "url_name": "velez-sarsfield",
+        "id": "ihc",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "central-cordoba-sde-vs-velez-sarsfield",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "25-10-2026 19:30",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     },
+     {
+      "id": "egddcdi",
+      "stage_round_name": "Fecha 14",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Unión de Santa Fe",
+        "short_name": "Unión",
+        "url_name": "union-santa-fe",
+        "id": "hcag",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#E93F2D",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Estudiantes de La Plata",
+        "short_name": "Estudiantes",
+        "url_name": "estudiantes-de-la-plata",
+        "id": "igh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FAFAFA",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "union-santa-fe-vs-estudiantes-de-la-plata",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "26-10-2026 17:00",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     },
+     {
+      "id": "egddcdh",
+      "stage_round_name": "Fecha 14",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Instituto",
+        "short_name": "Instituto",
+        "url_name": "instituto-ac-cordoba",
+        "id": "hchc",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FF0000",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Deportivo Riestra",
+        "short_name": "Riestra",
+        "url_name": "riestra",
+        "id": "bbjea",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#28272C",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "instituto-ac-cordoba-vs-riestra",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "26-10-2026 19:15",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     },
+     {
+      "id": "egddcde",
+      "stage_round_name": "Fecha 14",
+      "winner": -1,
+      "teams": [
+       {
+        "name": "Argentinos Juniors",
+        "short_name": "Argentinos",
+        "url_name": "argentinos-juniors",
+        "id": "ihb",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#DD2D2F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Independiente Rivadavia",
+        "short_name": "Independiente Riv.",
+        "url_name": "independiente-rivadavia",
+        "id": "hcch",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#14163F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "argentinos-juniors-vs-independiente-rivadavia",
+      "status": {
+       "enum": 1,
+       "name": "Prog.",
+       "short_name": "Prog.",
+       "symbol_name": "Prog."
+      },
+      "start_time": "27-10-2026 17:00",
+      "game_time": -1,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Prog."
+     }
+    ]
+   },
+   {
+    "name": "Fecha 15",
+    "key": "72_228_8_15"
+   },
+   {
+    "name": "Fecha 16",
+    "key": "72_228_8_16"
+   }
+  ],
+  "games": {
+   "72_228_4_-1 Octavos de Final": {
+    "TTL": 300,
+    "games": [
+     {
+      "id": "ehbaeae",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Talleres de Córdoba",
+        "short_name": "Talleres",
+        "url_name": "talleres-cordoba",
+        "id": "jche",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 2
+       },
+       {
+        "name": "Belgrano",
+        "short_name": "Belgrano",
+        "url_name": "belgrano",
+        "id": "fhid",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#358FC8",
+         "text_color": "#000000"
+        },
+        "red_cards": 1,
+        "goals": [
+         {
+          "player_name": "Francisco González Metilli",
+          "player_sname": "González Metilli",
+          "time": 48.0,
+          "time_to_display": "48'"
+         }
+        ]
+       }
+      ],
+      "url_name": "talleres-cordoba-vs-belgrano",
+      "scores": [
+       0.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "09-05-2026 14:30",
+      "game_time": 99,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehbajdb",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Boca Juniors",
+        "short_name": "Boca Jrs.",
+        "url_name": "boca-juniors",
+        "id": "igg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#2D2E58",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Milton Giménez",
+          "player_sname": "Giménez",
+          "time": 87.0,
+          "time_to_display": "87'"
+         },
+         {
+          "player_name": "Angel Romero",
+          "player_sname": "Romero",
+          "time": 116.0,
+          "time_to_display": "116'"
+         }
+        ]
+       },
+       {
+        "name": "Huracán",
+        "short_name": "Huracán",
+        "url_name": "huracan",
+        "id": "iie",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 2,
+        "goals": [
+         {
+          "player_name": "Leonardo Gil",
+          "player_sname": "Gil",
+          "time": 5.0,
+          "time_to_display": "5'"
+         },
+         {
+          "player_name": "Oscar Romero",
+          "player_sname": "Romero",
+          "time": 94.0,
+          "time_to_display": "94'",
+          "goal_type": "Pen"
+         },
+         {
+          "player_name": "Oscar Romero",
+          "player_sname": "Romero",
+          "time": 103.0,
+          "time_to_display": "103'",
+          "goal_type": "Pen"
+         }
+        ]
+       }
+      ],
+      "url_name": "boca-juniors-vs-huracan",
+      "scores": [
+       2.0,
+       3.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "En Tiempo Extra",
+       "short_name": "En Tiempo Extra",
+       "symbol_name": "TE"
+      },
+      "start_time": "09-05-2026 17:00",
+      "game_time": 120,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "En Tiempo Extra"
+     },
+     {
+      "id": "ehbajda",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Independiente Rivadavia",
+        "short_name": "Independiente Riv.",
+        "url_name": "independiente-rivadavia",
+        "id": "hcch",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#14163F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Fabrizio Sartori",
+          "player_sname": "Sartori",
+          "time": 70.0,
+          "time_to_display": "70'"
+         }
+        ]
+       },
+       {
+        "name": "Unión de Santa Fe",
+        "short_name": "Unión",
+        "url_name": "union-santa-fe",
+        "id": "hcag",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#E93F2D",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Brahian Cuello",
+          "player_sname": "Cuello",
+          "time": 34.0,
+          "time_to_display": "34'"
+         },
+         {
+          "player_name": "Cristian Tarragona",
+          "player_sname": "Tarragona",
+          "time": 49.0,
+          "time_to_display": "49'"
+         }
+        ]
+       }
+      ],
+      "url_name": "independiente-rivadavia-vs-union-santa-fe",
+      "scores": [
+       1.0,
+       2.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "09-05-2026 19:30",
+      "game_time": 102,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehbaeac",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Argentinos Juniors",
+        "short_name": "Argentinos",
+        "url_name": "argentinos-juniors",
+        "id": "ihb",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#DD2D2F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Francisco Álvarez",
+          "player_sname": "Álvarez",
+          "time": 28.0,
+          "time_to_display": "28'"
+         },
+         {
+          "player_name": "Alan Lescano",
+          "player_sname": "Alan Lescano",
+          "time": 90.0,
+          "time_to_display": "90'+6"
+         }
+        ]
+       },
+       {
+        "name": "Lanús",
+        "short_name": "Lanús",
+        "url_name": "lanus",
+        "id": "igj",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#753E4A",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "argentinos-juniors-vs-lanus",
+      "scores": [
+       2.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "09-05-2026 20:15",
+      "game_time": 99,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehbaead",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Rosario Central",
+        "short_name": "Central",
+        "url_name": "rosario-central",
+        "id": "ihf",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#004080",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Ángel Di María",
+          "player_sname": "Di María",
+          "time": 45.0,
+          "time_to_display": "45'+2"
+         },
+         {
+          "player_name": "Giovanni Cantizano",
+          "player_sname": "Cantizano",
+          "time": 84.0,
+          "time_to_display": "84'"
+         },
+         {
+          "player_name": "Elías Verón",
+          "player_sname": "Verón",
+          "time": 90.0,
+          "time_to_display": "90'+2"
+         }
+        ]
+       },
+       {
+        "name": "Independiente",
+        "short_name": "Independiente",
+        "url_name": "independiente",
+        "id": "ihe",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FF0000",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Gabriel Ávalos",
+          "player_sname": "Ávalos",
+          "time": 36.0,
+          "time_to_display": "36'"
+         }
+        ]
+       }
+      ],
+      "url_name": "rosario-central-vs-independiente",
+      "scores": [
+       3.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "10-05-2026 13:00",
+      "game_time": 97,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehbaeaf",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Estudiantes de La Plata",
+        "short_name": "Estudiantes",
+        "url_name": "estudiantes-de-la-plata",
+        "id": "igh",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FAFAFA",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Racing Club",
+        "short_name": "Racing",
+        "url_name": "racing-club",
+        "id": "ihg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Santiago Sosa",
+          "player_sname": "Sosa",
+          "time": 89.0,
+          "time_to_display": "89'"
+         }
+        ]
+       }
+      ],
+      "url_name": "estudiantes-de-la-plata-vs-racing-club",
+      "scores": [
+       0.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "10-05-2026 15:00",
+      "game_time": 99,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehbajci",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "River Plate",
+        "short_name": "River",
+        "url_name": "river-plate",
+        "id": "igi",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Marcos Acuña",
+          "player_sname": "Acuña",
+          "time": 55.0,
+          "time_to_display": "55'"
+         },
+         {
+          "player_name": "Juan Fernando Quintero",
+          "player_sname": "Quintero",
+          "time": 120.0,
+          "time_to_display": "120'+1"
+         }
+        ]
+       },
+       {
+        "name": "San Lorenzo",
+        "short_name": "San Lorenzo",
+        "url_name": "san-lorenzo",
+        "id": "igf",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#293592",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 1,
+        "goals": [
+         {
+          "player_name": "Rodrigo Auzmendi",
+          "player_sname": "Auzmendi",
+          "time": 37.0,
+          "time_to_display": "37'"
+         },
+         {
+          "player_name": "Fabricio López",
+          "player_sname": "López",
+          "time": 94.0,
+          "time_to_display": "94'"
+         }
+        ]
+       }
+      ],
+      "url_name": "river-plate-vs-san-lorenzo",
+      "scores": [
+       2.0,
+       2.0
+      ],
+      "penalties": [
+       4.0,
+       3.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "10-05-2026 17:00",
+      "game_time": 131,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     },
+     {
+      "id": "ehbajcj",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Vélez Sarsfield",
+        "short_name": "Vélez",
+        "url_name": "velez-sarsfield",
+        "id": "ihc",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       },
+       {
+        "name": "Gimnasia La Plata",
+        "short_name": "Gimnasia",
+        "url_name": "gimnasia-la-plata",
+        "id": "iia",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 1,
+        "goals": [
+         {
+          "player_name": "Marcelo Torres",
+          "player_sname": "Torres",
+          "time": 13.0,
+          "time_to_display": "13'",
+          "goal_type": "Pen"
+         }
+        ]
+       }
+      ],
+      "url_name": "velez-sarsfield-vs-gimnasia-la-plata",
+      "scores": [
+       0.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "10-05-2026 19:30",
+      "game_time": 101,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     }
+    ]
+   },
+   "72_228_5_-1 Cuartos de Final": {
+    "TTL": 300,
+    "games": [
+     {
+      "id": "ehbciaa",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Belgrano",
+        "short_name": "Belgrano",
+        "url_name": "belgrano",
+        "id": "fhid",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#358FC8",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Adrián Sánchez",
+          "player_sname": "Sánchez",
+          "time": 65.0,
+          "time_to_display": "65'"
+         },
+         {
+          "player_name": "Ramiro Hernandes",
+          "player_sname": "Hernandes",
+          "time": 90.0,
+          "time_to_display": "90'+6"
+         }
+        ]
+       },
+       {
+        "name": "Unión de Santa Fe",
+        "short_name": "Unión",
+        "url_name": "union-santa-fe",
+        "id": "hcag",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#E93F2D",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "belgrano-vs-union-santa-fe",
+      "scores": [
+       2.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "12-05-2026 17:00",
+      "game_time": 101,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     },
+     {
+      "id": "ehbciab",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Argentinos Juniors",
+        "short_name": "Argentinos",
+        "url_name": "argentinos-juniors",
+        "id": "ihb",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#DD2D2F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Tomás Molina",
+          "player_sname": "Molina",
+          "time": 95.0,
+          "time_to_display": "95'"
+         }
+        ]
+       },
+       {
+        "name": "Huracán",
+        "short_name": "Huracán",
+        "url_name": "huracan",
+        "id": "iie",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "argentinos-juniors-vs-huracan",
+      "scores": [
+       1.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "En Tiempo Extra",
+       "short_name": "En Tiempo Extra",
+       "symbol_name": "TE"
+      },
+      "start_time": "12-05-2026 19:30",
+      "game_time": 129,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "En Tiempo Extra"
+     },
+     {
+      "id": "ehbciga",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "Rosario Central",
+        "short_name": "Central",
+        "url_name": "rosario-central",
+        "id": "ihf",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#004080",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Gastón Ávila",
+          "player_sname": "Avila",
+          "time": 65.0,
+          "time_to_display": "65'"
+         },
+         {
+          "player_name": "Enzo Copetti",
+          "player_sname": "Copetti",
+          "time": 106.0,
+          "time_to_display": "106'"
+         }
+        ]
+       },
+       {
+        "name": "Racing Club",
+        "short_name": "Racing",
+        "url_name": "racing-club",
+        "id": "ihg",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 2,
+        "goals": [
+         {
+          "player_name": "Matias Zaracho",
+          "player_sname": "Zaracho",
+          "time": 41.0,
+          "time_to_display": "41'"
+         }
+        ]
+       }
+      ],
+      "url_name": "rosario-central-vs-racing-club",
+      "scores": [
+       2.0,
+       1.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "En Tiempo Extra",
+       "short_name": "En Tiempo Extra",
+       "symbol_name": "TE"
+      },
+      "start_time": "13-05-2026 16:45",
+      "game_time": 132,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "En Tiempo Extra"
+     },
+     {
+      "id": "ehbcigb",
+      "winner": 1,
+      "to_qualify": 1,
+      "teams": [
+       {
+        "name": "River Plate",
+        "short_name": "River",
+        "url_name": "river-plate",
+        "id": "igi",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Sebastián Driussi",
+          "player_sname": "Driussi",
+          "time": 27.0,
+          "time_to_display": "27'"
+         },
+         {
+          "player_name": "Lucas Martínez Quarta",
+          "player_sname": "Martínez Quarta",
+          "time": 65.0,
+          "time_to_display": "65'"
+         }
+        ]
+       },
+       {
+        "name": "Gimnasia La Plata",
+        "short_name": "Gimnasia",
+        "url_name": "gimnasia-la-plata",
+        "id": "iia",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0
+       }
+      ],
+      "url_name": "river-plate-vs-gimnasia-la-plata",
+      "scores": [
+       2.0,
+       0.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "13-05-2026 19:45",
+      "game_time": 97,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     }
+    ]
+   },
+   "72_228_6_-1 Semifinales": {
+    "TTL": 300,
+    "games": [
+     {
+      "id": "ehbdjfi",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "Argentinos Juniors",
+        "short_name": "Argentinos",
+        "url_name": "argentinos-juniors",
+        "id": "ihb",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#DD2D2F",
+         "text_color": "#FFFFFF"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Facundo Jainikoski",
+          "player_sname": "Jainikoski",
+          "time": 7.0,
+          "time_to_display": "7'"
+         }
+        ]
+       },
+       {
+        "name": "Belgrano",
+        "short_name": "Belgrano",
+        "url_name": "belgrano",
+        "id": "fhid",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#358FC8",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Nicolás Fernández",
+          "player_sname": "Fernández",
+          "time": 90.0,
+          "time_to_display": "90'+4"
+         }
+        ]
+       }
+      ],
+      "url_name": "argentinos-juniors-vs-belgrano",
+      "scores": [
+       1.0,
+       1.0
+      ],
+      "penalties": [
+       3.0,
+       4.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Por penales",
+       "short_name": "Por penales",
+       "symbol_name": "Pen"
+      },
+      "start_time": "17-05-2026 15:00",
+      "game_time": 129,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Por penales"
+     }
+    ]
+   },
+   "72_228_7_-1 Final": {
+    "TTL": 300,
+    "games": [
+     {
+      "id": "ehbfiia",
+      "winner": 2,
+      "to_qualify": 2,
+      "teams": [
+       {
+        "name": "River Plate",
+        "short_name": "River",
+        "url_name": "river-plate",
+        "id": "igi",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#FFFFFF",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Facundo Colidio",
+          "player_sname": "Colidio",
+          "time": 18.0,
+          "time_to_display": "18'"
+         },
+         {
+          "player_name": "Tomás Galván",
+          "player_sname": "Galván",
+          "time": 59.0,
+          "time_to_display": "59'"
+         }
+        ]
+       },
+       {
+        "name": "Belgrano",
+        "short_name": "Belgrano",
+        "url_name": "belgrano",
+        "id": "fhid",
+        "country_id": "ba",
+        "allow_open": true,
+        "colors": {
+         "color": "#358FC8",
+         "text_color": "#000000"
+        },
+        "red_cards": 0,
+        "goals": [
+         {
+          "player_name": "Leonardo Morales",
+          "player_sname": "Morales",
+          "time": 26.0,
+          "time_to_display": "26'"
+         },
+         {
+          "player_name": "Nicolás Fernández",
+          "player_sname": "Fernández",
+          "time": 85.0,
+          "time_to_display": "85'",
+          "goal_type": "Pen"
+         },
+         {
+          "player_name": "Nicolás Fernández",
+          "player_sname": "Fernández",
+          "time": 88.0,
+          "time_to_display": "88'"
+         }
+        ]
+       }
+      ],
+      "url_name": "river-plate-vs-belgrano",
+      "scores": [
+       2.0,
+       3.0
+      ],
+      "status": {
+       "enum": 3,
+       "name": "Finalizado",
+       "short_name": "Final",
+       "symbol_name": "Fin"
+      },
+      "start_time": "24-05-2026 13:30",
+      "game_time": 99,
+      "game_time_to_display": "",
+      "game_time_status_to_display": "Final"
+     }
+    ]
+   }
+  }
+ }
+}
