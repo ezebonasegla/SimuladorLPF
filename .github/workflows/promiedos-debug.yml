@@ -1,0 +1,35 @@
+name: Promiedos (exploración)
+# Baja algunas páginas de promiedos y las guarda en debug/ para ver cómo vienen los datos.
+on:
+  workflow_dispatch:
+  push:
+    paths: [".github/workflows/promiedos-debug.yml"]
+permissions:
+  contents: write
+jobs:
+  bajar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bajar páginas
+        run: |
+          mkdir -p debug
+          UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36"
+          while read -r name url; do
+            [ -z "$name" ] && continue
+            code=$(curl -sSL -A "$UA" -H "Accept-Language: es-AR,es;q=0.9" -o "debug/$name" -w "%{http_code}" "$url" || echo ERR)
+            echo "$name $code $(wc -c < debug/$name 2>/dev/null) $url" | tee -a debug/_index.txt
+          done <<'LISTA'
+          home.html https://www.promiedos.com.ar/
+          liga.html https://www.promiedos.com.ar/league/liga-profesional/hc
+          primera.html https://www.promiedos.com.ar/primera
+          api-tf.json https://api.promiedos.com.ar/league/tables_and_fixtures/hc
+          api-today.json https://api.promiedos.com.ar/games/today
+          LISTA
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add debug
+          git diff --cached --quiet || git commit -m "Exploración de promiedos (debug)"
+          git push
