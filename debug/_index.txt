@@ -1,0 +1,5 @@
+home.html 200 72225 https://www.promiedos.com.ar/
+liga.html 200 195427 https://www.promiedos.com.ar/league/liga-profesional/hc
+primera.html 404 10475 https://www.promiedos.com.ar/primera
+api-tf.json 200 2 https://api.promiedos.com.ar/league/tables_and_fixtures/hc
+api-today.json 200 2 https://api.promiedos.com.ar/games/today
