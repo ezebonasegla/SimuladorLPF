@@ -110,8 +110,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
 /* Tablas a un ancho cómodo de leer, centradas */
-#pane-zona-a, #pane-zona-b, #pane-anual { max-width: 1080px; margin-inline: auto; }
-#pane-promedios { max-width: 800px; margin-inline: auto; }
+#pane-zona-a, #pane-zona-b { max-width: 760px; margin-inline: auto; }
+#pane-anual { max-width: 900px; margin-inline: auto; }
+#pane-promedios { max-width: 740px; margin-inline: auto; }
 #pane-promedios td.team { width: 1%; white-space: nowrap; padding-right: 24px; }
 /* Partidos: en pantallas anchas, los partidos de cada grupo en grilla */
 .mgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr)); gap: 6px 10px; }
@@ -331,7 +332,7 @@ tr.in td.pos { color: var(--accent); }
 .cup .out b { color: var(--lib); }
 
 /* Probabilidades */
-.proj { max-width: 1240px; margin: 0 auto; }
+.proj { max-width: 1120px; margin: 0 auto; }
 .proj.compact-w { max-width: 980px; }
 .proj-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; }
 .proj-split > .ptable + .ptable { margin-top: -1px; border-top-left-radius: 0; border-top-right-radius: 0; }
@@ -550,6 +551,69 @@ html.dlg-open, html.dlg-open body { overflow: hidden; }
   .plabels { font-size: 12px; gap: 7px; }
   .probs { grid-template-columns: minmax(0, 1fr); }
   .score input { width: 34px; }
+}
+/* ===================== TABLAS EN EL CELULAR =====================
+   Todo entra sin deslizar: las etiquetas pasan a puntos de color (con su leyenda abajo),
+   se ocultan columnas secundarias y las tablas muy anchas pasan a tarjetas. */
+.sm, .xs-only { display: none; }
+.legend span.dot::before { border-radius: 50%; }
+.legend span.dot.ring::before { box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--c); }
+@media (max-width: 640px) {
+  .lg, .xh { display: none !important; }
+  .sm { display: inline; }
+  .xs-only { display: inline; color: var(--muted); font-weight: 500; }
+  table { font-size: 13px; }
+  th, td { padding: 6px 5px; }
+  th { font-size: 10.5px; letter-spacing: .04em; }
+  td.team { min-width: 0; }
+  td.pos { width: 24px; font-size: 14px; }
+  td.pts { font-size: 15px; }
+  .crest { margin-right: 4px; }
+  /* etiquetas -> puntos de color */
+  .tbl-wrap .tag { font-size: 0; line-height: 0; padding: 0; width: 10px; height: 10px; border-radius: 50%; margin-left: 6px; vertical-align: middle; display: inline-block; border: 0; }
+  .tbl-wrap .tag.lib { background: var(--lib); } .tbl-wrap .tag.pre { background: var(--pre); } .tbl-wrap .tag.sud { background: var(--sud); }
+  .tbl-wrap .tag.desc { background: var(--danger); } .tbl-wrap .tag.po { background: var(--accent); }
+  .tbl-wrap .tag.champ { background: var(--lib); box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--lib); }
+  .tbl-wrap .tag:not(.lib):not(.pre):not(.sud):not(.desc):not(.po):not(.champ) { background: var(--muted); }
+  .mv { font-size: 10px; margin-left: 3px; }
+  td.cross .crest { width: 1em; height: 1.2em; }
+  #pane-promedios td.team { padding-right: 6px; }
+  #pane-promedios td.chg small { display: none; }
+  #pane-promedios td.chg .mv { min-width: 0; }
+  /* cuadro de playoffs: una ronda debajo de la otra */
+  .bracket { grid-template-columns: minmax(0, 1fr); overflow-x: visible; gap: 18px; }
+  .round .ties { gap: 8px; }
+  /* Probabilidades resumida: cabeceras cortas, pastillas más chicas */
+  .proj-split table.fixed { min-width: 0; }
+  .proj-split col.c-rk { width: 22px; }
+  .proj-split col.c-pc { width: 13%; }
+  .proj-split .ptable td.team .crest { margin-right: 3px; }
+  .ptable.heat th { font-size: 9.5px; padding: 8px 1px 7px; }
+  .ptable.heat td { padding: 3px 1px; }
+  .ptable.heat td.team, .ptable.heat td.rk { font-size: 12.5px; }
+  .proj-split .ptable td.team { min-width: 0; }
+  .ptable .zb { display: none; }
+  .pill { height: 28px; font-size: 13.5px; border-radius: 6px; }
+  /* Probabilidades completa: una tarjeta por equipo */
+  .ptable.full table.fixed { min-width: 0; table-layout: auto; }
+  .ptable.full colgroup, .ptable.full thead { display: none; }
+  .ptable.full tbody tr { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 8px; border-bottom: 1px solid var(--line); }
+  .ptable.full tbody td { display: block; border: 0; padding: 0; background: none !important; }
+  .ptable.full td.rk { display: none; }
+  .ptable.full td.team { grid-column: 1 / -1; font-size: 15px; padding: 0 0 2px; }
+  .ptable.full td[data-l]::before { content: attr(data-l); display: block; font-size: 9px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; text-align: center; }
+  .ptable.full td.num { text-align: center; font-size: 15px; align-self: end; padding-bottom: 6px; }
+  .ptable.full .pill { height: 26px; font-size: 13px; }
+  /* Datos: una tarjeta por equipo */
+  .data-tbl { overflow: visible; }
+  .data-tbl thead { display: none; }
+  .data-tbl tbody tr { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px 8px; padding: 10px; border-bottom: 1px solid var(--line); }
+  .data-tbl tbody td { display: block; border: 0; padding: 0; text-align: left; }
+  .data-tbl td.team { grid-column: 1 / -1; }
+  .data-tbl td[data-l]::before { content: attr(data-l); display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  .data-tbl td input { width: 100% !important; }
+  .data-tbl td[data-l="Últimos 4"] { grid-column: span 2; }
 }
 </style>
 </head>
@@ -789,6 +853,11 @@ function crest(id) {
 }
 // Nombre con escudo
 const tn = id => `<span class="tn" data-t="${id}">${crest(id)}${esc(T(id).n)}</span>`;
+// Abreviatura de 3 letras para tablas muy apretadas en el celular
+const ABBR = { ins: "INS", boc: "BOC", dyj: "DYJ", vel: "VEL", lan: "LAN", gim: "GMZ", ind: "IND", new: "NOB", slo: "SLO", est: "EST", uni: "UNI", rie: "RIE",
+  pla: "PLA", cco: "CCO", tal: "TAL", cen: "CEN", arg: "ARG", bel: "BEL", glp: "GLP", riv: "RIV", sar: "SAR", hur: "HUR", irv: "IRV", bar: "BAR", atu: "ATU",
+  tig: "TIG", ban: "BAN", rac: "RAC", erc: "ERC", ald: "ALD" };
+const tnShort = id => `<span class="tn" data-t="${id}" title="${esc(T(id).n)}">${crest(id)}<span class="lg">${esc(T(id).n)}</span><span class="sm">${ABBR[id] || esc(T(id).n)}</span></span>`;
 function h2h(h, a) {
   if (H2H[h + "|" + a]) { const [v, txt, der] = H2H[h + "|" + a]; return { v, txt, der }; }
   if (H2H[a + "|" + h]) { const [v, txt, der] = H2H[a + "|" + h]; return { v: -v, txt, der }; }
@@ -1335,22 +1404,24 @@ function renderZone(z, st) {
   const pl = poList(st, z), po = poList(st, other);
   const html = rows.map((r, i) => {
     const pos = i + 1, k = pl.findIndex(x => x.id === r.id), seed = k >= 0 && k < 8 ? k + 1 : 0;
-    const rival = seed ? `${9 - seed}° ${other} (${esc(po[8 - seed].n)})` : "";
+    const rv = seed ? po[8 - seed] : null;
+    // En el celular: solo el escudo y el puesto del rival (8B), para que la tabla entre sin deslizar.
+    const rival = rv ? `<span class="lg">vs ${9 - seed}° ${other} (${esc(rv.n)})</span><span class="sm">${crest(rv.id)}${9 - seed}${other}</span>` : "";
     const out = pos <= 8 && !seed; // art. 14.1.2: en zona de descenso no juega playoffs
     return `<tr class="${seed ? "in" : ""}${pos === 8 ? " cut" : ""}">
       <td class="pos">${pos}</td>
       <td class="l team">${tn(r.id)}${r.id === APERTURA_CHAMP ? '<span class="tag champ">Camp. Apertura</span>' : ""}${out ? '<span class="tag desc">No juega playoffs (descenso)</span>' : ""}${seed && seed !== pos ? `<span class="tag po">Entra ${seed}°</span>` : ""}${moveTag(r.id, pos, order)}</td>
-      <td>${r.pj}</td><td>${r.gf}</td><td>${r.dg > 0 ? "+" : ""}${r.dg}</td>
+      <td>${r.pj}</td><td class="xh">${r.gf}</td><td>${r.dg > 0 ? "+" : ""}${r.dg}</td>
       <td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
-      <td class="l cross">${rival ? "vs " + rival : ""}</td>
+      <td class="l cross">${rival}</td>
     </tr>`;
   }).join("");
   document.getElementById("pane-zona-" + z.toLowerCase()).innerHTML = `
     <div class="panel-h"><h2>Clausura · Zona ${z}</h2><span class="sub">Los 8 primeros van a octavos · cruce con la Zona ${other}</span></div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>#</th><th class="l">Equipo</th><th>PJ</th><th>GF</th><th>DG</th><th>Pts</th><th class="l">Octavos</th></tr></thead>
+      <thead><tr><th>#</th><th class="l">Equipo</th><th>PJ</th><th class="xh">GF</th><th>DG</th><th>Pts</th><th class="l">Octavos</th></tr></thead>
       <tbody>${html}</tbody></table></div>
-    <div class="legend"><span style="--c:var(--accent)">Clasifica a playoffs (1° a 8°)</span><span>▲▼ cambio respecto a la tabla actual</span><span>+N puntos sumados en lo que falta</span></div>`;
+    <div class="legend"><span style="--c:var(--accent)">Clasifica a playoffs (1° a 8°)</span><span class="dot" style="--c:var(--lib)">Campeón Apertura</span><span class="dot" style="--c:var(--accent)">Entra a playoffs en otro puesto (el de arriba está en zona de descenso)</span><span class="dot" style="--c:var(--danger)">No juega playoffs: zona de descenso (art. 14.1.2)</span><span>▲▼ cambio respecto a la tabla actual</span><span>+N puntos sumados en lo que falta</span></div>`;
 }
 function currentBracket(st) {
   return bracket(st, t => {
@@ -1377,7 +1448,7 @@ function renderAnnual(st, br, cups) {
     return `<tr class="${band}">
       <td class="pos">${pos}</td>
       <td class="l team">${tn(r.id)}${moveTag(r.id, pos, order)}${tag}</td>
-      <td>${r.z}</td><td>${r.pj}</td><td>${r.dg > 0 ? "+" : ""}${r.dg}</td><td class="num">${promedio(r).toFixed(3).replace(".", ",")}</td>
+      <td class="xh">${r.z}</td><td class="xh">${r.pj}</td><td>${r.dg > 0 ? "+" : ""}${r.dg}</td><td class="num xh">${promedio(r).toFixed(3).replace(".", ",")}</td>
       <td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
     </tr>`;
   }).join("");
@@ -1405,9 +1476,9 @@ function renderAnnual(st, br, cups) {
     </div>
     ${pending.length ? `<p class="rule">Falta definir: ${pending.join(", ")}. Elegilos en Playoffs y Copas, o usá «Completar todo con IA».</p>` : ""}
     <div class="tbl-wrap"><table>
-      <thead><tr><th>#</th><th class="l">Equipo</th><th>Zona</th><th>PJ</th><th>DG</th><th>Prom.</th><th>Pts</th></tr></thead>
+      <thead><tr><th>#</th><th class="l">Equipo</th><th class="xh">Zona</th><th class="xh">PJ</th><th>DG</th><th class="xh">Prom.</th><th>Pts</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
-    <div class="legend"><span style="--c:var(--lib)">Libertadores (grupos)</span><span style="--c:var(--pre)">Libertadores fase previa</span><span style="--c:var(--sud)">Sudamericana</span><span style="--c:var(--danger)">Descenso: último de la Anual y peor promedio (si es el mismo, el anteúltimo de la Anual)</span></div>`;
+    <div class="legend"><span class="dot" style="--c:var(--accent)">Campeón de Liga (1° de la Anual)</span><span class="dot ring" style="--c:var(--lib)">Clasificado por título (Apertura, Clausura, copa)</span><span style="--c:var(--lib)">Libertadores (grupos)</span><span style="--c:var(--pre)">Libertadores fase previa</span><span style="--c:var(--sud)">Sudamericana</span><span style="--c:var(--danger)">Descenso: último de la Anual y peor promedio (si es el mismo, el anteúltimo de la Anual)</span></div>`;
 }
 // Promedio que arrastraría cada equipo al empezar 2027: se va la temporada 2024 y quedan 2025 + 2026.
 const PJ_2025 = 32; // Apertura 16 + Clausura 16
@@ -1431,15 +1502,15 @@ function renderPromedios(st) {
     if (next) {
       // En 2027 no juegan los que descienden este año: se muestran aparte, sin puesto.
       if (rel.has(r.id)) return gone.push(`<tr class="gone"><td class="pos">–</td><td class="l team">${tn(r.id)}<span class="tag desc">Desciende en 2026</span></td><td class="chg"><small>era ${pos26[r.id]}°</small></td>
-        <td class="pts">${prom(r).toFixed(3).replace(".", ",")}</td><td>${(+py[1] || 0) + r.pts}</td><td>${pj2025(t) + r.pj}</td><td class="num">${pj2025(t) ? py[1] : "–"}</td><td>${r.pts}</td></tr>`), "";
+        <td class="pts">${prom(r).toFixed(3).replace(".", ",")}</td><td>${(+py[1] || 0) + r.pts}</td><td>${pj2025(t) + r.pj}</td><td class="num xh">${pj2025(t) ? py[1] : "–"}</td><td class="xh">${r.pts}</td></tr>`), "";
       pos++;
       return `<tr>
         <td class="pos">${pos}</td>
         <td class="l team">${tn(r.id)}${pj2025(t) ? "" : '<span class="tag">solo 2026</span>'}</td>${change(r.id, pos)}
         <td class="pts">${prom(r).toFixed(3).replace(".", ",")}</td>
         <td>${(+py[1] || 0) + r.pts}</td><td>${pj2025(t) + r.pj}</td>
-        <td class="num">${pj2025(t) ? py[1] : "–"}</td>
-        <td>${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
+        <td class="num xh">${pj2025(t) ? py[1] : "–"}</td>
+        <td class="xh">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
       </tr>`;
     }
     pos++;
@@ -1450,8 +1521,8 @@ function renderPromedios(st) {
       <td class="l team">${tn(r.id)}${moveTag(r.id, pos, base)}${tag}</td>
       <td class="pts">${prom(r).toFixed(3).replace(".", ",")}</td>
       <td>${pr[0] + r.pts}</td><td>${pr[1] + r.pj}</td>
-      <td class="num">${py[0]}</td><td class="num">${py[1]}</td>
-      <td>${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
+      <td class="num xh">${py[0]}</td><td class="num xh">${py[1]}</td>
+      <td class="xh">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
     </tr>`;
   }).join("");
   const seg = `<div class="seg" role="group" aria-label="Temporada"><button type="button" data-prom="2026" aria-pressed="${!next}">Este año (2026)</button><button type="button" data-prom="2027" aria-pressed="${next}">El año que viene (2027)</button></div>`;
@@ -1461,9 +1532,9 @@ function renderPromedios(st) {
       ? `<p class="rule"><b>Cómo arrancaría el promedio de 2027:</b> sale la temporada 2024 y quedan 2025 + 2026 (puntos ÷ partidos). Los puntos de 2026 suman lo que cargues o simules. Los que descienden este año no juegan 2027 y van al final; los que ascienden de la Primera Nacional arrancan sin promedio y no están en la tabla. «Solo 2026»: equipos que no jugaron 2025 en Primera.</p>`
       : `<p class="rule">Temporadas 2024, 2025 y 2026 · puntos ÷ partidos jugados. Desciende el peor promedio y el último de la Tabla Anual. Si son el mismo equipo, desciende también el anteúltimo de la Anual. Los puntos de 2026 suman lo que cargues o simules.</p>`}
     <div class="tbl-wrap"><table>
-      <thead><tr><th>#</th><th class="l">Equipo</th>${next ? '<th class="l" title="Puestos que sube o baja respecto del promedio de 2026">vs 2026</th>' : ""}<th>Prom.</th><th>Pts</th><th>PJ</th>${next ? "" : "<th>2024</th>"}<th>2025</th><th>2026</th></tr></thead>
+      <thead><tr><th>#</th><th class="l">Equipo</th>${next ? '<th class="l" title="Puestos que sube o baja respecto del promedio de 2026">vs 2026</th>' : ""}<th>Prom.</th><th>Pts</th><th>PJ</th>${next ? "" : '<th class="xh">2024</th>'}<th class="xh">2025</th><th class="xh">2026</th></tr></thead>
       <tbody>${html}${gone.join("")}</tbody></table></div>
-    <div class="legend">${next ? "" : '<span style="--c:var(--danger)">Desciende</span>'}<span>▲▼ ${next ? "puestos que sube o baja respecto del promedio de 2026" : "cambio respecto a los promedios actuales"}</span><span>+N puntos sumados en lo que falta</span></div>`;
+    <div class="legend">${next ? '<span class="dot" style="--c:var(--danger)">Desciende en 2026 (no juega 2027)</span><span class="dot" style="--c:var(--muted)">Solo jugó 2026 en Primera</span>' : '<span style="--c:var(--danger)">Desciende</span>'}<span>▲▼ ${next ? "puestos que sube o baja respecto del promedio de 2026" : "cambio respecto a los promedios actuales"}</span><span>+N puntos sumados en lo que falta</span></div>`;
 }
 function baseOrderProm2027() {
   const rows = teams.map(t => emptyRow(t, "an"));
@@ -1675,45 +1746,47 @@ function renderProjection() {
       </div>
     </div>
     ${projTable()}
-    <p class="proj-note">Cuanto más fuerte el color, más probable. «Libertadores directo» es fase de grupos; «Lib. fase previa» es el último que entra por la Tabla Anual. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana). Las chances chicas van con un decimal; «—» es que no pasó en ninguna simulación.${projCompact ? "" : " «Gana alguna copa» es la chance de ganar la Libertadores, la Sudamericana o la Copa Argentina de este año (pasando el mouse se ve cada una)."}</p>
+    <p class="proj-note"><span class="xs-only">${projCompact ? "PO = playoffs · Sud = Sudamericana · Previa = Libertadores fase previa · Lib = Libertadores directo · Camp. = campeón del Clausura · Liga = Campeón de Liga (1° de la Anual). " : "Pts = puntos esperados en la Anual · Liga = Campeón de Liga · Lib. = Libertadores directo · Previa = fase previa · Copa 2026 = gana alguna copa este año. "}</span>Cuanto más fuerte el color, más probable. «Libertadores directo» es fase de grupos; «Lib. fase previa» es el último que entra por la Tabla Anual. Libertadores incluye los cupos por título (Apertura, Clausura, Copa Argentina, Libertadores y Sudamericana). Las chances chicas van con un decimal; «—» es que no pasó en ninguna simulación.${projCompact ? "" : " «Gana alguna copa» es la chance de ganar la Libertadores, la Sudamericana o la Copa Argentina de este año (pasando el mouse se ve cada una)."}</p>
   </div>`;
 }
 const heatAlpha = v => Math.round(Math.max(0.07, Math.min(1, Math.sqrt(v))) * 100);
 function projTable() {
   const { acc } = projection;
   // Mapa de calor: cuanto más alto el %, más fuerte el color; números grandes. Un color por columna.
-  const heat = (v, c, title) => {
-    if (v <= 1e-9) return `<td class="hm"><div class="pill nil">—</div></td>`;
+  // label: nombre de la columna, se muestra arriba de cada número cuando la tabla pasa a tarjetas (celular).
+  const heat = (v, c, title, label) => {
+    const l = label ? ` data-l="${esc(label)}"` : "";
+    if (v <= 1e-9) return `<td class="hm"${l}><div class="pill nil">—</div></td>`;
     const a = heatAlpha(v);
-    return `<td class="hm"${title ? ` title="${esc(title)}"` : ""}><div class="pill${a >= 74 ? " hi" : ""}" style="--c:${c};--a:${a}%">${pctP(v)}</div></td>`;
+    return `<td class="hm"${l}${title ? ` title="${esc(title)}"` : ""}><div class="pill${a >= 74 ? " hi" : ""}" style="--c:${c};--a:${a}%">${pctP(v)}</div></td>`;
   };
-  const team = (t, i) => `<td class="rk">${i + 1}</td><td class="l team">${tn(t.id)}<span class="zb">${t.z}</span></td>`;
+  const team = (t, i, short) => `<td class="rk">${i + 1}</td><td class="l team">${short ? tnShort(t.id) : tn(t.id)}<span class="zb">${t.z}</span></td>`;
   if (projCompact) {
     const order = teams.slice().sort((a, b) => acc[b.id].champ + acc[b.id].liga - acc[a.id].champ - acc[a.id].liga || acc[b.id].lib - acc[a.id].lib || acc[b.id].po - acc[a.id].po);
     // En pantallas anchas va en dos columnas de 15; en el celular, una debajo de la otra.
     // Mismos anchos de columna en las dos mitades para que queden alineadas cuando van una debajo de la otra.
     const cols = `<colgroup><col class="c-rk"><col class="c-team">${"<col class=\"c-pc\">".repeat(6)}</colgroup>`;
-    const HM = [["Playoffs", t => acc[t].po, "var(--accent)"], ["Sudamericana", t => acc[t].sud, "var(--sud)"],
-      ["Libertadores fase previa", t => acc[t].pre, "var(--pre)"], ["Libertadores directo", t => acc[t].lib - acc[t].pre, "var(--lib)"],
-      ["Campeón Clausura", t => acc[t].champ, "var(--champ)"], ["Campeón de Liga", t => acc[t].liga, "var(--liga)"]];
+    const HM = [["Playoffs", t => acc[t].po, "var(--accent)", "PO"], ["Sudamericana", t => acc[t].sud, "var(--sud)", "Sud"],
+      ["Libertadores fase previa", t => acc[t].pre, "var(--pre)", "Previa"], ["Libertadores directo", t => acc[t].lib - acc[t].pre, "var(--lib)", "Lib"],
+      ["Campeón Clausura", t => acc[t].champ, "var(--champ)", "Camp."], ["Campeón de Liga", t => acc[t].liga, "var(--liga)", "Liga"]];
     const half = (from, to) => `<div class="tbl-wrap ptable heat"><table class="fixed">${cols}
-      <thead><tr><th></th><th class="l">Equipo</th>${HM.map(h => `<th><i style="background:${h[2]}"></i>${h[0]}</th>`).join("")}</tr></thead>
-      <tbody>${order.slice(from, to).map((t, i) => `<tr>${team(t, from + i)}${HM.map(h => heat(h[1](t.id), h[2])).join("")}</tr>`).join("")}</tbody>
+      <thead><tr><th></th><th class="l">Equipo</th>${HM.map(h => `<th title="${h[0]}"><i style="background:${h[2]}"></i><span class="lg">${h[0]}</span><span class="sm">${h[3]}</span></th>`).join("")}</tr></thead>
+      <tbody>${order.slice(from, to).map((t, i) => `<tr>${team(t, from + i, true)}${HM.map(h => heat(h[1](t.id), h[2])).join("")}</tr>`).join("")}</tbody>
     </table></div>`;
     return `<div class="proj-split">${half(0, 15)}${half(15, 30)}</div>`;
   }
   const rows = teams.slice().sort((a, b) => acc[b.id].pts - acc[a.id].pts || acc[b.id].lib - acc[a.id].lib);
-  const FULL = [["Playoffs", t => acc[t].po, "var(--accent)"], ["1° zona", t => acc[t].first, "var(--accent)"], ["Campeón", t => acc[t].champ, "var(--champ)"],
-    ["Campeón de Liga", t => acc[t].liga, "var(--liga)"], ["Desc.", t => acc[t].desc, "var(--danger)"],
-    ["Lib. directo", t => acc[t].lib - acc[t].pre, "var(--lib)"], ["Lib. fase previa", t => acc[t].pre, "var(--pre)"], ["Sudamericana", t => acc[t].sud, "var(--sud)"],
-    ["Gana alguna copa", t => acc[t].cupT || 0, "var(--lib)", t => ["libT", "sudT", "caT"].map((k, i) => acc[t][k] ? `${["Libertadores", "Sudamericana", "Copa Argentina"][i]} ${pctP(acc[t][k])}` : "").filter(Boolean).join(" · ")]];
+  const FULL = [["Playoffs", t => acc[t].po, "var(--accent)", null, "Playoffs"], ["1° zona", t => acc[t].first, "var(--accent)", null, "1° zona"], ["Campeón", t => acc[t].champ, "var(--champ)", null, "Campeón"],
+    ["Campeón de Liga", t => acc[t].liga, "var(--liga)", null, "Liga"], ["Desc.", t => acc[t].desc, "var(--danger)", null, "Desc."],
+    ["Lib. directo", t => acc[t].lib - acc[t].pre, "var(--lib)", null, "Lib."], ["Lib. fase previa", t => acc[t].pre, "var(--pre)", null, "Previa"], ["Sudamericana", t => acc[t].sud, "var(--sud)", null, "Sudam."],
+    ["Gana alguna copa", t => acc[t].cupT || 0, "var(--lib)", t => ["libT", "sudT", "caT"].map((k, i) => acc[t][k] ? `${["Libertadores", "Sudamericana", "Copa Argentina"][i]} ${pctP(acc[t][k])}` : "").filter(Boolean).join(" · "), "Copa 2026"]];
   return `<div class="tbl-wrap ptable heat full"><table class="fixed">
       <colgroup><col class="c-rk"><col class="c-team"><col class="c-pts">${"<col class=\"c-pc\">".repeat(FULL.length)}</colgroup>
       <thead>
         <tr class="grp"><th colspan="3"></th><th colspan="3">Clausura</th><th colspan="2">Tabla Anual</th><th colspan="3">Copas 2027</th><th>Copas 2026</th></tr>
         <tr><th></th><th class="l">Equipo</th><th>Pts Anual</th>${FULL.map(h => `<th><i style="background:${h[2]}"></i>${h[0]}</th>`).join("")}</tr>
       </thead>
-      <tbody>${rows.map((t, i) => `<tr>${team(t, i)}<td class="num">${acc[t.id].pts.toFixed(1)}</td>${FULL.map(h => heat(h[1](t.id), h[2], h[3] && h[3](t.id))).join("")}</tr>`).join("")}</tbody>
+      <tbody>${rows.map((t, i) => `<tr>${team(t, i)}<td class="num" data-l="Pts">${acc[t.id].pts.toFixed(1)}</td>${FULL.map(h => heat(h[1](t.id), h[2], h[3] && h[3](t.id), h[4])).join("")}</tr>`).join("")}</tbody>
     </table></div>`;
 }
 // Las probabilidades se recalculan solas un momento después del último cambio.
@@ -1870,11 +1943,11 @@ async function exportProjImage(btn) {
 /* ===================== RENDER: DATOS ===================== */
 function renderData() {
   const rows = teams.map((t, i) => `<tr>
-    <td class="l team">${tn(t.id)}</td><td>${t.z}</td>
-    ${[0, 1, 2, 3].map(k => `<td><input id="d-${t.id}-cl${k}" data-i="${i}" data-k="cl" data-j="${k}" inputmode="numeric" value="${t.cl[k]}"></td>`).join("")}
-    ${[0, 1, 2, 3].map(k => `<td><input id="d-${t.id}-an${k}" data-i="${i}" data-k="an" data-j="${k}" inputmode="numeric" value="${t.an[k]}"></td>`).join("")}
-    ${[0, 1].map(k => `<td><input id="d-${t.id}-pr${k}" data-i="${i}" data-k="pr" data-j="${k}" inputmode="numeric" value="${(t.pr || [0, 0])[k]}"></td>`).join("")}
-    <td><input id="d-${t.id}-f" data-i="${i}" data-k="f" maxlength="5" value="${esc(t.f || "")}" style="width:64px;text-align:left"></td>
+    <td class="l team">${tn(t.id)} <small class="xs-only">Zona ${t.z}</small></td><td class="xh">${t.z}</td>
+    ${[0, 1, 2, 3].map(k => `<td data-l="Cl. ${["PJ", "Pts", "DG", "GF"][k]}"><input id="d-${t.id}-cl${k}" data-i="${i}" data-k="cl" data-j="${k}" inputmode="numeric" value="${t.cl[k]}"></td>`).join("")}
+    ${[0, 1, 2, 3].map(k => `<td data-l="An. ${["PJ", "Pts", "DG", "GF"][k]}"><input id="d-${t.id}-an${k}" data-i="${i}" data-k="an" data-j="${k}" inputmode="numeric" value="${t.an[k]}"></td>`).join("")}
+    ${[0, 1].map(k => `<td data-l="Prom. ${["Pts", "PJ"][k]}"><input id="d-${t.id}-pr${k}" data-i="${i}" data-k="pr" data-j="${k}" inputmode="numeric" value="${(t.pr || [0, 0])[k]}"></td>`).join("")}
+    <td data-l="Últimos 4"><input id="d-${t.id}-f" data-i="${i}" data-k="f" maxlength="5" value="${esc(t.f || "")}" style="width:64px;text-align:left"></td>
   </tr>`).join("");
   document.getElementById("pane-datos").innerHTML = `
     <div class="panel-h"><h2>Datos de partida</h2><span class="sub">Tablas antes de la fecha 14 · los cambios recalculan todo</span></div>
@@ -1908,11 +1981,16 @@ function ownFixedPts(team) {
   return p;
 }
 function reachablePts(team) {
-  const k = ownPending(team).length, base = ownFixedPts(team), out = new Set();
-  for (let w = 0; w <= k; w++) for (let d = 0; d + w <= k; d++) out.add(base + 3 * w + d);
+  // Puntos que puede sumar en lo que le queda (lo ya jugado no cuenta).
+  const k = ownPending(team).length, out = new Set();
+  for (let w = 0; w <= k; w++) for (let d = 0; d + w <= k; d++) out.add(3 * w + d);
   return [...out].sort((a, b) => a - b);
 }
-const goalTarget = team => goalPts === "any" ? null : goalPts === "max" ? Math.max(...reachablePts(team)) : +goalPts;
+const goalTarget = team => {
+  if (goalPts === "any") return null;
+  const opts = reachablePts(team);
+  return goalPts !== "max" && opts.includes(+goalPts) ? +goalPts : Math.max(...opts); // si ya no se puede (jugó un partido), lo máximo
+};
 const GOAL_N = 6000, GOAL_N_MAX = 30000;
 function goalSim(team, goal, target) {
   const ownIds = new Set(ownPending(team).map(m => m.id));
@@ -1922,7 +2000,7 @@ function goalSim(team, goal, target) {
   if (target != null) {
     const own = ownPending(team).map(m => { const mm = matchModel(m); const home = m.h === team;
       return { m, mm, p: home ? [mm.ph, mm.pd, mm.pa] : [mm.pa, mm.pd, mm.ph], home }; });
-    const need = target - ownFixedPts(team);
+    const need = target;
     combos = [];
     const walk = (i, acc, pr, pts) => {
       if (i === own.length) { if (pts === need) combos.push({ outs: acc.slice(), pr }); return; }
@@ -2012,6 +2090,7 @@ function goalSim(team, goal, target) {
     // puntos y récord del equipo en lo que falta
     let pts = 0, W = 0, D = 0, L = 0;
     for (const m of mine) {
+      if (fixed[m.id]) continue; // solo lo que le queda
       const r = res[m.id], gf = m.h === team ? r[0] : r[1], gc = m.h === team ? r[1] : r[0];
       if (gf > gc) { pts += 3; W++; } else if (gf === gc) { pts += 1; D++; } else L++;
     }
@@ -2042,8 +2121,8 @@ function renderGoalForm() {
       const opts = reachablePts(goalTeam), mx = Math.max(...opts), cur = goalTarget(goalTeam);
       return `<select id="goal-pts" aria-label="Puntos que suma">
         <option value="any"${goalPts === "any" ? " selected" : ""}>Cualquier cantidad</option>
-        ${opts.slice().reverse().map(v => `<option value="${v === mx ? "max" : v}"${cur === v && goalPts !== "any" ? " selected" : ""}>Suma ${v} ${v === 1 ? "punto" : "puntos"}${v === mx ? " (todo)" : ""}</option>`).join("")}
-      </select><span class="proj-sub" style="margin:0">Le quedan ${ownPending(goalTeam).length} partidos: puede sumar hasta ${mx} puntos.</span>`; })()}</div>
+        ${opts.slice().reverse().map(v => `<option value="${v === mx ? "max" : v}"${cur === v && goalPts !== "any" ? " selected" : ""}>Suma ${v} ${v === 1 ? "punto" : "puntos"} más${v === mx ? " (todo)" : ""}</option>`).join("")}
+      </select><span class="proj-sub" style="margin:0">Le quedan ${ownPending(goalTeam).length} partidos: puede sumar hasta ${mx} puntos más.${(() => { const f = ownFixedPts(goalTeam), n = MATCHES.filter(m => (m.h === goalTeam || m.a === goalTeam) && results[m.id]).length; return n ? ` Ya sumó ${f} en ${n === 1 ? "el partido jugado" : `los ${n} jugados`} (eso ya está contado).` : ""; })()}</span>`; })()}</div>
     <div class="row"><span class="lbl">Objetivo</span><div class="goal-opts" role="group" aria-label="Objetivo">${GOALS.map(([k, l]) => `<button type="button" data-goal="${k}" aria-pressed="${k === goalKind}">${l}</button>`).join("")}</div></div>
   </div>`;
 }
@@ -2151,7 +2230,7 @@ function goalHTML(G) {
 
 // Cuentas "matemáticas" para la zona: con cuántos puntos queda y cuánto pueden sumar como máximo los rivales.
 function zoneMath(team, target, annual) {
-  const z = T(team).z, final = (annual ? T(team).an[1] : T(team).cl[1]) + target;
+  const z = T(team).z, final = (annual ? T(team).an[1] : T(team).cl[1]) + ownFixedPts(team) + target;
   const rows = teams.filter(t => (annual || t.z === z) && t.id !== team).map(t => {
     const cur = (annual ? t.an[1] : t.cl[1]) + ownFixedPts(t.id), left = 3 * ownPending(t.id).length;
     return { id: t.id, cur, top: cur + left, max: final - cur };
