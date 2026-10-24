@@ -578,8 +578,9 @@ html.dlg-open, html.dlg-open body { overflow: hidden; }
   .tbl-wrap .tag:not(.lib):not(.pre):not(.sud):not(.desc):not(.po):not(.champ) { background: var(--muted); }
   .mv { font-size: 10px; margin-left: 3px; }
   td.cross .crest { width: 1em; height: 1.2em; }
-  /* Zonas, Anual y Promedios: todas las columnas, equipo con escudo + abreviatura */
-  #pane-zona-a table, #pane-zona-b table, #pane-anual table, #pane-promedios table { font-size: 11.5px; }
+  /* Zonas, Anual y Promedios: equipo con escudo + abreviatura; zonas y Anual sin GF/GC y la Anual sin promedio */
+  #pane-zona-a table, #pane-zona-b table, #pane-anual table { font-size: 12.5px; }
+  #pane-promedios table { font-size: 11.5px; }
   #pane-zona-a :is(th, td), #pane-zona-b :is(th, td), #pane-anual :is(th, td), #pane-promedios :is(th, td) { padding: 6px 2px; }
   #pane-zona-a th, #pane-zona-b th, #pane-anual th, #pane-promedios th { font-size: 9.5px; letter-spacing: 0; }
   #pane-zona-a td.team, #pane-zona-b td.team, #pane-anual td.team, #pane-promedios td.team { padding-right: 4px; }
@@ -1413,8 +1414,9 @@ function moveTag(id, newPos, order) {
   return `<span class="mv ${d > 0 ? "up" : "down"}">${d > 0 ? "▲" : "▼"}${Math.abs(d)}</span>`;
 }
 // PJ, ganados, empatados, perdidos, goles a favor y en contra, diferencia
-const statCells = r => `<td>${r.pj}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.gc}</td><td>${r.dg > 0 ? "+" : ""}${r.dg}</td>`;
-const statHead = `<th>PJ</th><th>G</th><th>E</th><th>P</th><th>GF</th><th>GC</th><th>DG</th>`;
+// En el celular no se muestran GF ni GC (class "xh"): queda la diferencia de gol.
+const statCells = r => `<td>${r.pj}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td class="xh">${r.gf}</td><td class="xh">${r.gc}</td><td>${r.dg > 0 ? "+" : ""}${r.dg}</td>`;
+const statHead = `<th>PJ</th><th>G</th><th>E</th><th>P</th><th class="xh">GF</th><th class="xh">GC</th><th>DG</th>`;
 function renderZone(z, st) {
   const rows = z === "A" ? st.A : st.B, other = z === "A" ? "B" : "A";
   const order = baseOrder(z);
@@ -1465,7 +1467,7 @@ function renderAnnual(st, br, cups) {
     return `<tr class="${band}">
       <td class="pos">${pos}</td>
       <td class="l team">${tnShort(r.id)}${moveTag(r.id, pos, order)}${tag}</td>
-      <td>${r.z}</td>${statCells(r)}<td class="num">${promedio(r).toFixed(3).replace(".", ",")}</td>
+      <td>${r.z}</td>${statCells(r)}<td class="num xh">${promedio(r).toFixed(3).replace(".", ",")}</td>
       <td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
     </tr>`;
   }).join("");
@@ -1493,7 +1495,7 @@ function renderAnnual(st, br, cups) {
     </div>
     ${pending.length ? `<p class="rule">Falta definir: ${pending.join(", ")}. Elegilos en Playoffs y Copas, o usá «Completar todo con IA».</p>` : ""}
     <div class="tbl-wrap"><table>
-      <thead><tr><th>#</th><th class="l">Equipo</th><th title="Zona">Z</th>${statHead}<th>Prom.</th><th>Pts</th></tr></thead>
+      <thead><tr><th>#</th><th class="l">Equipo</th><th title="Zona">Z</th>${statHead}<th class="xh">Prom.</th><th>Pts</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
     <div class="legend"><span class="dot" style="--c:var(--accent)">Campeón de Liga (1° de la Anual)</span><span class="dot ring" style="--c:var(--lib)">Clasificado por título (Apertura, Clausura, copa)</span><span style="--c:var(--lib)">Libertadores (grupos)</span><span style="--c:var(--pre)">Libertadores fase previa</span><span style="--c:var(--sud)">Sudamericana</span><span style="--c:var(--danger)">Descenso: último de la Anual y peor promedio (si es el mismo, el anteúltimo de la Anual)</span></div>`;
 }
