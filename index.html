@@ -139,6 +139,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px;
   background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 8px 10px; margin-bottom: 6px;
 }
+.match { position: relative; }
+.match.official { border-color: color-mix(in srgb, var(--sud) 55%, var(--line)); }
+.match.official .score input { background: var(--sud-soft); border-color: var(--sud); color: var(--ink); cursor: default; }
+.off-tag { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font: 700 10px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--sud); background: var(--surface); border: 1px solid var(--sud); border-radius: 4px; padding: 2px 6px; }
+.off-note { color: var(--sud); font-weight: 600; }
+.po-row input[readonly] { background: var(--sud-soft); border-color: var(--sud); }
 .match.done { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
 .team-n { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .team-n.home { text-align: right; }
@@ -1078,7 +1085,8 @@ function resolveCups(pick) {
     // "won": llave ya jugada, el ganador queda fijo.
     const w = c.sf.map(t => { const tt = Object.assign({}, t, { cup: c.id }); tt.w = t.won || pick(tt, tt.h, tt.a); out.ties.push(tt); return tt.w; });
     const fin = { id: c.fin, cup: c.id, h: w[0] || null, a: w[1] || null, neutral: true, info: "Final" };
-    fin.w = fin.h && fin.a ? pick(fin, fin.h, fin.a) : null;
+    if (c.finWon && fin.h && fin.a && samePair(c.finWon, fin.h, fin.a)) fin.won = c.finWon.w; // final ya jugada
+    fin.w = fin.h && fin.a ? (fin.won || pick(fin, fin.h, fin.a)) : null;
     out.ties.push(fin);
     if (fin.h) out.finalists.add(fin.h); if (fin.a) out.finalists.add(fin.a);
     out.champ[c.id] = fin.w;
@@ -1215,6 +1223,50 @@ function cupos(an, clausuraChamp, cups) {
   return { champs: [...Q], holders, lib, pre: lib.length ? lib[lib.length - 1] : null, sud: pool.slice(libN, libN + 6) };
 }
 
+/* ===================== RESULTADOS OFICIALES (promiedos) =====================
+   resultados.json lo actualiza solo una acción de GitHub (scripts/promiedos.py) con los partidos terminados.
+   Al abrir la página se cargan como oficiales: quedan fijos y no se pueden editar. */
+let official = { data: null, liga: {}, po: [], n: 0 };
+const samePair = (r, h, a) => (r.h === h && r.a === a) || (r.h === a && r.a === h);
+function applyOfficial(d) {
+  if (!d) return;
+  official = { data: d, liga: {}, po: d.playoffs || [], n: 0 };
+  for (const r of d.liga || []) {
+    const m = MATCHES.find(x => samePair(r, x.h, x.a)); if (!m) continue;
+    results[m.id] = m.h === r.h ? r.g.slice() : [r.g[1], r.g[0]];
+    delete aiFilled[m.id]; official.liga[m.id] = true; official.n++;
+  }
+  for (const r of d.copas || []) {
+    const c = CUPS.find(x => x.id === r.copa); if (!c) continue;
+    const t = c.sf.find(x => samePair(r, x.h, x.a));
+    if (t) { t.won = r.w; delete cupPicks[t.id]; delete aiCupPicks[t.id]; }
+    else if (r.fase === "Final") { c.finWon = r; delete cupPicks[c.fin]; delete aiCupPicks[c.fin]; }
+  }
+  official.n += official.po.length;
+}
+// Resultado oficial de una llave de playoffs, orientado como la llave del cuadro.
+function officialPO(t) {
+  const r = t.h && t.a && official.po.find(x => samePair(x, t.h, t.a)); if (!r) return null;
+  const rev = r.h !== t.h, g = rev ? [r.g[1], r.g[0]] : r.g.slice(), p = r.p ? (rev ? [r.p[1], r.p[0]] : r.p.slice()) : null;
+  const w = g[0] !== g[1] ? (g[0] > g[1] ? t.h : t.a) : p && p[0] !== p[1] ? (p[0] > p[1] ? t.h : t.a) : null;
+  return w ? { g, p, w } : null;
+}
+function setOfficialPO(t) {
+  const o = officialPO(t); if (!o) return null;
+  poScores[t.id] = { h: t.h, a: t.a, g: o.g, p: o.p, ai: false, official: true };
+  poWinners[t.id] = o.w;
+  return o.w;
+}
+async function loadOfficial() {
+  try {
+    const r = await fetch("resultados.json?t=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) return;
+    applyOfficial(await r.json());
+    if (!official.n) return;
+    invalidate(); goalRes = null; save(); renderAll();
+  } catch (e) {} // sin conexión o abierto como archivo: se usa lo guardado
+}
+
 /* ===================== RENDER: PARTIDOS ===================== */
 const pct = x => Math.round(x * 100) + "%";
 // Para chances chicas: no redondear a 0% algo que puede pasar.
@@ -1234,12 +1286,13 @@ function matchHTML(m) {
   const pick = aiPick(mm);
   const label = isClose(mm) ? `Partido parejo: <b>empate</b> probable` : `Favorito: <b>${esc(fav.n)}</b> (${pct(favP)})`;
   const cls = k => (k === top ? "top" : "");
-  return `<div class="match${r ? " done" : ""}" data-m="${m.id}">
+  const off = official.liga[m.id], ro = off ? " readonly" : "";
+  return `<div class="match${r ? " done" : ""}${off ? " official" : ""}" data-m="${m.id}">${off ? '<span class="off-tag" title="Resultado final de promiedos">Final</span>' : ""}
     <div class="team-n home" title="${esc(H.n)}">${mm.ph > mm.pa ? '<span class="fav">●</span> ' : ""}${esc(H.n)}${crest(H.id)}</div>
     <div class="score">
-      <input id="${m.id}-h" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(H.n)}" value="${r ? r[0] : ""}" class="${r && aiFilled[m.id] ? "ai" : ""}" data-side="0">
+      <input id="${m.id}-h" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(H.n)}" value="${r ? r[0] : ""}" class="${r && aiFilled[m.id] ? "ai" : ""}" data-side="0"${ro}>
       <span>–</span>
-      <input id="${m.id}-a" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(A.n)}" value="${r ? r[1] : ""}" class="${r && aiFilled[m.id] ? "ai" : ""}" data-side="1">
+      <input id="${m.id}-a" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(A.n)}" value="${r ? r[1] : ""}" class="${r && aiFilled[m.id] ? "ai" : ""}" data-side="1"${ro}>
     </div>
     <div class="team-n" title="${esc(A.n)}">${crest(A.id)}${esc(A.n)}${mm.pa > mm.ph ? ' <span class="fav">●</span>' : ""}</div>
     <div class="probs">
@@ -1301,6 +1354,7 @@ function renderZone(z, st) {
 }
 function currentBracket(st) {
   return bracket(st, t => {
+    const ow = setOfficialPO(t); if (ow) return ow;
     const w = poWinners[t.id];
     return (w === t.h || w === t.a) ? w : null;
   });
@@ -1443,13 +1497,13 @@ function tieHTML(t, s, cups, ro) { // ro: solo lectura (Resumen), sin casilleros
     if (!id) return `<div class="po-row"><button type="button" disabled><span class="seed"></span><span class="nm">A definir</span><span class="pr"></span></button></div>`;
     const p = other ? (id === t.h ? advanceProb(t.h, t.a, t.neutral, cups) : 1 - advanceProb(t.h, t.a, t.neutral, cups)) : null;
     const cls = t.w ? (t.w === id ? "win" : "lose") : "";
-    const ai = sc && sc.ai ? " ai" : "";
+    const ai = sc && sc.ai ? " ai" : "", lock = sc && sc.official ? " readonly" : "";
     const g = sc ? sc.g[side] : "", pen = sc && sc.p ? sc.p[side] : "";
     return `<div class="po-row ${cls}"><button type="button" class="${cls}" data-tie="${t.id}" data-team="${id}" ${other ? "" : "disabled"}>
       <span class="seed">${s[id].p}${s[id].z}</span><span class="nm">${tn(id)}</span><span class="pr">${p == null ? "" : bataTag(t.w === id, p) + pct(p)}</span></button>
       ${both && ro ? (isSet(g) ? `<span class="po-sc">${g}${tiedG && isSet(pen) ? `<small>(${pen})</small>` : ""}</span>` : "") : ""}
-      ${both && !ro ? `<input class="po-g${ai}" id="po-${t.id}-g${side}" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(T(id).n)}" value="${g ?? ""}" data-potie="${t.id}" data-side="${side}" data-k="g">
-      ${tiedG ? `<input class="po-p${ai}" id="po-${t.id}-p${side}" inputmode="numeric" maxlength="2" aria-label="Penales ${esc(T(id).n)}" title="Penales" placeholder="pen" value="${pen ?? ""}" data-potie="${t.id}" data-side="${side}" data-k="p">` : ""}` : ""}
+      ${both && !ro ? `<input class="po-g${ai}" id="po-${t.id}-g${side}" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(T(id).n)}" value="${g ?? ""}" data-potie="${t.id}" data-side="${side}" data-k="g"${lock}>
+      ${tiedG ? `<input class="po-p${ai}" id="po-${t.id}-p${side}" inputmode="numeric" maxlength="2" aria-label="Penales ${esc(T(id).n)}" title="Penales" placeholder="pen" value="${pen ?? ""}" data-potie="${t.id}" data-side="${side}" data-k="p"${lock}>` : ""}` : ""}
     </div>`;
   };
   return `<div class="tie${tiedG ? " pens" : ""}">${row(t.h, t.a, 0)}${row(t.a, t.h, 1)}${tiedG && !ro ? `<div class="pen-note">Empate: ${sc.p && isSet(sc.p[0]) && isSet(sc.p[1]) ? `penales ${sc.p[0]}-${sc.p[1]}` : "cargá los penales"}</div>` : ""}</div>`;
@@ -1501,7 +1555,7 @@ function renderCups(cups) {
     const row = (id, other) => {
       if (!id) return `<button type="button" disabled><span class="seed"></span><span class="nm">A definir</span><span class="pr"></span></button>`;
       if (t.won) return `<button type="button" class="${t.won === id ? "win" : "lose"}" disabled>
-        <span class="seed">${isLocal(id) ? "ARG" : ""}</span><span class="nm">${tn(id)}</span><span class="pr">${t.won === id ? "Pasó" : "Eliminado"}</span></button>`;
+        <span class="seed">${isLocal(id) ? "ARG" : ""}</span><span class="nm">${tn(id)}</span><span class="pr">${t.info === "Final" ? (t.won === id ? "Campeón" : "Subcampeón") : t.won === id ? "Pasó" : "Eliminado"}</span></button>`;
       const p = other ? (id === t.h ? cupTieProb(t, t.h, t.a) : 1 - cupTieProb(t, t.h, t.a)) : null;
       const cls = t.w ? (t.w === id ? "win" : "lose") : "";
       return `<button type="button" class="${cls}" data-cuptie="${t.id}" data-team="${id}" ${other ? "" : "disabled"}>
@@ -2397,7 +2451,7 @@ function renderAll() {
   renderChips(); renderFocusSelect(); renderFixture(); renderTables(); renderData(); showTab(activeTab); applyFocus();
   const done = MATCHES.filter(m => results[m.id]).length;
   document.getElementById("data-note").innerHTML =
-    `<b>Tablas de promiedos al ${DATA_DATE}</b>. Fecha 13 completa (Newell's 2-1 Central Córdoba, Sarmiento 1-1 Barracas y Riestra 1-1 Unión). Correcciones en la pestaña <b>Datos</b>. Cargados: <b>${done}/${MATCHES.length}</b> partidos.`;
+    `<b>Tablas de promiedos al ${DATA_DATE}</b>. Fecha 13 completa (Newell's 2-1 Central Córdoba, Sarmiento 1-1 Barracas y Riestra 1-1 Unión). Correcciones en la pestaña <b>Datos</b>.${official.n ? ` <span class="off-note">Resultados oficiales de promiedos: ${official.n}${official.data.actualizado ? ` (actualizado ${new Date(official.data.actualizado).toLocaleString("es-AR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })})` : ""}.</span>` : ""} Cargados: <b>${done}/${MATCHES.length}</b> partidos.`;
 }
 function invalidate() { projection = null; cache.clear(); mcache.clear(); advCache.clear(); stakesCache = null; }
 function showTab(tab) {
@@ -2445,6 +2499,7 @@ function fillAI() {
   for (const t of cups.ties) if (t.w && !cupPicks[t.id]) { cupPicks[t.id] = t.w; aiCupPicks[t.id] = true; }
   const st = standings(results);
   const br = bracket(st, t => {
+    const ow = setOfficialPO(t); if (ow) return ow;
     const mine = poScores[t.id];
     if (mine && !mine.ai && mine.h === t.h && mine.a === t.a && scoreWinner(mine)) return scoreWinner(mine); // lo cargado a mano se respeta
     const w = pickTie(advanceProb(t.h, t.a, t.neutral, cups), t.h, t.a);
@@ -2471,6 +2526,7 @@ function fillRandom() {
   for (const t of cups.ties) if (t.w && !cupPicks[t.id]) { cupPicks[t.id] = t.w; aiCupPicks[t.id] = true; }
   const st = standings(results);
   const br = bracket(st, t => {
+    const ow = setOfficialPO(t); if (ow) return ow;
     const mine = poScores[t.id];
     if (mine && !mine.ai && mine.h === t.h && mine.a === t.a && scoreWinner(mine)) return scoreWinner(mine);
     poScores[t.id] = Object.assign({ h: t.h, a: t.a, ai: true }, koScoreRandom(koModel(t.h, t.a, t.neutral, cups)));
@@ -2498,6 +2554,7 @@ document.addEventListener("click", e => {
   const tieBtn = e.target.closest("button[data-tie]");
   if (tieBtn) {
     const id = tieBtn.dataset.tie;
+    if (poScores[id] && poScores[id].official) return; // llave ya jugada
     poWinners[id] = poWinners[id] === tieBtn.dataset.team ? undefined : tieBtn.dataset.team;
     if (!poWinners[id]) delete poWinners[id];
     if (poScores[id] && scoreWinner(poScores[id]) !== poWinners[id]) delete poScores[id]; // el marcador ya no coincide
@@ -2511,7 +2568,9 @@ document.addEventListener("click", e => {
   if (e.target.closest("#btn-ia")) return fillAI();
   if (e.target.closest("#btn-rand")) return fillRandom();
   if (e.target.closest("#btn-clear")) {
-    results = {}; aiFilled = {}; poWinners = {}; poScores = {}; cupPicks = {}; aiCupPicks = {}; projection = null; save(); renderAll(); toast("Resultados borrados"); return;
+    results = {}; aiFilled = {}; poWinners = {}; poScores = {}; cupPicks = {}; aiCupPicks = {}; projection = null;
+    applyOfficial(official.data); // los resultados oficiales de promiedos se mantienen
+    save(); renderAll(); toast(official.n ? "Resultados borrados (quedan los oficiales)" : "Resultados borrados"); return;
   }
   if (e.target.closest("#btn-proj-img")) { exportProjImage(e.target.closest("#btn-proj-img")); return; }
   if (e.target.closest("#btn-proj")) { projection = null; renderProjection(); toast("Recalculando 10.000 simulaciones…"); return; }
@@ -2532,6 +2591,7 @@ document.addEventListener("input", e => {
     // Marcador de playoffs: con goles distintos define al ganador; si empatan, definen los penales.
     inp.value = inp.value.replace(/\D/g, "").slice(0, 2);
     const id = inp.dataset.potie, side = +inp.dataset.side, k = inp.dataset.k;
+    if (poScores[id] && poScores[id].official) return;
     const t = currentBracket(standings(results)).ties.find(x => x.id === id); if (!t) return;
     let sc = poScores[id];
     if (!sc || sc.h !== t.h || sc.a !== t.a) sc = poScores[id] = { h: t.h, a: t.a, g: ["", ""], p: null, ai: false };
@@ -2552,6 +2612,7 @@ document.addEventListener("input", e => {
   if (inp.matches(".score input")) {
     inp.value = inp.value.replace(/\D/g, "").slice(0, 2);
     const box = inp.closest(".match"), id = box.dataset.m;
+    if (official.liga[id]) return; // resultado oficial: no se toca
     const [h, a] = box.querySelectorAll("input");
     delete aiFilled[id]; h.classList.remove("ai"); a.classList.remove("ai");
     if (h.value !== "" && a.value !== "") { results[id] = [+h.value, +a.value]; box.classList.add("done"); }
@@ -2574,6 +2635,7 @@ document.addEventListener("input", e => {
 load();
 initTheme();
 renderAll();
+loadOfficial();
 </script>
 </body>
 </html>

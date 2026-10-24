@@ -1,0 +1,29 @@
+name: Resultados de promiedos
+# Cada 20 minutos en horario de partidos (13 a 0:40 de Argentina) baja de promiedos los resultados
+# terminados y, si cambió algo, actualiza resultados.json (Netlify vuelve a publicar solo).
+on:
+  schedule:
+    - cron: "*/20 16-23,0-3 * * *"
+  workflow_dispatch:
+  push:
+    paths: ["scripts/promiedos.py", ".github/workflows/resultados.yml"]
+permissions:
+  contents: write
+concurrency:
+  group: resultados
+  cancel-in-progress: false
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/promiedos.py resultados.json
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add resultados.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Resultados de promiedos"
+          git pull --rebase -q
+          git push
