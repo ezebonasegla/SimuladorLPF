@@ -1,0 +1,55 @@
+{
+ "liga": [
+  {
+   "h": "gim",
+   "a": "pla",
+   "g": [
+    1,
+    2
+   ],
+   "f": 14
+  },
+  {
+   "h": "glp",
+   "a": "sar",
+   "g": [
+    2,
+    0
+   ],
+   "f": 14
+  }
+ ],
+ "playoffs": [],
+ "copas": [
+  {
+   "copa": "sud",
+   "fase": "Semifinales",
+   "h": "vas",
+   "a": "boc",
+   "w": "boc"
+  },
+  {
+   "copa": "sud",
+   "fase": "Semifinales",
+   "h": "ctq",
+   "a": "cam",
+   "w": "cam"
+  },
+  {
+   "copa": "lib",
+   "fase": "Semifinales",
+   "h": "fla",
+   "a": "est",
+   "w": "est"
+  },
+  {
+   "copa": "lib",
+   "fase": "Semifinales",
+   "h": "pal",
+   "a": "flu",
+   "w": "pal"
+  }
+ ],
+ "sin_mapear": [],
+ "actualizado": "2026-10-24T00:02+00:00"
+}
