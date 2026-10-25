@@ -1,9 +1,10 @@
 name: Resultados de promiedos
-# Cada 20 minutos en horario de partidos (13 a 0:40 de Argentina) baja de promiedos los resultados
-# terminados y, si cambió algo, actualiza resultados.json (Netlify vuelve a publicar solo).
+# Cada 5 minutos en horario de partidos (13 a 0:55 de Argentina) baja de promiedos los resultados
+# terminados y, si cambió algo, actualiza resultados.json (el sitio vuelve a publicar solo).
+# Es el respaldo: con la página abierta, el navegador ya consulta promiedos directo.
 on:
   schedule:
-    - cron: "*/20 16-23,0-3 * * *"
+    - cron: "*/5 16-23,0-3 * * *"
   workflow_dispatch:
   push:
     paths: ["scripts/promiedos.py", ".github/workflows/resultados.yml"]

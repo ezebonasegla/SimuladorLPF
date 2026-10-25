@@ -135,17 +135,38 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   margin: 6px 0 8px;
 }
 .fecha-h::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.day-l { font: 700 14px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 14px 0 8px; }
+.fecha-h .sub { font: 500 13px var(--font-body); color: var(--muted); text-transform: none; letter-spacing: 0; }
+.match { display: flex; flex-direction: column; gap: 8px; }
+.m-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 12px; color: var(--muted); }
+.m-when { font: 700 16px/1 var(--font-display); color: var(--ink); letter-spacing: .02em; }
+.m-tv { font-weight: 600; color: var(--ink); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); border-radius: 4px; padding: 2px 6px; font-size: 11px; }
+.m-zone { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.m-st { margin-left: auto; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-radius: 4px; padding: 2px 7px; }
+.m-st.fin { color: var(--sud); background: var(--sud-soft); }
+.m-st.wait { color: var(--muted); background: var(--surface-2); }
+.m-st.live { color: var(--danger); background: var(--danger-soft); display: inline-flex; align-items: center; gap: 5px; }
+.m-st.live b { color: var(--ink); }
+.m-st.live i { width: 7px; height: 7px; border-radius: 50%; background: var(--danger); animation: livepulse 1.2s ease-in-out infinite; }
+@keyframes livepulse { 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .m-st.live i { animation: none; } }
+.m-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; }
+.m-more summary { cursor: pointer; font-size: 12.5px; color: var(--muted); list-style: none; }
+.m-more summary::-webkit-details-marker { display: none; }
+.m-more summary::before { content: "▸ "; color: var(--accent); }
+.m-more[open] summary::before { content: "▾ "; }
+.m-more summary b { color: var(--ink); }
+.m-more .verdict, .m-more .keys { margin-top: 6px; }
 .group-l { font-size: 11.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 10px 0 4px; }
 
 .match {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px;
-  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 8px 10px; margin-bottom: 6px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 6px;
 }
 .match { position: relative; }
 .match.official { border-color: color-mix(in srgb, var(--sud) 55%, var(--line)); }
+.match.is-live .score input::placeholder { color: var(--danger); opacity: .7; }
+.match.is-live { border-color: var(--danger); box-shadow: 0 0 0 1px color-mix(in srgb, var(--danger) 35%, transparent); }
 .match.official .score input { background: var(--sud-soft); border-color: var(--sud); color: var(--ink); cursor: default; }
-.off-tag { position: absolute; top: -8px; left: 50%; transform: translateX(-50%); font: 700 10px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase;
-  color: var(--sud); background: var(--surface); border: 1px solid var(--sud); border-radius: 4px; padding: 2px 6px; }
 .off-note { color: var(--sud); font-weight: 600; }
 .po-row input[readonly] { background: var(--sud-soft); border-color: var(--sud); }
 .match.done { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
@@ -1357,6 +1378,83 @@ async function loadOfficial() {
   } catch (e) {} // sin conexión o abierto como archivo: se usa lo guardado
 }
 
+/* ===================== EN VIVO (promiedos, desde el navegador) =====================
+   Con la página abierta se consulta la API de promiedos (permite CORS) para tener horario, TV y estado de cada partido.
+   Se vuelve a consultar cuando un partido debería estar terminando (inicio + ~1h50) y cada 2 minutos si está en juego;
+   cuando llega el final se carga como resultado oficial y se recalcula todo. */
+const PD_TEAMS = {
+  hchc: "ins", igg: "boc", hcbh: "dyj", ihc: "vel", igj: "lan", ihh: "new", bbjbf: "gim", ihe: "ind", igf: "slo", igh: "est", hcag: "uni", hcah: "pla",
+  bbjea: "rie", beafh: "cco", jche: "tal", ihf: "cen", ihb: "arg", iia: "glp", fhid: "bel", hbbh: "sar", igi: "riv", jafb: "bar", iie: "hur", hcch: "irv",
+  gbfc: "atu", iid: "tig", ihi: "ban", ihg: "rac", bheaf: "erc", hccd: "ald",
+};
+const PD_KEY = f => `72_228_8_${f}`; // Clausura 2026, fecha f
+const AGENDA_KEY = "simlpf-agenda-v1";
+const MIN = 60000;
+let agenda = {}; // matchId -> { t: inicio (ms), tv: [canales], st: 1 prog / 2 en juego / 3 final, txt, g: goles en vivo }
+try { agenda = JSON.parse(localStorage.getItem(AGENDA_KEY) || "{}") || {}; } catch (e) {}
+let liveTimer = null, liveBusy = false, tvAsked = {};
+// "25-10-2026 17:30": promiedos ya la devuelve en el horario de quien consulta.
+function pdTime(s) {
+  const m = /^(\d+)-(\d+)-(\d+) (\d+):(\d+)/.exec(s || ""); if (!m) return null;
+  return new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5]).getTime();
+}
+async function fetchLive() {
+  if (liveBusy) return; liveBusy = true;
+  const finals = [];
+  try {
+    for (const f of FECHAS) {
+      const r = await fetch(`https://api.promiedos.com.ar/league/games/hc/${PD_KEY(f)}`, { cache: "no-cache" });
+      if (!r.ok) continue;
+      for (const g of (await r.json()).games || []) {
+        const h = PD_TEAMS[g.teams[0].id], a = PD_TEAMS[g.teams[1].id];
+        const m = h && a && MATCHES.find(x => samePair({ h, a }, x.h, x.a)); if (!m) continue;
+        const rev = m.h !== h, sc = g.scores ? g.scores.map(Number) : null, st = g.status && g.status.enum;
+        agenda[m.id] = { t: pdTime(g.start_time), tv: (agenda[m.id] && agenda[m.id].tv) || [], st,
+          txt: g.game_time_to_display || g.game_time_status_to_display || "", g: sc ? (rev ? [sc[1], sc[0]] : sc) : null };
+        if (st === 3 && sc && !official.liga[m.id]) finals.push({ h, a, g: sc, f });
+      }
+    }
+    // Canales de TV: vienen en la lista de partidos de cada día (se pide una vez por día que tenga partidos por jugar).
+    const pad = n => String(n).padStart(2, "0");
+    const days = new Set(MATCHES.filter(m => agenda[m.id] && agenda[m.id].t && !official.liga[m.id] && !agenda[m.id].tv.length)
+      .map(m => { const d = new Date(agenda[m.id].t); return `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()}`; }));
+    for (const day of days) {
+      if (tvAsked[day] && Date.now() - tvAsked[day] < 6 * 60 * MIN) continue;
+      tvAsked[day] = Date.now();
+      const r = await fetch(`https://api.promiedos.com.ar/games/${day}`, { cache: "no-cache" }).catch(() => null);
+      if (!r || !r.ok) continue;
+      for (const l of (await r.json()).leagues || []) if (l.id === "hc") for (const g of l.games || []) {
+        const h = PD_TEAMS[g.teams[0].id], a = PD_TEAMS[g.teams[1].id];
+        const m = h && a && MATCHES.find(x => samePair({ h, a }, x.h, x.a));
+        if (m && agenda[m.id]) agenda[m.id].tv = (g.tv_networks || []).map(x => x.name.replace(/\s*\(.*\)$/, ""));
+      }
+    }
+    try { localStorage.setItem(AGENDA_KEY, JSON.stringify(agenda)); } catch (e) {}
+    if (finals.length) {
+      const d = official.data || { liga: [], playoffs: [], copas: [] };
+      d.liga = (d.liga || []).filter(x => !finals.some(y => samePair(x, y.h, y.a))).concat(finals);
+      d.actualizado = new Date().toISOString();
+      applyOfficial(d); invalidate(); goalRes = null; save(); renderAll();
+      toast(finals.map(x => `Final: ${T(x.h).n} ${x.g[0]}-${x.g[1]} ${T(x.a).n}`).join(" · "));
+    } else renderFixture();
+  } catch (e) {} // sin conexión o bloqueado: se sigue con lo que había
+  liveBusy = false;
+  scheduleLive();
+}
+// Próxima consulta: cada 2 min si hay algo en juego; si no, cuando el próximo partido debería terminar.
+function scheduleLive() {
+  clearTimeout(liveTimer);
+  const now = Date.now(); let next = now + 30 * MIN;
+  for (const m of MATCHES) {
+    const a = agenda[m.id]; if (!a || official.liga[m.id] || !a.t) continue;
+    const end = a.t + 110 * MIN;
+    if (a.st === 2 || (now >= end && now < a.t + 4 * 60 * MIN)) next = Math.min(next, now + 2 * MIN);
+    else if (end > now) next = Math.min(next, end);
+  }
+  liveTimer = setTimeout(fetchLive, Math.max(MIN, next - now));
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) fetchLive(); });
+
 /* ===================== RENDER: PARTIDOS ===================== */
 const pct = x => Math.round(x * 100) + "%";
 // Para chances chicas: no redondear a 0% algo que puede pasar.
@@ -1369,45 +1467,68 @@ function renderChips() {
   document.getElementById("fecha-chips").innerHTML = opts.map(([v, l]) =>
     `<button class="chip" type="button" data-f="${v}" aria-pressed="${fechaFilter === v}">${l}</button>`).join("");
 }
+const hhmm = t => new Date(t).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 function matchHTML(m) {
-  const mm = matchModel(m), r = results[m.id], H = T(m.h), A = T(m.a);
+  const mm = matchModel(m), r = results[m.id], H = T(m.h), A = T(m.a), ag = agenda[m.id];
   const top = Math.max(mm.ph, mm.pd, mm.pa);
   const fav = mm.ph >= mm.pa ? H : A, favP = Math.max(mm.ph, mm.pa);
   const pick = aiPick(mm);
   const label = isClose(mm) ? `Partido parejo: <b>empate</b> probable` : `Favorito: <b>${esc(fav.n)}</b> (${pct(favP)})`;
   const cls = k => (k === top ? "top" : "");
-  const off = official.liga[m.id], ro = off ? " readonly" : "";
-  return `<div class="match${r ? " done" : ""}${off ? " official" : ""}" data-m="${m.id}">${off ? '<span class="off-tag" title="Resultado final de promiedos">Final</span>' : ""}
-    <div class="team-n home" title="${esc(H.n)}">${mm.ph > mm.pa ? '<span class="fav">●</span> ' : ""}${esc(H.n)}${crest(H.id)}</div>
-    <div class="score">
-      <input id="${m.id}-h" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(H.n)}" value="${r ? r[0] : ""}" class="${r && aiFilled[m.id] ? "ai" : ""}" data-side="0"${ro}>
-      <span>–</span>
-      <input id="${m.id}-a" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(A.n)}" value="${r ? r[1] : ""}" class="${r && aiFilled[m.id] ? "ai" : ""}" data-side="1"${ro}>
+  const off = official.liga[m.id], ro = off ? " readonly" : "", live = !off && ag && ag.st === 2;
+  // Estado: final oficial, en juego (con el resultado parcial) o el horario
+  const status = off ? '<span class="m-st fin">Final</span>'
+    : live ? `<span class="m-st live"><i></i>En vivo${ag.txt ? " · " + esc(ag.txt) : ""}${ag.g ? ` · <b>${ag.g[0]}-${ag.g[1]}</b>` : ""}</span>`
+    : ag && ag.t && Date.now() > ag.t + 110 * MIN && ag.st !== 3 ? '<span class="m-st wait">Esperando el final</span>' : "";
+  const zone = m.g === "I" ? "Interzonal" : "Zona " + m.g;
+  return `<div class="match${r ? " done" : ""}${off ? " official" : ""}${live ? " is-live" : ""}" data-m="${m.id}">
+    <div class="m-top">
+      <span class="m-when">${ag && ag.t ? hhmm(ag.t) : "A conf."}</span>
+      ${ag && ag.tv.length ? `<span class="m-tv">${ag.tv.map(esc).join(" · ")}</span>` : ""}
+      <span class="m-zone">${zone}</span>${status}
     </div>
-    <div class="team-n" title="${esc(A.n)}">${crest(A.id)}${esc(A.n)}${mm.pa > mm.ph ? ' <span class="fav">●</span>' : ""}</div>
+    <div class="m-row">
+      <div class="team-n home" title="${esc(H.n)}">${mm.ph > mm.pa ? '<span class="fav">●</span> ' : ""}${esc(H.n)}${crest(H.id)}</div>
+      <div class="score">
+        <input id="${m.id}-h" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(H.n)}" value="${r ? r[0] : ""}" class="${r && aiFilled[m.id] ? "ai" : ""}" data-side="0"${ro}${live && ag.g ? ` placeholder="${ag.g[0]}"` : ""}>
+        <span>–</span>
+        <input id="${m.id}-a" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(A.n)}" value="${r ? r[1] : ""}" class="${r && aiFilled[m.id] ? "ai" : ""}" data-side="1"${ro}${live && ag.g ? ` placeholder="${ag.g[1]}"` : ""}>
+      </div>
+      <div class="team-n" title="${esc(A.n)}">${crest(A.id)}${esc(A.n)}${mm.pa > mm.ph ? ' <span class="fav">●</span>' : ""}</div>
+    </div>
     <div class="probs">
       <div class="bar" role="img" aria-label="Local ${pct(mm.ph)}, empate ${pct(mm.pd)}, visitante ${pct(mm.pa)}">
         <i class="h" style="width:${mm.ph * 100}%"></i><i class="d" style="width:${mm.pd * 100}%"></i><i class="a" style="width:${mm.pa * 100}%"></i>
       </div>
       <div class="plabels"><span class="${cls(mm.ph)}">L <b>${pct(mm.ph)}</b></span><span class="${cls(mm.pd)}">E <b>${pct(mm.pd)}</b></span><span class="${cls(mm.pa)}">V <b>${pct(mm.pa)}</b></span></div>
     </div>
-    <div class="verdict">${label} · más probable: <b>${pick[0]}-${pick[1]}</b> · goles esperados ${mm.lh.toFixed(1)}–${mm.la.toFixed(1)}${isUpset(mm, r) ? ' · <span class="k neg"><b>Batacazo</b></span>' : ""}</div>
-    ${mm.keys.length ? `<div class="keys">${mm.keys.map(k => `<span class="k ${k.c}">${k.t}</span>`).join("")}</div>` : ""}
+    <details class="m-more"><summary>${label} · más probable <b>${pick[0]}-${pick[1]}</b>${isUpset(mm, r) ? ' · <span class="k neg"><b>Batacazo</b></span>' : ""}</summary>
+      <div class="verdict">Goles esperados ${mm.lh.toFixed(1)}–${mm.la.toFixed(1)}</div>
+      ${mm.keys.length ? `<div class="keys">${mm.keys.map(k => `<span class="k ${k.c}">${k.t}</span>`).join("")}</div>` : ""}
+    </details>
   </div>`;
 }
+// Partidos agrupados por fecha y por día, ordenados por horario (los que no tienen horario van al final).
 function renderFixture() {
   const out = [];
+  const dayKey = t => { const d = new Date(t); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
+  const dayName = t => { const s = new Date(t).toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); return s.charAt(0).toUpperCase() + s.slice(1); };
   for (const f of FECHAS) {
     if (fechaFilter !== "all" && fechaFilter !== String(f)) continue;
     const ms = MATCHES.filter(m => m.f === f && (!focusTeam || m.h === focusTeam || m.a === focusTeam));
     if (!ms.length) continue;
-    const done = ms.filter(m => results[m.id]).length;
-    out.push(`<div class="fecha"><div class="fecha-h">Fecha ${f}${f === 13 ? " · pendiente" : ""} <span class="sub" style="font:500 13px var(--font-body);color:var(--muted);text-transform:none;letter-spacing:0">${done}/${ms.length} cargados</span></div>`);
-    for (const [g, l] of [["A", "Zona A"], ["B", "Zona B"], ["I", "Interzonal"]]) {
-      if (!ms.some(m => m.g === g)) continue;
-      out.push(`<div class="group-l">${l}</div>`);
-      out.push(`<div class="mgrid">${ms.filter(m => m.g === g).map(matchHTML).join("")}</div>`);
+    const done = ms.filter(m => results[m.id]).length, offN = ms.filter(m => official.liga[m.id]).length;
+    out.push(`<div class="fecha"><div class="fecha-h">Fecha ${f} <span class="sub">${offN ? `${offN} jugados · ` : ""}${done}/${ms.length} cargados</span></div>`);
+    const tOf = m => (agenda[m.id] && agenda[m.id].t) || Infinity;
+    const sorted = ms.slice().sort((a, b) => tOf(a) - tOf(b) || a.g.localeCompare(b.g));
+    const groups = [];
+    for (const m of sorted) {
+      const t = tOf(m), k = t === Infinity ? "x" : dayKey(t);
+      let g = groups[groups.length - 1];
+      if (!g || g.k !== k) groups.push(g = { k, label: t === Infinity ? "Horario a confirmar" : dayName(t), ms: [] });
+      g.ms.push(m);
     }
+    for (const g of groups) out.push(`<div class="day-l">${g.label}</div><div class="mgrid">${g.ms.map(matchHTML).join("")}</div>`);
     out.push(`</div>`);
   }
   document.getElementById("fixture").innerHTML = out.join("");
@@ -2739,7 +2860,7 @@ document.addEventListener("input", e => {
 load();
 initTheme();
 renderAll();
-loadOfficial();
+loadOfficial().then(fetchLive);
 </script>
 </body>
 </html>
