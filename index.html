@@ -1388,6 +1388,8 @@ const PD_TEAMS = {
   gbfc: "atu", iid: "tig", ihi: "ban", ihg: "rac", bheaf: "erc", hccd: "ald",
 };
 const PD_KEY = f => `72_228_8_${f}`; // Clausura 2026, fecha f
+// Sin este encabezado (el que manda la web de promiedos) la lista del día viene vacía.
+const PD_OPTS = { cache: "no-cache", headers: { "X-VER": "1.11.7.5" } };
 const AGENDA_KEY = "simlpf-agenda-v1";
 const MIN = 60000;
 let agenda = {}; // matchId -> { t: inicio (ms), tv: [canales], st: 1 prog / 2 en juego / 3 final, txt, g: goles en vivo }
@@ -1403,7 +1405,7 @@ async function fetchLive() {
   const finals = [];
   try {
     for (const f of FECHAS) {
-      const r = await fetch(`https://api.promiedos.com.ar/league/games/hc/${PD_KEY(f)}`, { cache: "no-cache" });
+      const r = await fetch(`https://api.promiedos.com.ar/league/games/hc/${PD_KEY(f)}`, PD_OPTS);
       if (!r.ok) continue;
       for (const g of (await r.json()).games || []) {
         const h = PD_TEAMS[g.teams[0].id], a = PD_TEAMS[g.teams[1].id];
@@ -1423,7 +1425,7 @@ async function fetchLive() {
       if (day !== today && tvAsked[day] && Date.now() - tvAsked[day] < 6 * 60 * MIN) continue;
       if (day !== today && MATCHES.every(m => !agenda[m.id] || dstr(agenda[m.id].t || 0) !== day || agenda[m.id].tv.length)) continue;
       tvAsked[day] = Date.now();
-      const r = await fetch(`https://api.promiedos.com.ar/games/${day}`, { cache: "no-cache" }).catch(() => null);
+      const r = await fetch(`https://api.promiedos.com.ar/games/${day}`, PD_OPTS).catch(() => null);
       if (!r || !r.ok) continue;
       for (const l of (await r.json()).leagues || []) if (l.id === "hc") for (const g of l.games || []) {
         const h = PD_TEAMS[g.teams[0].id], a = PD_TEAMS[g.teams[1].id];
