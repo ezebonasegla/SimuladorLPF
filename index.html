@@ -1414,19 +1414,26 @@ async function fetchLive() {
         if (st === 3 && sc && !official.liga[m.id]) finals.push({ h, a, g: sc, f });
       }
     }
-    // Canales de TV: vienen en la lista de partidos de cada día (se pide una vez por día que tenga partidos por jugar).
-    const pad = n => String(n).padStart(2, "0");
-    const days = new Set(MATCHES.filter(m => agenda[m.id] && agenda[m.id].t && !official.liga[m.id] && !agenda[m.id].tv.length)
-      .map(m => { const d = new Date(agenda[m.id].t); return `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()}`; }));
+    // Lista del día (se actualiza cada 15 s en promiedos, la de la fecha cada 5 min): trae los canales de TV
+    // y el estado más fresco de los partidos de hoy. Se pide hoy siempre y los demás días una vez cada 6 h.
+    const pad = n => String(n).padStart(2, "0"), dstr = t => { const d = new Date(t); return `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()}`; };
+    const today = dstr(Date.now());
+    const days = new Set(MATCHES.filter(m => agenda[m.id] && agenda[m.id].t && !official.liga[m.id]).map(m => dstr(agenda[m.id].t)));
     for (const day of days) {
-      if (tvAsked[day] && Date.now() - tvAsked[day] < 6 * 60 * MIN) continue;
+      if (day !== today && tvAsked[day] && Date.now() - tvAsked[day] < 6 * 60 * MIN) continue;
+      if (day !== today && MATCHES.every(m => !agenda[m.id] || dstr(agenda[m.id].t || 0) !== day || agenda[m.id].tv.length)) continue;
       tvAsked[day] = Date.now();
       const r = await fetch(`https://api.promiedos.com.ar/games/${day}`, { cache: "no-cache" }).catch(() => null);
       if (!r || !r.ok) continue;
       for (const l of (await r.json()).leagues || []) if (l.id === "hc") for (const g of l.games || []) {
         const h = PD_TEAMS[g.teams[0].id], a = PD_TEAMS[g.teams[1].id];
-        const m = h && a && MATCHES.find(x => samePair({ h, a }, x.h, x.a));
-        if (m && agenda[m.id]) agenda[m.id].tv = (g.tv_networks || []).map(x => x.name.replace(/\s*\(.*\)$/, ""));
+        const m = h && a && MATCHES.find(x => samePair({ h, a }, x.h, x.a)), ag = m && agenda[m.id];
+        if (!ag) continue;
+        ag.tv = (g.tv_networks || []).map(x => x.name.replace(/\s*\(.*\)$/, ""));
+        const st = g.status && g.status.enum, sc = g.scores ? g.scores.map(Number) : null;
+        if (st) { ag.st = st; ag.txt = g.game_time_to_display || g.game_time_status_to_display || ag.txt; }
+        if (sc) ag.g = m.h !== h ? [sc[1], sc[0]] : sc;
+        if (st === 3 && sc && !official.liga[m.id] && !finals.some(x => samePair(x, h, a))) finals.push({ h, a, g: sc, f: m.f });
       }
     }
     try { localStorage.setItem(AGENDA_KEY, JSON.stringify(agenda)); } catch (e) {}

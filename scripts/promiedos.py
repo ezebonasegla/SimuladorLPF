@@ -12,7 +12,7 @@ import json
 import re
 import sys
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 UA = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36",
@@ -86,6 +86,26 @@ def main(out_path):
                 if g.get("penalties"):
                     row["p"] = ints(g["penalties"])
                 out["playoffs"].append(row)
+
+    # --- Lista del día (promiedos la actualiza cada 15 s; la de la fecha cada 5 min): partidos de ayer y hoy en Argentina.
+    art = timezone(timedelta(hours=-3))
+    seen = {(r["h"], r["a"]) for r in out["liga"]}
+    for day in {(datetime.now(art) - timedelta(days=k)).strftime("%d-%m-%Y") for k in (0, 1)}:
+        try:
+            data = json.loads(get(f"https://api.promiedos.com.ar/games/{day}"))
+        except Exception:
+            continue
+        for lg in data.get("leagues", []):
+            if lg.get("id") != "hc":
+                continue
+            for g in lg.get("games", []):
+                if g.get("status", {}).get("enum") != 3 or not g.get("scores") or not re.fullmatch(r"Fecha (\d+)", g.get("stage_round_name", "")):
+                    continue
+                f = int(g["stage_round_name"].split()[1])
+                h, a = team_ids(g)
+                if f in FECHAS and h and a and (h, a) not in seen:
+                    out["liga"].append({"h": h, "a": a, "g": ints(g["scores"]), "f": f})
+                    seen.add((h, a))
 
     # --- Copas: semifinales y final. Una llave está definida cuando el partido trae "to_qualify".
     for slug, lid, cup in CUPS:
