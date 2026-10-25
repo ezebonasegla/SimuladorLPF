@@ -1186,10 +1186,11 @@ function emptyRow(t, kind) {
   const b = kind === "an" ? t.an : t.cl, r = (kind === "an" ? t.anr : t.clr) || [0, 0, 0];
   return { id: t.id, n: t.n, z: t.z, pj: b[0], pts: b[1], dg: b[2], gf: b[3] || 0, gc: (b[3] || 0) - b[2], w: r[0], d: r[1], l: r[2], add: 0 };
 }
-function applyResult(row, gf, gc) {
+// base: resultado oficial (ya jugado). Suma a la tabla pero no al "+N" de lo que falta.
+function applyResult(row, gf, gc, base) {
   row.pj++; row.dg += gf - gc; row.gf += gf; row.gc += gc;
   if (gf > gc) row.w++; else if (gf === gc) row.d++; else row.l++;
-  const p = gf > gc ? 3 : gf === gc ? 1 : 0; row.pts += p; row.add += p;
+  const p = gf > gc ? 3 : gf === gc ? 1 : 0; row.pts += p; if (!base) row.add += p;
 }
 const cmp = (a, b) => b.pts - a.pts || b.dg - a.dg || b.gf - a.gf || a.n.localeCompare(b.n, "es");
 function standings(res) {
@@ -1197,18 +1198,23 @@ function standings(res) {
   for (const t of teams) { zone[t.id] = emptyRow(t, "cl"); annual[t.id] = emptyRow(t, "an"); }
   for (const m of MATCHES) {
     const r = res[m.id]; if (!r) continue;
-    applyResult(zone[m.h], r[0], r[1]); applyResult(zone[m.a], r[1], r[0]);
-    applyResult(annual[m.h], r[0], r[1]); applyResult(annual[m.a], r[1], r[0]);
+    const base = official.liga[m.id] && results[m.id] === r;
+    applyResult(zone[m.h], r[0], r[1], base); applyResult(zone[m.a], r[1], r[0], base);
+    applyResult(annual[m.h], r[0], r[1], base); applyResult(annual[m.a], r[1], r[0], base);
   }
   const A = Object.values(zone).filter(r => r.z === "A").sort(cmp);
   const B = Object.values(zone).filter(r => r.z === "B").sort(cmp);
   const AN = Object.values(annual).sort(cmp);
   return { A, B, AN };
 }
+// Tabla actual: datos de partida más los resultados oficiales (para las flechas ▲▼).
+function officialStandings() {
+  const res = {}; for (const id in official.liga) res[id] = results[id];
+  return standings(res);
+}
 function baseOrder(kind) {
-  const rows = teams.map(t => emptyRow(t, kind === "an" ? "an" : "cl"));
-  if (kind === "an") return rows.sort(cmp).map(r => r.id);
-  return rows.filter(r => r.z === kind).sort(cmp).map(r => r.id);
+  const st = officialStandings();
+  return (kind === "an" ? st.AN : kind === "A" ? st.A : st.B).map(r => r.id);
 }
 
 /* ===================== PLAYOFFS =====================
@@ -1556,11 +1562,11 @@ function renderPromedios(st) {
     <div class="legend">${next ? '<span class="dot" style="--c:var(--danger)">Desciende en 2026 (no juega 2027)</span><span class="dot" style="--c:var(--muted)">Solo jugó 2026 en Primera</span>' : '<span style="--c:var(--danger)">Desciende</span>'}<span>▲▼ ${next ? "puestos que sube o baja respecto del promedio de 2026" : "cambio respecto a los promedios actuales"}</span><span>+N puntos sumados en lo que falta</span></div>`;
 }
 function baseOrderProm2027() {
-  const rows = teams.map(t => emptyRow(t, "an"));
+  const rows = officialStandings().AN.slice();
   return rows.sort((a, b) => promedio2027(b) - promedio2027(a) || b.pts - a.pts).map(r => r.id);
 }
 function baseOrderProm() {
-  const rows = teams.map(t => emptyRow(t, "an"));
+  const rows = officialStandings().AN.slice();
   return rows.sort((a, b) => promedio(b) - promedio(a) || b.pts - a.pts).map(r => r.id);
 }
 function renderPlayoffs(st, br, cups) {
