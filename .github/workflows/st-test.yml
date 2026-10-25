@@ -1,0 +1,22 @@
+name: Prueba estados promiedos (temporal)
+on:
+  push:
+    paths: [".github/workflows/st-test.yml"]
+jobs:
+  probar:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          date -u
+          for u in "league/games/hc/72_228_8_14" "games/25-10-2026" "games/today"; do
+            echo "== $u"
+            curl -sS -D hdr.txt -A "Mozilla/5.0" "https://api.promiedos.com.ar/$u" -o out.json
+            grep -i -E "^(age|cache-control|x-cache|date|last-modified)" hdr.txt || true
+            python3 -c "
+          import json
+          d=json.load(open('out.json'))
+          gs=d.get('games') or [g for l in d.get('leagues',[]) if l.get('id')=='hc' for g in l['games']]
+          for g in gs:
+            if g['start_time'].startswith('25-10'): print(g['teams'][0]['name'],'-',g['teams'][1]['name'],g['start_time'],g['status'],g.get('scores'),g.get('game_time_to_display'))
+          "
+          done
