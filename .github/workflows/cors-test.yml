@@ -1,0 +1,14 @@
+name: Prueba CORS promiedos (temporal)
+on:
+  push:
+    paths: [".github/workflows/cors-test.yml"]
+jobs:
+  probar:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          for o in https://simuladorlpf.vercel.app https://simulpf.netlify.app; do
+            echo "== Origin $o"
+            curl -sS -D - -o /dev/null -H "Origin: $o" -A "Mozilla/5.0" "https://api.promiedos.com.ar/league/games/hc/72_228_8_14" | grep -i -E "^(HTTP|access-control|vary|cache-control|age|cf-cache)" || true
+            curl -sS -D - -o /dev/null -X OPTIONS -H "Origin: $o" -H "Access-Control-Request-Method: GET" "https://api.promiedos.com.ar/league/games/hc/72_228_8_14" | grep -i -E "^(HTTP|access-control)" || true
+          done
