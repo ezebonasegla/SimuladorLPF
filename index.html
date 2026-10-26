@@ -1736,13 +1736,15 @@ function tieHTML(t, s, cups, ro) { // ro: solo lectura (Resumen), sin casilleros
 }
 
 /* ===================== RENDER: RESUMEN ===================== */
+// ¿Tiene algún partido simulado o cargado a mano (no oficial)? Sirve para mostrar "+0" cuando no sumó.
+const simPlayed = id => MATCHES.some(m => (m.h === id || m.a === id) && results[m.id] && !official.liga[m.id]);
 function renderSummary(st, br, cups) {
   const an = st.AN.map(r => r.id), c = cupos(an, br.champ, cups);
   const lib = new Set([...c.champs, ...c.lib]), sud = new Set(c.sud), desc = new Set(relegated(st));
   const dg = v => (v > 0 ? "+" : "") + v;
   const zoneT = (rows, z) => `<div><h3>Zona ${z}</h3><div class="tbl-wrap"><table class="compact">
     <thead><tr><th>#</th><th class="l">Equipo</th><th>PJ</th><th>DG</th><th>Pts</th></tr></thead>
-    <tbody>${rows.map((r, i) => `<tr class="${i < 8 ? "in" : ""}${i === 7 ? " cut" : ""}"><td class="pos">${i + 1}</td><td class="l team">${tn(r.id)}</td><td>${r.pj}</td><td>${dg(r.dg)}</td><td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : (r.pj > T(r.id).cl[0] ? '<span class="delta zero">+0</span>' : "")}</td></tr>`).join("")}</tbody>
+    <tbody>${rows.map((r, i) => `<tr class="${i < 8 ? "in" : ""}${i === 7 ? " cut" : ""}"><td class="pos">${i + 1}</td><td class="l team">${tn(r.id)}</td><td>${r.pj}</td><td>${dg(r.dg)}</td><td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : (simPlayed(r.id) ? '<span class="delta zero">+0</span>' : "")}</td></tr>`).join("")}</tbody>
   </table></div></div>`;
   const tag = id => {
     if (c.champs.includes(id)) return '<span class="mini-tag champ">TÍTULO</span>';
@@ -1755,7 +1757,7 @@ function renderSummary(st, br, cups) {
   const band = id => id === c.pre ? "rowband-pre" : lib.has(id) ? "rowband-lib" : sud.has(id) ? "rowband-sud" : desc.has(id) ? "rowband-desc" : "";
   const anT = `<div><h3>Tabla Anual</h3><div class="tbl-wrap"><table class="compact">
     <thead><tr><th>#</th><th class="l">Equipo</th><th>DG</th><th>Pts</th><th></th></tr></thead>
-    <tbody>${st.AN.map((r, i) => `<tr class="${band(r.id)}"><td class="pos">${i + 1}</td><td class="l team">${tn(r.id)}</td><td>${dg(r.dg)}</td><td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : (r.pj > T(r.id).an[0] ? '<span class="delta zero">+0</span>' : "")}</td><td>${tag(r.id)}</td></tr>`).join("")}</tbody>
+    <tbody>${st.AN.map((r, i) => `<tr class="${band(r.id)}"><td class="pos">${i + 1}</td><td class="l team">${tn(r.id)}</td><td>${dg(r.dg)}</td><td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : (simPlayed(r.id) ? '<span class="delta zero">+0</span>' : "")}</td><td>${tag(r.id)}</td></tr>`).join("")}</tbody>
   </table></div></div>`;
   const li = (id, extra = "") => `<li>${tn(id)}${extra}</li>`;
   const champ = br.champ ? `<div class="big">${tn(br.champ)}</div>` : `<div class="cross">A definir en Playoffs</div>`;
