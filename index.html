@@ -1566,15 +1566,15 @@ function renderZone(z, st) {
     return `<tr class="${seed ? "in" : ""}${pos === 8 ? " cut" : ""}">
       <td class="pos">${pos}</td>
       <td class="l team">${tnShort(r.id)}${r.id === APERTURA_CHAMP ? '<span class="tag champ">Camp. Apertura</span>' : ""}${out ? '<span class="tag desc">No juega playoffs (descenso)</span>' : ""}${seed && seed !== pos ? `<span class="tag po">Entra ${seed}°</span>` : ""}${moveTag(r.id, pos, order)}</td>
-      ${statCells(r)}
       <td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
+      ${statCells(r)}
       <td class="l cross">${rival}</td>
     </tr>`;
   }).join("");
   document.getElementById("pane-zona-" + z.toLowerCase()).innerHTML = `
     <div class="panel-h"><h2>Clausura · Zona ${z}</h2><span class="sub">Los 8 primeros van a octavos · cruce con la Zona ${other}</span></div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>#</th><th class="l">Equipo</th>${statHead}<th>Pts</th><th class="l">Octavos</th></tr></thead>
+      <thead><tr><th>#</th><th class="l">Equipo</th><th>Pts</th>${statHead}<th class="l">Octavos</th></tr></thead>
       <tbody>${html}</tbody></table></div>
     <div class="legend"><span style="--c:var(--accent)">Clasifica a playoffs (1° a 8°)</span><span class="dot" style="--c:var(--lib)">Campeón Apertura</span><span class="dot" style="--c:var(--accent)">Entra a playoffs en otro puesto (el de arriba está en zona de descenso)</span><span class="dot" style="--c:var(--danger)">No juega playoffs: zona de descenso (art. 14.1.2)</span><span>▲▼ cambio respecto a la tabla actual</span><span>+N puntos sumados en lo que falta</span></div>`;
 }
@@ -1603,8 +1603,8 @@ function renderAnnual(st, br, cups) {
     return `<tr class="${band}">
       <td class="pos">${pos}</td>
       <td class="l team">${tnShort(r.id)}${moveTag(r.id, pos, order)}${tag}</td>
-      <td>${r.z}</td>${statCells(r)}<td class="num xh">${promedio(r).toFixed(3).replace(".", ",")}</td>
       <td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : ""}</td>
+      <td>${r.z}</td>${statCells(r)}<td class="num xh">${promedio(r).toFixed(3).replace(".", ",")}</td>
     </tr>`;
   }).join("");
   const nm = id => tn(id);
@@ -1631,7 +1631,7 @@ function renderAnnual(st, br, cups) {
     </div>
     ${pending.length ? `<p class="rule">Falta definir: ${pending.join(", ")}. Elegilos en Playoffs y Copas, o usá «Completar todo con IA».</p>` : ""}
     <div class="tbl-wrap"><table>
-      <thead><tr><th>#</th><th class="l">Equipo</th><th title="Zona">Z</th>${statHead}<th class="xh">Prom.</th><th>Pts</th></tr></thead>
+      <thead><tr><th>#</th><th class="l">Equipo</th><th>Pts</th><th title="Zona">Z</th>${statHead}<th class="xh">Prom.</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
     <div class="legend"><span class="dot" style="--c:var(--accent)">Campeón de Liga (1° de la Anual)</span><span class="dot ring" style="--c:var(--lib)">Clasificado por título (Apertura, Clausura, copa)</span><span style="--c:var(--lib)">Libertadores (grupos)</span><span style="--c:var(--pre)">Libertadores fase previa</span><span style="--c:var(--sud)">Sudamericana</span><span style="--c:var(--danger)">Descenso: último de la Anual y peor promedio (si es el mismo, el anteúltimo de la Anual)</span></div>`;
 }
@@ -1743,8 +1743,8 @@ function renderSummary(st, br, cups) {
   const lib = new Set([...c.champs, ...c.lib]), sud = new Set(c.sud), desc = new Set(relegated(st));
   const dg = v => (v > 0 ? "+" : "") + v;
   const zoneT = (rows, z) => `<div><h3>Zona ${z}</h3><div class="tbl-wrap"><table class="compact">
-    <thead><tr><th>#</th><th class="l">Equipo</th><th>PJ</th><th>DG</th><th>Pts</th></tr></thead>
-    <tbody>${rows.map((r, i) => `<tr class="${i < 8 ? "in" : ""}${i === 7 ? " cut" : ""}"><td class="pos">${i + 1}</td><td class="l team">${tn(r.id)}</td><td>${r.pj}</td><td>${dg(r.dg)}</td><td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : (simPlayed(r.id) ? '<span class="delta zero">+0</span>' : "")}</td></tr>`).join("")}</tbody>
+    <thead><tr><th>#</th><th class="l">Equipo</th><th>Pts</th><th>PJ</th><th>DG</th></tr></thead>
+    <tbody>${rows.map((r, i) => `<tr class="${i < 8 ? "in" : ""}${i === 7 ? " cut" : ""}"><td class="pos">${i + 1}</td><td class="l team">${tn(r.id)}</td><td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : (simPlayed(r.id) ? '<span class="delta zero">+0</span>' : "")}</td><td>${r.pj}</td><td>${dg(r.dg)}</td></tr>`).join("")}</tbody>
   </table></div></div>`;
   const tag = id => {
     if (c.champs.includes(id)) return '<span class="mini-tag champ">TÍTULO</span>';
@@ -1756,8 +1756,8 @@ function renderSummary(st, br, cups) {
   };
   const band = id => id === c.pre ? "rowband-pre" : lib.has(id) ? "rowband-lib" : sud.has(id) ? "rowband-sud" : desc.has(id) ? "rowband-desc" : "";
   const anT = `<div><h3>Tabla Anual</h3><div class="tbl-wrap"><table class="compact">
-    <thead><tr><th>#</th><th class="l">Equipo</th><th>DG</th><th>Pts</th><th></th></tr></thead>
-    <tbody>${st.AN.map((r, i) => `<tr class="${band(r.id)}"><td class="pos">${i + 1}</td><td class="l team">${tn(r.id)}</td><td>${dg(r.dg)}</td><td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : (simPlayed(r.id) ? '<span class="delta zero">+0</span>' : "")}</td><td>${tag(r.id)}</td></tr>`).join("")}</tbody>
+    <thead><tr><th>#</th><th class="l">Equipo</th><th>Pts</th><th>DG</th><th></th></tr></thead>
+    <tbody>${st.AN.map((r, i) => `<tr class="${band(r.id)}"><td class="pos">${i + 1}</td><td class="l team">${tn(r.id)}</td><td class="pts">${r.pts}${r.add ? `<span class="delta">+${r.add}</span>` : (simPlayed(r.id) ? '<span class="delta zero">+0</span>' : "")}</td><td>${dg(r.dg)}</td><td>${tag(r.id)}</td></tr>`).join("")}</tbody>
   </table></div></div>`;
   const li = (id, extra = "") => `<li>${tn(id)}${extra}</li>`;
   const champ = br.champ ? `<div class="big">${tn(br.champ)}</div>` : `<div class="cross">A definir en Playoffs</div>`;
