@@ -384,6 +384,8 @@ tr.in td.pos { color: var(--accent); }
 .seg button { border: 0; background: none; padding: 6px 14px; border-radius: 7px; font: 600 13px/1 var(--font-body); color: var(--muted); }
 .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.12), 0 0 0 1px var(--line); }
 .btn.icon { padding: 8px; }
+.btn-exp { padding: 6px 12px; font-size: 13px; gap: 6px; }
+.panel-h .btn-exp { margin-left: auto; }
 .ptable { border-radius: 10px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
 .ptable table { font-size: 13.5px; }
 .ptable th { font-size: 11px; padding: 9px 10px; }
@@ -1572,7 +1574,7 @@ function renderZone(z, st) {
     </tr>`;
   }).join("");
   document.getElementById("pane-zona-" + z.toLowerCase()).innerHTML = `
-    <div class="panel-h"><h2>Clausura · Zona ${z}</h2><span class="sub">Los 8 primeros van a octavos · cruce con la Zona ${other}</span></div>
+    <div class="panel-h"><h2>Clausura · Zona ${z}</h2><span class="sub">Los 8 primeros van a octavos · cruce con la Zona ${other}</span><button class="btn ghost btn-exp" type="button" data-export="zona-${z}" title="Descargar la tabla como imagen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Imagen</button></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>#</th><th class="l">Equipo</th><th>Pts</th>${statHead}<th class="l">Octavos</th></tr></thead>
       <tbody>${html}</tbody></table></div>
@@ -1618,7 +1620,7 @@ function renderAnnual(st, br, cups) {
   if (!cups.champ.lib) pending.push("Libertadores (¿Estudiantes?)");
   if (!cups.champ.sud) pending.push("Sudamericana (¿Boca?)");
   document.getElementById("pane-anual").innerHTML = `
-    <div class="panel-h"><h2>Tabla Anual 2026</h2><span class="sub">Apertura + Clausura · suman las fechas que faltan, no los playoffs</span></div>
+    <div class="panel-h"><h2>Tabla Anual 2026</h2><span class="sub">Apertura + Clausura · suman las fechas que faltan, no los playoffs</span><button class="btn ghost btn-exp" type="button" data-export="anual" title="Descargar la tabla como imagen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Imagen</button></div>
     <p class="rule">Según el reglamento LPF 2026: ARG 1 campeón del Apertura (Belgrano), ARG 2 campeón del Clausura, ARG 3 campeón de la Copa Argentina, y ARG 4 a 6 los 3 mejores de la Anual sin contar a esos campeones. Si Belgrano gana el Clausura, su plaza pasa al siguiente de la Anual. Si el campeón de la Copa Argentina ya tenía plaza por Apertura, Clausura, Libertadores o Sudamericana, la suya pasa al subcampeón de la Copa Argentina. Un campeón argentino de Libertadores o Sudamericana suma una plaza extra. Sudamericana: los 6 siguientes de la Anual. A diferencia de promiedos, acá Belgrano sí libera su lugar.</p>
     <div class="cupos">
       <div class="cupo-box lib"><h3>Copa Libertadores</h3><ol>
@@ -1682,7 +1684,7 @@ function renderPromedios(st) {
   }).join("");
   const seg = `<div class="seg" role="group" aria-label="Temporada"><button type="button" data-prom="2026" aria-pressed="${!next}">Este año (2026)</button><button type="button" data-prom="2027" aria-pressed="${next}">El año que viene (2027)</button></div>`;
   document.getElementById("pane-promedios").innerHTML = `
-    <div class="panel-h"><h2>Promedios</h2>${seg}</div>
+    <div class="panel-h"><h2>Promedios</h2><div class="proj-actions">${seg}<button class="btn ghost btn-exp" type="button" data-export="promedios" title="Descargar la tabla como imagen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Imagen</button></div></div>
     ${next
       ? `<p class="rule"><b>Cómo arrancaría el promedio de 2027:</b> sale la temporada 2024 y quedan 2025 + 2026 (puntos ÷ partidos). Los puntos de 2026 suman lo que cargues o simules. Los que descienden este año no juegan 2027 y van al final; los que ascienden de la Primera Nacional arrancan sin promedio y no están en la tabla. «Solo 2026»: equipos que no jugaron 2025 en Primera.</p>`
       : `<p class="rule">Temporadas 2024, 2025 y 2026 · puntos ÷ partidos jugados. Desciende el peor promedio y el último de la Tabla Anual. Si son el mismo equipo, desciende también el anteúltimo de la Anual. Los puntos de 2026 suman lo que cargues o simules.</p>`}
@@ -1990,6 +1992,49 @@ function mixHex(c, a, bg) {
   const x = p(c), y = p(bg);
   return "rgb(" + x.map((v, i) => Math.round(v * a + y[i] * (1 - a))).join(",") + ")";
 }
+// Marca de agua de todas las imágenes exportadas
+const SITE_URL = "simulpf.netlify.app", TWITTER = "@footytictactoe";
+const EXP_DF = '"Barlow Condensed", "Arial Narrow", sans-serif', EXP_BF = '"Barlow", "Segoe UI", sans-serif';
+function expTheme() {
+  const css = getComputedStyle(document.documentElement), v = n => css.getPropertyValue(n).trim();
+  return { v, dark: document.documentElement.getAttribute("data-sim-theme") === "dark",
+    C: { bg: v("--bg"), card: v("--surface"), head: v("--surface-2"), ink: v("--ink"), muted: v("--muted"), line: v("--line"), accent: v("--accent"), hi: v("--hm-hi"),
+      lib: v("--lib"), pre: v("--pre"), sud: v("--sud"), danger: v("--danger") } };
+}
+const expFonts = () => Promise.all([`700 58px ${EXP_DF}`, `600 18px ${EXP_BF}`, `400 17px ${EXP_BF}`].map(f => document.fonts?.load(f).catch(() => {})));
+// Marca de agua: texto grande y tenue cruzando la imagen, y la firma abajo a la derecha.
+function drawWatermark(x, W, H, C, footY) {
+  x.save();
+  x.translate(W / 2, H / 2); x.rotate(-Math.PI / 9);
+  x.globalAlpha = 0.05; x.fillStyle = C.ink; x.textAlign = "center"; x.textBaseline = "middle";
+  x.font = `700 ${Math.round(W / 16)}px ${EXP_DF}`;
+  for (const dy of [-H / 3, 0, H / 3]) x.fillText(`${SITE_URL.toUpperCase()} · ${TWITTER.toUpperCase()}`, 0, dy);
+  x.restore();
+  x.save(); x.textBaseline = "alphabetic"; x.textAlign = "right";
+  x.font = `700 17px ${EXP_BF}`; x.fillStyle = C.accent;
+  const tw = x.measureText(TWITTER).width;
+  x.fillText(TWITTER, W - 52, footY);
+  x.font = `600 17px ${EXP_BF}`; x.fillStyle = C.ink;
+  x.fillText(`${SITE_URL}  ·  `, W - 52 - tw, footY);
+  x.restore();
+}
+async function saveCanvas(make, ids, filename, msg) {
+  let cv = make(await crestImages(ids, true)), blob;
+  try { blob = await new Promise((res, rej) => { try { cv.toBlob(b => b ? res(b) : rej(), "image/png"); } catch (e) { rej(e); } }); }
+  catch { cv = make(await crestImages(ids, false)); blob = await new Promise(res => cv.toBlob(res, "image/png")); }
+  // Dentro del visor de Claude la descarga pasa por su capacidad "downloads"; en la web, un link común.
+  const dl = window.claude?.use ? await window.claude.use("downloads").catch(() => null) : null;
+  if (dl) {
+    try { await dl.save({ filename, data: blob }); toast(msg); }
+    catch (e) { if (e?.code !== "declined") toast("No se pudo descargar la imagen"); }
+    return;
+  }
+  const url = URL.createObjectURL(blob), a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+  toast(msg);
+}
 async function exportProjImage(btn) {
   if (!projection) { toast("Esperá a que terminen las simulaciones"); return; }
   btn.disabled = true;
@@ -2072,26 +2117,155 @@ async function exportProjImage(btn) {
         x.restore();
       }
       x.textAlign = "left"; x.font = `400 14px ${BF}`; x.fillStyle = C.muted;
-      x.fillText("Cuanto más fuerte el color, más probable · Libertadores directo = fase de grupos · fase previa = último clasificado por la Tabla Anual · Campeón de Liga = 1° de la Tabla Anual · «—» no pasó en ninguna simulación", 52, H - 30);
+      x.fillText("Cuanto más fuerte el color, más probable · Lib. directo = fase de grupos · fase previa = último clasificado por la Anual · Campeón de Liga = 1° de la Anual · «—» no pasó en ninguna simulación", 52, H - 30);
+      drawWatermark(x, W, H, C, H - 30);
       return cv;
     };
-    const ids = order.map(t => t.id);
-    let cv = draw(await crestImages(ids, true)), blob;
-    try { blob = await new Promise((res, rej) => { try { cv.toBlob(b => b ? res(b) : rej(), "image/png"); } catch (e) { rej(e); } }); }
-    catch { cv = draw(await crestImages(ids, false)); blob = await new Promise(res => cv.toBlob(res, "image/png")); }
-    const filename = `probabilidades-lpf-${DATA_DATE.replace(/\//g, "-")}.png`;
-    // Dentro del visor de Claude la descarga pasa por su capacidad "downloads"; en la web, un link común.
-    const dl = window.claude?.use ? await window.claude.use("downloads").catch(() => null) : null;
-    if (dl) {
-      try { await dl.save({ filename, data: blob }); toast("Imagen descargada (1920×1080 en alta resolución)"); }
-      catch (e) { if (e?.code !== "declined") toast("No se pudo descargar la imagen"); }
-      return;
-    }
-    const url = URL.createObjectURL(blob), a = document.createElement("a");
-    a.href = url; a.download = filename;
-    document.body.append(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 30000);
-    toast("Imagen descargada (1920×1080 en alta resolución)");
+    await saveCanvas(draw, order.map(t => t.id), `probabilidades-lpf-${DATA_DATE.replace(/\//g, "-")}.png`, "Imagen descargada (1920×1080 en alta resolución)");
+  } catch (err) {
+    console.error(err); toast("No se pudo generar la imagen");
+  } finally { btn.disabled = false; }
+}
+
+/* ===================== EXPORTAR TABLAS =====================
+   Zonas, Anual y Promedios como imagen (mismo estilo que Probabilidades, con marca de agua).
+   spec: { title, sub, file, cols: [{ h, w, align, key }], rows: [{ id, band, cells, tags: [{c, ring}], mv, cut }], legend: [[color, texto, punto?]] } */
+function tableSpec(kind, st) {
+  const { v } = expTheme(), A = v("--accent"), L = v("--lib"), PR = v("--pre"), S = v("--sud"), D = v("--danger");
+  const dgs = n => (n > 0 ? "+" : "") + n;
+  const offN = Object.keys(official.liga).length, simN = MATCHES.filter(m => results[m.id] && !official.liga[m.id]).length;
+  const sub = `Fechas 14 a 16: ${offN} ${offN === 1 ? "jugado" : "jugados"}${simN ? ` · ${simN} simulados` : ""} · datos de promiedos`;
+  const ptsCell = r => ({ v: String(r.pts), bold: true, delta: r.add ? "+" + r.add : "" });
+  const stat = r => ({ pj: r.pj, g: r.w, e: r.d, p: r.l, gf: r.gf, gc: r.gc, dg: dgs(r.dg) });
+  const statCols = [["PJ", "pj"], ["G", "g"], ["E", "e"], ["P", "p"], ["GF", "gf"], ["GC", "gc"], ["DG", "dg"]].map(([h, key]) => ({ h, key, w: 56 }));
+  if (kind === "zona-A" || kind === "zona-B") {
+    const z = kind.slice(-1), other = z === "A" ? "B" : "A", rows = z === "A" ? st.A : st.B, pl = poList(st, z), po = poList(st, other), order = baseOrder(z);
+    return { title: `Clausura · Zona ${z}`, sub, file: `zona-${z.toLowerCase()}`,
+      cols: [{ h: "Pts", key: "pts", w: 84 }, ...statCols, { h: "Octavos", key: "oct", w: 250, align: "left" }],
+      rows: rows.map((r, i) => {
+        const k = pl.findIndex(x => x.id === r.id), seed = k >= 0 && k < 8 ? k + 1 : 0, out = i < 8 && !seed, tags = [];
+        if (r.id === APERTURA_CHAMP) tags.push({ c: L, ring: true });
+        if (out) tags.push({ c: D }); if (seed && seed !== i + 1) tags.push({ c: A });
+        const old = order.indexOf(r.id) + 1, d = old - (i + 1);
+        return { id: r.id, band: seed ? A : null, cut: i === 7, tags, mv: d,
+          cells: { pts: ptsCell(r), ...stat(r), oct: { v: seed ? `vs ${9 - seed}° ${other} · ${po[8 - seed].n}` : "", muted: true } } };
+      }),
+      legend: [[A, "Clasifica a playoffs (1° a 8°)"], [L, "Campeón Apertura", "ring"], [A, "Entra en otro puesto (el de arriba está en descenso)", "dot"], [D, "No juega playoffs: zona de descenso", "dot"]] };
+  }
+  if (kind === "anual") {
+    const an = st.AN.map(r => r.id), c = cupos(an, currentBracket(st).champ, userCups()), rel = new Set(relegated(st)), order = baseOrder("an");
+    const lib = new Set(c.lib), sud = new Set(c.sud), held = new Set(c.holders.filter(h => !h[2]).map(h => h[0]));
+    return { title: "Tabla Anual 2026", sub, file: "tabla-anual",
+      cols: [{ h: "Pts", key: "pts", w: 84 }, { h: "Z", key: "z", w: 40 }, ...statCols, { h: "Prom.", key: "prom", w: 80 }],
+      rows: st.AN.map((r, i) => {
+        const tags = [], id = r.id;
+        if (i === 0) tags.push({ c: A });
+        if (held.has(id)) tags.push({ c: L, ring: true });
+        if (lib.has(id)) tags.push({ c: id === c.pre ? PR : L }); if (sud.has(id)) tags.push({ c: S }); if (rel.has(id)) tags.push({ c: D });
+        const band = rel.has(id) ? D : id === c.pre ? PR : lib.has(id) || held.has(id) ? L : sud.has(id) ? S : null;
+        return { id, band, tags, mv: order.indexOf(id) + 1 - (i + 1),
+          cells: { pts: ptsCell(r), z: r.z, ...stat(r), prom: promedio(r).toFixed(3).replace(".", ",") } };
+      }),
+      legend: [[A, "Campeón de Liga", "dot"], [L, "Clasificado por título", "ring"], [L, "Libertadores (grupos)"], [PR, "Libertadores fase previa"], [S, "Sudamericana"], [D, "Descenso"]] };
+  }
+  // Promedios (la vista elegida: 2026 o 2027)
+  const next = promYear === "2027", rel = new Set(relegated(st)), prom = next ? promedio2027 : promedio;
+  const rows = st.AN.slice().sort((a, b) => prom(b) - prom(a) || b.pts - a.pts);
+  const pos26 = Object.fromEntries(st.AN.slice().sort((a, b) => promedio(b) - promedio(a) || b.pts - a.pts).map((r, i) => [r.id, i + 1]));
+  const list = next ? rows.filter(r => !rel.has(r.id)).concat(rows.filter(r => rel.has(r.id))) : rows;
+  const base = next ? null : baseOrderProm();
+  return { title: next ? "Promedios 2027 (2025 + 2026)" : "Promedios 2026", sub, file: next ? "promedios-2027" : "promedios",
+    cols: next ? [{ h: "vs 2026", key: "vs", w: 130 }, { h: "Prom.", key: "prom", w: 90 }, { h: "Pts", key: "pts", w: 64 }, { h: "PJ", key: "pj", w: 56 }, { h: "2025", key: "y25", w: 64 }, { h: "2026", key: "y26", w: 76 }]
+      : [{ h: "Prom.", key: "prom", w: 90 }, { h: "Pts", key: "pts", w: 64 }, { h: "PJ", key: "pj", w: 56 }, { h: "2024", key: "y24", w: 64 }, { h: "2025", key: "y25", w: 64 }, { h: "2026", key: "y26", w: 76 }],
+    rows: list.map((r, i) => {
+      const t = T(r.id), pr = t.pr || [0, 0], py = t.py || ["–", "–"], gone = next && rel.has(r.id), pj25 = pj2025(t);
+      const d = next ? pos26[r.id] - (i + 1) : base.indexOf(r.id) - i;
+      return { id: r.id, band: rel.has(r.id) ? D : null, gone, tags: rel.has(r.id) ? [{ c: D }] : [], mv: next ? 0 : d,
+        cells: { prom: { v: prom(r).toFixed(3).replace(".", ","), bold: true }, pts: next ? (+py[1] || 0) + r.pts : pr[0] + r.pts, pj: next ? pj25 + r.pj : pr[1] + r.pj,
+          y24: py[0], y25: next && !pj25 ? "–" : py[1], y26: { v: String(r.pts), delta: r.add ? "+" + r.add : "" },
+          vs: gone ? { v: `era ${pos26[r.id]}°`, muted: true } : { v: (d > 0 ? "▲" + d : d < 0 ? "▼" + -d : "=") + ` · era ${pos26[r.id]}°`, color: d > 0 ? S : d < 0 ? D : null } } };
+    }),
+    legend: next ? [[D, "Desciende en 2026 (no juega 2027)", "dot"]] : [[D, "Desciende"]] };
+}
+async function exportTableImage(kind, btn) {
+  btn.disabled = true;
+  try {
+    const { C, dark } = expTheme(); await expFonts();
+    const sp = tableSpec(kind, standings(results));
+    const W = 1200, P = 48, rh = 46, hh = 44, top = 150, rkw = 44;
+    const legendH = 34, H = top + hh + rh * sp.rows.length + 24 + legendH + 56;
+    const draw = imgs => {
+      const S = 2, cv = document.createElement("canvas"); cv.width = W * S; cv.height = H * S;
+      const x = cv.getContext("2d"); x.scale(S, S);
+      const ls = em => { if ("letterSpacing" in x) x.letterSpacing = em; };
+      const rr = (X, Y, w, h, r) => { x.beginPath(); x.roundRect ? x.roundRect(X, Y, w, h, r) : x.rect(X, Y, w, h); };
+      x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
+      const g = x.createRadialGradient(0, 0, 0, 0, 0, 900); g.addColorStop(0, mixHex(C.accent, dark ? .12 : .08, C.bg)); g.addColorStop(1, C.bg);
+      x.fillStyle = g; x.fillRect(0, 0, W, H);
+      // encabezado
+      x.textBaseline = "alphabetic"; x.textAlign = "left";
+      x.fillStyle = C.accent; x.font = `700 16px ${EXP_DF}`; ls("2.6px"); x.fillText("SIMULADOR LPF · CLAUSURA 2026", P, 56);
+      x.fillStyle = C.ink; x.font = `700 48px ${EXP_DF}`; ls("0.5px"); x.fillText(sp.title.toUpperCase(), P - 2, 104); ls("0px");
+      x.font = `400 16px ${EXP_BF}`; x.fillStyle = C.muted; x.fillText(sp.sub, P, 132);
+      // tarjeta
+      const tw = W - 2 * P, th = hh + rh * sp.rows.length;
+      x.save(); x.shadowColor = "rgba(0,0,0,.10)"; x.shadowBlur = 12; x.shadowOffsetY = 2; x.fillStyle = C.card; rr(P, top, tw, th, 14); x.fill(); x.restore();
+      x.save(); rr(P, top, tw, th, 14); x.clip();
+      x.fillStyle = C.head; x.fillRect(P, top, tw, hh); x.fillStyle = C.line; x.fillRect(P, top + hh - 2, tw, 2);
+      // columnas (de derecha a izquierda)
+      let cx = P + tw - 14; const colX = [];
+      for (const c of sp.cols.slice().reverse()) { colX.unshift({ ...c, x0: cx - c.w, x1: cx }); cx -= c.w; }
+      const teamMax = colX[0].x0 - (P + rkw + 50) - 16;
+      x.font = `600 12px ${EXP_BF}`; ls("0.6px"); x.fillStyle = C.muted; x.textBaseline = "middle";
+      x.textAlign = "left"; x.fillText("EQUIPO", P + rkw + 10, top + hh / 2);
+      for (const c of colX) { x.textAlign = c.align === "left" ? "left" : "right"; x.fillText(c.h.toUpperCase(), c.align === "left" ? c.x0 + 8 : c.x1 - 6, top + hh / 2); }
+      ls("0px");
+      sp.rows.forEach((r, i) => {
+        const y = top + hh + i * rh, cy = y + rh / 2;
+        if (i) { x.fillStyle = C.line; x.globalAlpha = .55; x.fillRect(P, y, tw, 1); x.globalAlpha = 1; }
+        if (r.band) { x.fillStyle = r.band; x.fillRect(P, y, 5, rh); }
+        x.globalAlpha = r.gone ? 0.55 : 1;
+        x.textAlign = "center"; x.fillStyle = r.band && !r.gone ? r.band : C.muted; x.font = `700 19px ${EXP_DF}`;
+        x.fillText(r.gone ? "–" : String(i + 1), P + rkw / 2 + 4, cy + 1);
+        const im = imgs[r.id]; if (im) { const real = !im.src.startsWith("data:"), bw = real ? 30 : 22, bh = real ? 30 : 26; x.drawImage(im, P + rkw + 10 + (30 - bw) / 2, cy - bh / 2, bw, bh); }
+        x.textAlign = "left"; x.fillStyle = C.ink; x.font = `600 18px ${EXP_BF}`;
+        let nm = T(r.id).n; const nx = P + rkw + 50; while (x.measureText(nm).width > teamMax - 70 && nm.length > 3) nm = nm.slice(0, -2) + "…";
+        x.fillText(nm, nx, cy + 1); let ex = nx + x.measureText(nm).width + 8;
+        if (r.mv) { x.font = `700 13px ${EXP_BF}`; x.fillStyle = r.mv > 0 ? C.sud : C.danger; const t = (r.mv > 0 ? "▲" : "▼") + Math.abs(r.mv); x.fillText(t, ex, cy + 1); ex += x.measureText(t).width + 8; }
+        for (const tg of r.tags) {
+          x.beginPath(); x.arc(ex + 6, cy, 6, 0, 2 * Math.PI); x.fillStyle = tg.c; x.fill();
+          if (tg.ring) { x.beginPath(); x.arc(ex + 6, cy, 9, 0, 2 * Math.PI); x.strokeStyle = tg.c; x.lineWidth = 1.5; x.stroke(); ex += 4; }
+          ex += 18;
+        }
+        for (const c of colX) {
+          let cell = r.cells[c.key]; if (cell == null) cell = ""; if (typeof cell !== "object") cell = { v: String(cell) };
+          const right = c.align !== "left", tx = right ? c.x1 - 6 : c.x0 + 8;
+          x.textAlign = right ? "right" : "left";
+          let dw = 0;
+          if (cell.delta) { x.font = `700 12px ${EXP_BF}`; x.fillStyle = C.sud; if (right) { x.fillText(cell.delta, tx, cy + 2); dw = x.measureText(cell.delta).width + 4; } }
+          x.font = cell.bold ? `700 23px ${EXP_DF}` : `500 17px ${EXP_BF}`;
+          x.fillStyle = cell.color || (cell.muted ? C.muted : C.ink);
+          let val = String(cell.v); if (!right) { const mw = c.w - 12; while (x.measureText(val).width > mw && val.length > 3) val = val.slice(0, -2) + "…"; }
+          x.fillText(val, tx - dw, cy + 1);
+          if (cell.delta && !right) { const vw = x.measureText(val).width; x.font = `700 12px ${EXP_BF}`; x.fillStyle = C.sud; x.textAlign = "left"; x.fillText(cell.delta, tx + vw + 4, cy + 2); }
+        }
+        x.globalAlpha = 1;
+        if (r.cut) { x.fillStyle = C.accent; x.fillRect(P, y + rh - 1, tw, 2.5); }
+      });
+      x.restore();
+      // leyenda
+      let lx = P, ly = top + th + 28; x.textBaseline = "middle"; x.textAlign = "left"; x.font = `500 14px ${EXP_BF}`;
+      for (const [c, t, kind2] of sp.legend) {
+        if (kind2) { x.beginPath(); x.arc(lx + 6, ly, 6, 0, 2 * Math.PI); x.fillStyle = c; x.fill(); if (kind2 === "ring") { x.beginPath(); x.arc(lx + 6, ly, 9, 0, 2 * Math.PI); x.strokeStyle = c; x.lineWidth = 1.5; x.stroke(); } }
+        else { x.fillStyle = c; rr(lx, ly - 6, 12, 12, 2); x.fill(); }
+        x.fillStyle = C.muted; x.fillText(t, lx + 20, ly); lx += 20 + x.measureText(t).width + 22;
+      }
+      x.textBaseline = "alphabetic";
+      drawWatermark(x, W, H, C, H - 26);
+      x.textAlign = "left"; x.font = `400 13px ${EXP_BF}`; x.fillStyle = C.muted; x.fillText(`Tablas de promiedos al ${DATA_DATE} · ▲▼ respecto de la tabla actual · +N lo que suma en lo simulado`, P, H - 26);
+      return cv;
+    };
+    await saveCanvas(draw, sp.rows.map(r => r.id), `${sp.file}-lpf.png`, "Imagen descargada");
   } catch (err) {
     console.error(err); toast("No se pudo generar la imagen");
   } finally { btn.disabled = false; }
@@ -2808,6 +2982,7 @@ document.addEventListener("click", e => {
     applyOfficial(official.data); // los resultados oficiales de promiedos se mantienen
     save(); renderAll(); toast(official.n ? "Resultados borrados (quedan los oficiales)" : "Resultados borrados"); return;
   }
+  const exb = e.target.closest("[data-export]"); if (exb) { exportTableImage(exb.dataset.export, exb); return; }
   if (e.target.closest("#btn-proj-img")) { exportProjImage(e.target.closest("#btn-proj-img")); return; }
   if (e.target.closest("#btn-proj")) { projection = null; renderProjection(); toast("Recalculando 10.000 simulaciones…"); return; }
   if (e.target.closest("#btn-reset-data")) {
