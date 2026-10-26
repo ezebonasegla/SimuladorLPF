@@ -722,7 +722,14 @@ html.dlg-open, html.dlg-open body { overflow: hidden; }
    cl: Clausura [PJ, Pts, DG, GF]   an: Tabla Anual [PJ, Pts, DG, GF]   f: últimos 4 (más reciente primero)
    pr: promedios, puntos y partidos de 2024 y 2025 [Pts, PJ] (el promedio suma los de 2026) · py: puntos 2024 y 2025 por separado
    Editables desde la pestaña "Datos". */
-const DATA_DATE = "20/10/2026";
+const DATA_DATE = "20/10/2026"; // datos de partida (tablas después de la fecha 13); lo nuevo llega solo de promiedos
+let lastSync = 0; // última consulta exitosa a promiedos desde esta página
+// Fecha de los datos: la última actualización de resultados (página o acción), o la de los datos de partida.
+function dataAsOf(withTime) {
+  const t = Math.max(lastSync, official.data && official.data.actualizado ? Date.parse(official.data.actualizado) : 0);
+  if (!t) return DATA_DATE;
+  return new Date(t).toLocaleString("es-AR", withTime ? { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" } : { day: "2-digit", month: "2-digit", year: "numeric" });
+}
 // Subir este número cuando cambian los datos base: descarta las tablas guardadas en el navegador.
 const DATA_VERSION = 4; // 4: Banfield-Lanús con Banfield de local · 2: Newell's 2-1 Central Córdoba y Sarmiento 1-1 Barracas · 3: Riestra 1-1 Unión (fecha 13 completa)
 const DATA_SRC = "promiedos";
@@ -1441,13 +1448,14 @@ async function fetchLive() {
       }
     }
     try { localStorage.setItem(AGENDA_KEY, JSON.stringify(agenda)); } catch (e) {}
+    lastSync = Date.now();
     if (finals.length) {
       const d = official.data || { liga: [], playoffs: [], copas: [] };
       d.liga = (d.liga || []).filter(x => !finals.some(y => samePair(x, y.h, y.a))).concat(finals);
       d.actualizado = new Date().toISOString();
       applyOfficial(d); invalidate(); goalRes = null; save(); renderAll();
       toast(finals.map(x => `Final: ${T(x.h).n} ${x.g[0]}-${x.g[1]} ${T(x.a).n}`).join(" · "));
-    } else renderFixture();
+    } else { renderFixture(); renderNote(); }
   } catch (e) {} // sin conexión o bloqueado: se sigue con lo que había
   liveBusy = false;
   scheduleLive();
@@ -2120,11 +2128,11 @@ async function exportProjImage(btn) {
       }
       x.textAlign = "left"; x.font = `400 14px ${BF}`; x.fillStyle = C.muted;
       x.fillText("Cuanto más fuerte el color, más probable · Lib. directo = fase de grupos · fase previa = último clasificado por la Anual · Campeón de Liga = 1° de la Anual · «—» no pasó en ninguna simulación", 52, H - 30);
-      x.textAlign = "right"; x.fillText(`${N.toLocaleString("es-AR")} simulaciones · ${filled}/${MATCHES.length} partidos cargados · promiedos al ${DATA_DATE}`, W - 52, H - 30);
+      x.textAlign = "right"; x.fillText(`${N.toLocaleString("es-AR")} simulaciones · ${filled}/${MATCHES.length} partidos cargados · datos de promiedos al ${dataAsOf(true)}`, W - 52, H - 30);
       drawWatermark(x, W, H, C);
       return cv;
     };
-    await saveCanvas(draw, order.map(t => t.id), `probabilidades-lpf-${DATA_DATE.replace(/\//g, "-")}.png`, "Imagen descargada (1920×1080 en alta resolución)");
+    await saveCanvas(draw, order.map(t => t.id), `probabilidades-lpf-${dataAsOf().replace(/\//g, "-")}.png`, "Imagen descargada (1920×1080 en alta resolución)");
   } catch (err) {
     console.error(err); toast("No se pudo generar la imagen");
   } finally { btn.disabled = false; }
@@ -2266,7 +2274,7 @@ async function exportTableImage(kind, btn) {
       }
       x.textBaseline = "alphabetic";
       drawWatermark(x, W, H, C);
-      x.textAlign = "left"; x.font = `400 13px ${EXP_BF}`; x.fillStyle = C.muted; x.fillText(`Tablas de promiedos al ${DATA_DATE} · ▲▼ respecto de la tabla actual · +N lo que suma en lo simulado`, P, H - 26);
+      x.textAlign = "left"; x.font = `400 13px ${EXP_BF}`; x.fillStyle = C.muted; x.fillText(`Datos de promiedos al ${dataAsOf(true)} · ▲▼ respecto de la tabla actual · +N lo que suma en lo simulado`, P, H - 26);
       return cv;
     };
     await saveCanvas(draw, sp.rows.map(r => r.id), `${sp.file}-lpf.png`, "Imagen descargada");
@@ -2863,9 +2871,12 @@ function renderTables() {
 }
 function renderAll() {
   renderChips(); renderFocusSelect(); renderFixture(); renderTables(); renderData(); showTab(activeTab); applyFocus();
+  renderNote();
+}
+function renderNote() {
   const done = MATCHES.filter(m => results[m.id]).length;
   document.getElementById("data-note").innerHTML =
-    `<b>Tablas de promiedos al ${DATA_DATE}</b>. Fecha 13 completa (Newell's 2-1 Central Córdoba, Sarmiento 1-1 Barracas y Riestra 1-1 Unión). Correcciones en la pestaña <b>Datos</b>.${official.n ? ` <span class="off-note">Resultados oficiales de promiedos: ${official.n}${official.data.actualizado ? ` (actualizado ${new Date(official.data.actualizado).toLocaleString("es-AR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })})` : ""}.</span>` : ""} Cargados: <b>${done}/${MATCHES.length}</b> partidos.`;
+    `<b>Datos de promiedos al ${dataAsOf(true)}</b>.${official.n ? ` <span class="off-note">Resultados oficiales: ${official.n} ${official.n === 1 ? "partido jugado" : "partidos jugados"} de las fechas 14 a 16.</span>` : ""} Correcciones en la pestaña <b>Datos</b>. Cargados: <b>${done}/${MATCHES.length}</b> partidos.`;
 }
 function invalidate() { projection = null; cache.clear(); mcache.clear(); advCache.clear(); stakesCache = null; }
 function showTab(tab) {
