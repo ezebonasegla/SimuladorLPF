@@ -2002,26 +2002,30 @@ function expTheme() {
       lib: v("--lib"), pre: v("--pre"), sud: v("--sud"), danger: v("--danger") } };
 }
 const expFonts = () => Promise.all([`700 58px ${EXP_DF}`, `600 18px ${EXP_BF}`, `400 17px ${EXP_BF}`].map(f => document.fonts?.load(f).catch(() => {})));
-// Marca de agua: texto grande y tenue cruzando la imagen, y la firma abajo a la derecha.
-function drawWatermark(x, W, H, C, footY) {
+// Marca de agua: texto grande y tenue cruzando la imagen.
+function drawWatermark(x, W, H, C) {
   x.save();
   x.translate(W / 2, H / 2); x.rotate(-Math.PI / 9);
   x.globalAlpha = 0.05; x.fillStyle = C.ink; x.textAlign = "center"; x.textBaseline = "middle";
   x.font = `700 ${Math.round(W / 16)}px ${EXP_DF}`;
   for (const dy of [-H / 3, 0, H / 3]) x.fillText(`${SITE_URL.toUpperCase()} · ${TWITTER.toUpperCase()}`, 0, dy);
   x.restore();
+}
+// Firma arriba a la derecha: logo de Footy TicTacToe, la cuenta y la página.
+function drawBrand(x, right, top, C, logo, size = 72) {
   x.save(); x.textBaseline = "alphabetic"; x.textAlign = "right";
-  x.font = `700 17px ${EXP_BF}`; x.fillStyle = C.accent;
-  const tw = x.measureText(TWITTER).width;
-  x.fillText(TWITTER, W - 52, footY);
-  x.font = `600 17px ${EXP_BF}`; x.fillStyle = C.ink;
-  x.fillText(`${SITE_URL}  ·  `, W - 52 - tw, footY);
+  if (logo) x.drawImage(logo, right - size, top, size, size);
+  const tx = right - (logo ? size + 14 : 0);
+  x.font = `700 ${Math.round(size * 0.4)}px ${EXP_BF}`; x.fillStyle = C.accent; x.fillText(TWITTER, tx, top + size * 0.46);
+  x.font = `600 ${Math.round(size * 0.29)}px ${EXP_BF}`; x.fillStyle = C.ink; x.fillText(SITE_URL, tx, top + size * 0.86);
   x.restore();
 }
 async function saveCanvas(make, ids, filename, msg) {
-  let cv = make(await crestImages(ids, true)), blob;
+  const logo = await loadImg("logo-footytictactoe.png", false);
+  const build = async real => { const imgs = await crestImages(ids, real); imgs.__logo = logo; return make(imgs); };
+  let cv = await build(true), blob;
   try { blob = await new Promise((res, rej) => { try { cv.toBlob(b => b ? res(b) : rej(), "image/png"); } catch (e) { rej(e); } }); }
-  catch { cv = make(await crestImages(ids, false)); blob = await new Promise(res => cv.toBlob(res, "image/png")); }
+  catch { cv = await build(false); blob = await new Promise(res => cv.toBlob(res, "image/png")); }
   // Dentro del visor de Claude la descarga pasa por su capacidad "downloads"; en la web, un link común.
   const dl = window.claude?.use ? await window.claude.use("downloads").catch(() => null) : null;
   if (dl) {
@@ -2066,9 +2070,7 @@ async function exportProjImage(btn) {
       x.textBaseline = "alphabetic"; x.textAlign = "left";
       x.fillStyle = C.accent; x.font = `700 18px ${DF}`; sp("2.9px"); x.fillText("SIMULADOR LPF · CLAUSURA 2026", 52, 56);
       x.fillStyle = C.ink; x.font = `700 58px ${DF}`; sp("0.6px"); x.fillText("PROBABILIDADES", 50, 112); sp("0px");
-      x.textAlign = "right"; x.font = `400 17px ${BF}`; x.fillStyle = C.muted;
-      x.fillText(`${N.toLocaleString("es-AR")} simulaciones de las fechas ${FECHAS[0]} a ${FECHAS[FECHAS.length - 1]}, playoffs y copas`, W - 52, 86);
-      x.fillText(`Tablas de promiedos al ${DATA_DATE} · ${filled}/${MATCHES.length} partidos cargados`, W - 52, 111);
+      drawBrand(x, W - 52, 36, C, imgs.__logo, 84);
       // tablas
       const top = 138, gap = 26, tw = (W - 104 - gap) / 2, hh = 62, rh = 55, pw = 98, rkw = 44;
       for (let half = 0; half < 2; half++) {
@@ -2118,7 +2120,8 @@ async function exportProjImage(btn) {
       }
       x.textAlign = "left"; x.font = `400 14px ${BF}`; x.fillStyle = C.muted;
       x.fillText("Cuanto más fuerte el color, más probable · Lib. directo = fase de grupos · fase previa = último clasificado por la Anual · Campeón de Liga = 1° de la Anual · «—» no pasó en ninguna simulación", 52, H - 30);
-      drawWatermark(x, W, H, C, H - 30);
+      x.textAlign = "right"; x.fillText(`${N.toLocaleString("es-AR")} simulaciones · ${filled}/${MATCHES.length} partidos cargados · promiedos al ${DATA_DATE}`, W - 52, H - 30);
+      drawWatermark(x, W, H, C);
       return cv;
     };
     await saveCanvas(draw, order.map(t => t.id), `probabilidades-lpf-${DATA_DATE.replace(/\//g, "-")}.png`, "Imagen descargada (1920×1080 en alta resolución)");
@@ -2207,6 +2210,7 @@ async function exportTableImage(kind, btn) {
       x.fillStyle = C.accent; x.font = `700 16px ${EXP_DF}`; ls("2.6px"); x.fillText("SIMULADOR LPF · CLAUSURA 2026", P, 56);
       x.fillStyle = C.ink; x.font = `700 48px ${EXP_DF}`; ls("0.5px"); x.fillText(sp.title.toUpperCase(), P - 2, 104); ls("0px");
       x.font = `400 16px ${EXP_BF}`; x.fillStyle = C.muted; x.fillText(sp.sub, P, 132);
+      drawBrand(x, W - P, 40, C, imgs.__logo, 80);
       // tarjeta
       const tw = W - 2 * P, th = hh + rh * sp.rows.length;
       x.save(); x.shadowColor = "rgba(0,0,0,.10)"; x.shadowBlur = 12; x.shadowOffsetY = 2; x.fillStyle = C.card; rr(P, top, tw, th, 14); x.fill(); x.restore();
@@ -2261,7 +2265,7 @@ async function exportTableImage(kind, btn) {
         x.fillStyle = C.muted; x.fillText(t, lx + 20, ly); lx += 20 + x.measureText(t).width + 22;
       }
       x.textBaseline = "alphabetic";
-      drawWatermark(x, W, H, C, H - 26);
+      drawWatermark(x, W, H, C);
       x.textAlign = "left"; x.font = `400 13px ${EXP_BF}`; x.fillStyle = C.muted; x.fillText(`Tablas de promiedos al ${DATA_DATE} · ▲▼ respecto de la tabla actual · +N lo que suma en lo simulado`, P, H - 26);
       return cv;
     };
