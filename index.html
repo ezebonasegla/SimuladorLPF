@@ -2183,8 +2183,9 @@ function tableSpec(kind, st) {
   const list = next ? rows.filter(r => !rel.has(r.id)).concat(rows.filter(r => rel.has(r.id))) : rows;
   const base = next ? null : baseOrderProm();
   return { title: next ? "Promedios 2027" : "Promedios 2026", sub: next ? "Temporadas 2025 + 2026 · " + sub : sub, file: next ? "promedios-2027" : "promedios",
-    cols: next ? [{ h: "vs 2026", key: "vs", w: 150 }, { h: "Prom.", key: "prom", w: 100 }, { h: "Pts", key: "pts", w: 66 }, { h: "PJ", key: "pj", w: 56 }]
-      : [{ h: "Prom.", key: "prom", w: 100 }, { h: "Pts", key: "pts", w: 66 }, { h: "PJ", key: "pj", w: 60 }, { h: "2026", key: "y26", w: 96 }],
+    // Puntos de cada temporada que cuenta para el promedio
+    cols: next ? [{ h: "vs 2026", key: "vs", w: 146 }, { h: "Prom.", key: "prom", w: 96 }, { h: "Pts", key: "pts", w: 62 }, { h: "PJ", key: "pj", w: 52 }, { h: "2025", key: "y25", w: 64 }, { h: "2026", key: "y26", w: 88 }]
+      : [{ h: "Prom.", key: "prom", w: 96 }, { h: "Pts", key: "pts", w: 62 }, { h: "PJ", key: "pj", w: 56 }, { h: "2024", key: "y24", w: 64 }, { h: "2025", key: "y25", w: 64 }, { h: "2026", key: "y26", w: 88 }],
     rows: list.map((r, i) => {
       const t = T(r.id), pr = t.pr || [0, 0], py = t.py || ["–", "–"], gone = next && rel.has(r.id), pj25 = pj2025(t);
       const d = next ? pos26[r.id] - (i + 1) : base.indexOf(r.id) - i;
