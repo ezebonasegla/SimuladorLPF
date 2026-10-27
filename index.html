@@ -2342,9 +2342,9 @@ async function exportBracketImage(_, btn) {
       const k = id === t.h ? 0 : 1; return { g: sc.g[k], p: sc.p && isSet(sc.p[k]) ? sc.p[k] : null };
     };
     const ids = new Set(); br.ties.forEach(t => { if (t.h) ids.add(t.h); if (t.a) ids.add(t.a); });
-    const W = 1080, H = 1350, y0 = 300, y1 = 1262;
+    const W = 1080, H = 1350, y0 = 300, y1 = 1262, FX = 100; // FX: distancia de cada finalista al centro
     // columnas: centros x por ronda y lado
-    const XS = { L: [74, 196, 312], R: [1006, 884, 768] }, SZ = [62, 68, 74];
+    const XS = { L: [66, 194, 320], R: [1014, 886, 760] }, SZ = [74, 80, 86];
     const draw = imgs => {
       const S = 2, cv = document.createElement("canvas"); cv.width = W * S; cv.height = H * S;
       const x = cv.getContext("2d"); x.scale(S, S);
@@ -2366,7 +2366,7 @@ async function exportBracketImage(_, btn) {
       // slot con escudo
       // escudo suelto (sin tarjeta): el ganador lleva un disco de color detrás; el eliminado queda en gris y tenue
       const slot = (id, cx, cy, size, state) => {
-        const r = size * 0.66, im = id && imgs[id];
+        const r = size * 0.6, im = id && imgs[id];
         x.save();
         if (state === "win") {
           const g2 = x.createRadialGradient(cx, cy, r * 0.2, cx, cy, r);
@@ -2378,7 +2378,7 @@ async function exportBracketImage(_, btn) {
           x.fillStyle = C.muted; x.font = `700 ${Math.round(size * 0.45)}px ${EXP_DF}`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("?", cx, cy + 2);
         } else {
           if (state === "lose") { x.globalAlpha = 0.38; if ("filter" in x) x.filter = "grayscale(1)"; }
-          const real = !im.src.startsWith("data:"), sz = state === "win" ? size * 0.86 : size * 0.9;
+          const real = !im.src.startsWith("data:"), sz = size * 0.9;
           const bw = real ? sz : sz * 0.75, bh = real ? sz : sz * 0.88; x.drawImage(im, cx - bw / 2, cy - bh / 2, bw, bh);
         }
         x.restore();
@@ -2410,7 +2410,7 @@ async function exportBracketImage(_, btn) {
         ];
         // conectores
         rounds.forEach((r, k) => {
-          const half = SZ[k] * 0.66 + 4, nx = k < 2 ? X[k + 1] - dir * (SZ[k + 1] * 0.66 + 4) : W / 2 - dir * (110 + 74 * 0.66 + 4), mid = (X[k] + dir * half + nx) / 2;
+          const half = SZ[k] * 0.6 + 4, nx = k < 2 ? X[k + 1] - dir * (SZ[k + 1] * 0.6 + 4) : W / 2 - dir * (FX + 80 * 0.6 + 4), mid = (X[k] + dir * half + nx) / 2;
           for (let i = 0; i < r.y.length; i += 2) {
             const ya = r.y[i], yb = r.y[i + 1], ym = (ya + yb) / 2;
             line([[X[k] + dir * half, ya], [mid, ya], [mid, yb], [X[k] + dir * half, yb]]);
@@ -2420,7 +2420,7 @@ async function exportBracketImage(_, btn) {
         rounds.forEach((r, k) => r.teams.forEach(([id, t], i) => {
           const state = t && t.w ? (t.w === id ? "win" : "lose") : "";
           const s2 = slot(id, X[k], r.y[i], SZ[k], id ? state : "");
-          scoreTxt(id && scoreOf(t, id), X[k], r.y[i] + s2 / 2 + 12, state === "win");
+          scoreTxt(id && scoreOf(t, id), X[k], r.y[i] + s2 / 2 + 11, state === "win");
         }));
         return fY;
       };
@@ -2430,13 +2430,13 @@ async function exportBracketImage(_, btn) {
       const fin = tie("f"), s0 = tie("s0"), s1 = tie("s1"), fl = s0.w, fr = s1.w;
       const champ = fin && fin.w;
       drawTrophy(x, W / 2, fY - 375, 300, C, lpf || imgs.__logo);
-      const fs = (id, cx) => { const st2 = fin && fin.w ? (fin.w === id ? "win" : "lose") : ""; return slot(id, cx, fY, 74, id ? st2 : ""); };
-      const sL = fs(fl, W / 2 - 110); fs(fr, W / 2 + 110);
-      for (const [id, cx] of [[fl, W / 2 - 110], [fr, W / 2 + 110]]) scoreTxt(id && scoreOf(fin, id), cx, fY + sL / 2 + 14, fin && fin.w === id);
+      const fs = (id, cx) => { const st2 = fin && fin.w ? (fin.w === id ? "win" : "lose") : ""; return slot(id, cx, fY, 80, id ? st2 : ""); };
+      const sL = fs(fl, W / 2 - FX); fs(fr, W / 2 + FX);
+      for (const [id, cx] of [[fl, W / 2 - FX], [fr, W / 2 + FX]]) scoreTxt(id && scoreOf(fin, id), cx, fY + sL / 2 + 14, fin && fin.w === id);
       x.font = `700 22px ${EXP_DF}`; x.fillStyle = C.muted; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("VS", W / 2, fY);
       if (champ) {
         x.font = `700 22px ${EXP_DF}`; x.fillStyle = C.accent; x.fillText("CAMPEÓN", W / 2, fY + 128);
-        slot(champ, W / 2, fY + 222, 96, "win");
+        slot(champ, W / 2, fY + 228, 110, "win");
       }
       drawWatermark(x, W, H, C);
       x.textAlign = "left"; x.textBaseline = "alphabetic"; x.font = `400 17px ${EXP_BF}`; x.fillStyle = C.muted;
