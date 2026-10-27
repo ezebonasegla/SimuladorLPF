@@ -36,6 +36,36 @@ jobs:
             raf Logotipo_Oficial_y_Escudo_del_Club_Atl%C3%A9tico_de_Rafaela.svg
           LISTA
           ls -la escudos/nacional
+      - name: Escudos de la Primera Nacional por búsqueda en Wikipedia (imagen principal del artículo del club)
+        continue-on-error: true
+        run: |
+          mkdir -p escudos/nacional
+          python3 - <<'PY'
+          import json, urllib.request, urllib.parse, io
+          from PIL import Image
+          UA = {"User-Agent": "SimuladorLPF/1.0 (github.com/ezebonasegla/simuladorlpf)"}
+          LISTA = {
+              "fer": "Club Ferro Carril Oeste", "gcr": "Club Deportivo Godoy Cruz Antonio Tomba",
+              "tsu": "Club Social y Deportivo Tristán Suárez", "atl": "Club Atlético Atlanta",
+              "tem": "Club Atlético Temperley", "aca": "Club Atlético Acassuso",
+              "alm": "Club Atlético Almirante Brown", "mai": "Club Deportivo Maipú",
+              "mid": "Club Social y Deportivo Midland", "gue": "Club Atlético Güemes",
+          }
+          for id_, q in LISTA.items():
+              try:
+                  u = "https://es.wikipedia.org/w/api.php?" + urllib.parse.urlencode({"action": "query", "format": "json", "generator": "search",
+                      "gsrsearch": q, "gsrlimit": 1, "prop": "pageimages", "piprop": "original"})
+                  pages = json.load(urllib.request.urlopen(urllib.request.Request(u, headers=UA)))["query"]["pages"]
+                  pg = next(iter(pages.values())); src = pg["original"]["source"]
+                  if src.endswith(".svg"):
+                      fn = src.rsplit("/", 1)[1]; src = "https://commons.wikimedia.org/wiki/Special:FilePath/" + fn + "?width=512"
+                  data = urllib.request.urlopen(urllib.request.Request(src, headers=UA)).read()
+                  im = Image.open(io.BytesIO(data)).convert("RGBA"); im = im.crop(im.getbbox()); im.thumbnail((256, 256), Image.LANCZOS)
+                  im.save(f"escudos/nacional/{id_}.png", optimize=True); print(id_, pg["title"], src)
+              except Exception as e:
+                  print("no se pudo bajar", id_, q, e)
+          PY
+          ls -la escudos/nacional
       - name: Descargar y achicar
         run: |
           mkdir -p escudos
