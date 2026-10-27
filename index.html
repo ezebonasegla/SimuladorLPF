@@ -286,6 +286,30 @@ tr.in td.pos { color: var(--accent); }
 .tie button.win { background: var(--accent-soft); }
 .tie button.win .nm { color: var(--accent); }
 .tie button.lose .nm { color: var(--muted); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent); }
+/* cuadro espejado (SVG): horizontal en pantallas anchas, vertical en el celular */
+.bk-wrap { max-width: 980px; margin: 0 auto 6px; }
+.bk-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.bk-v { display: none; }
+@media (max-width: 700px) { .bk-h { display: none; } .bk-v { display: block; } .bk-wrap { max-width: 460px; } }
+.bk-ln { fill: none; stroke: color-mix(in srgb, var(--muted) 55%, var(--bg)); stroke-width: 2px; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.bk-svg text { font-family: var(--font-display); font-weight: 700; dominant-baseline: middle; }
+.bk-lbl, .bk-vs, .bk-champ, .bk-q, .bk-cup-t { text-anchor: middle; }
+.bk-lbl, .bk-vs, .bk-q { fill: var(--muted); font-size: 20px; }
+.bk-v .bk-vs { font-size: 30px; }
+.bk-champ { fill: var(--accent); font-size: 22px; letter-spacing: .04em; }
+.bk-v .bk-champ { font-size: 32px; }
+.bk-cup-t { fill: #f3cf5a; }
+.bk-sc { fill: var(--muted); }
+.bk-sc.w { fill: var(--ink); }
+.bk-pen { fill: var(--muted); }
+.bk-tbd { fill: none; stroke: var(--line); stroke-width: 2; stroke-dasharray: 5 5; }
+.bk-d0 { stop-color: color-mix(in srgb, var(--accent) 30%, var(--bg)); }
+.bk-d1 { stop-color: color-mix(in srgb, var(--accent) 15%, var(--bg)); }
+.bk-s.lose image { filter: grayscale(1); opacity: .38; }
+.bk-click { cursor: pointer; outline: none; }
+.bk-click:hover image, .bk-click:focus-visible image { filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 70%, transparent)); }
+.bk-s.lose.bk-click:hover image { filter: grayscale(1) drop-shadow(0 0 6px color-mix(in srgb, var(--accent) 70%, transparent)); }
+.po-load { font: 700 15px/1 var(--font-display); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 18px 0 10px; }
 .champion {
   margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--lib);
   border-radius: var(--r); padding: 12px 16px;
@@ -1713,8 +1737,10 @@ function renderPlayoffs(st, br, cups) {
   const cols = bracketCols(br, cups);
   const filled = MATCHES.filter(m => results[m.id]).length;
   document.getElementById("pane-playoffs").innerHTML = `
-    <div class="panel-h"><h2>Playoffs Clausura</h2><span class="sub">${filled < MATCHES.length ? `Proyección con ${filled}/${MATCHES.length} resultados cargados` : "Con todos los resultados cargados"} · cargá el resultado (y los penales si empatan) o tocá un equipo para hacerlo avanzar</span><button class="btn ghost btn-exp" type="button" data-export="playoffs" title="Descargar el cuadro como imagen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Imagen</button></div>
+    <div class="panel-h"><h2>Playoffs Clausura</h2><span class="sub">${filled < MATCHES.length ? `Proyección con ${filled}/${MATCHES.length} resultados cargados` : "Con todos los resultados cargados"} · tocá un escudo para hacerlo avanzar o cargá los resultados abajo</span><button class="btn ghost btn-exp" type="button" data-export="playoffs" title="Descargar el cuadro como imagen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Imagen</button></div>
     <p class="rule">Partido único, local el mejor ubicado. 1° vs 8° de la otra zona, 2° vs 7°, 3° vs 6°, 4° vs 5°. El % es la chance de pasar la llave (si empatan, penales 50/50). La final es en cancha neutral. Los equipos que llegan a una final de copa en noviembre o diciembre restan un poco por cansancio. La jerarquía (historia ganando títulos) pesa en cada llave.</p>
+    ${bracketView(br, true, cups)}
+    <h3 class="po-load">Cargar resultados</h3>
     <div class="bracket">${cols}</div>
     ${br.champ ? `<div class="champion"><div><div class="lbl">Campeón del Clausura</div><div class="big">${tn(br.champ)}</div></div><span class="cross">Clasifica a la Libertadores por título${br.champ === APERTURA_CHAMP ? " (ya lo tenía por el Apertura, así que no libera un cupo nuevo)" : ""}.</span></div>` : ""}`;
 }
@@ -1784,7 +1810,7 @@ function renderSummary(st, br, cups) {
       <div class="sum-card desc"><div class="lbl">Descienden</div><ul>${relegated(st).map(id => li(id)).join("")}</ul></div>
     </div>
     <div class="sum-grid three">${zoneT(st.A, "A")}${zoneT(st.B, "B")}${anT}</div>
-    <div class="sum-sec"><h3>Playoffs</h3><div class="bracket">${bracketCols(br, cups, true)}</div></div>`;
+    <div class="sum-sec"><h3>Playoffs</h3>${bracketView(br, false, cups)}</div>`;
 }
 
 /* ===================== RENDER: COPAS ===================== */
@@ -2329,26 +2355,125 @@ function drawTrophy(x, cx, top, h, C, logo) {
   }
   x.restore();
 }
+// Geometría del cuadro espejado, compartida por la imagen (canvas) y la vista en pantalla (SVG).
+// Horizontal: octavos → semis desde cada costado y la final al medio. Vertical (celular): lo mismo de arriba hacia abajo.
+function bracketLayout(br, vertical) {
+  const V = !!vertical, W = 1080, tie = id => br.ties.find(t => t.id === id);
+  const P = (m, c) => V ? [c, m] : [m, c]; // m: eje de las rondas, c: eje de las llaves
+  // marcador de un equipo en una llave (goles y penales), si está cargado
+  const scoreOf = (t, id) => {
+    const sc = t && id && poScores[t.id]; if (!sc || !t.h || sc.h !== t.h || sc.a !== t.a || !isSet(sc.g[0]) || !isSet(sc.g[1])) return null;
+    const k = id === t.h ? 0 : 1; return { g: sc.g[k], p: sc.p && isSet(sc.p[k]) ? sc.p[k] : null };
+  };
+  const state = (t, id) => !id ? "" : t && t.w ? (t.w === id ? "win" : "lose") : "";
+  const G = V
+    ? { c0: 0, c1: W, M: { L: [96, 250, 404], R: [1304, 1150, 996] }, SZ: [90, 96, 102], FSZ: 100, fs: [34, 26] }
+    : { c0: 60, c1: 1022, M: { L: [66, 194, 320], R: [1014, 886, 760] }, SZ: [74, 80, 86], FSZ: 80, FX: 100, fs: [23, 17] };
+  const out = { w: W, h: V ? 1400 : 1040, vertical: V, fs: G.fs, lines: [], slots: [], labels: [] };
+  const fC = (G.c0 + G.c1) / 2, fin = tie("f");
+  // finalistas: al medio del cuadro (horizontal) o uno arriba y otro abajo de la copa (vertical)
+  const finPos = sd => V ? { x: W / 2, y: sd === "L" ? 588 : 812 } : { x: W / 2 + (sd === "L" ? -G.FX : G.FX), y: fC };
+  const push = (id, t, x, y, size, sp) => out.slots.push({ id, t, x, y, size, state: state(t, id), sc: scoreOf(t, id), sp });
+  for (const sd of ["L", "R"]) {
+    const X = G.M[sd], dir = sd === "L" ? 1 : -1, span = (G.c1 - G.c0) / 8, base = sd === "L" ? 0 : 4;
+    const oC = [...Array(8)].map((_, i) => G.c0 + span * (i + 0.5));
+    const qC = [0, 1, 2, 3].map(i => (oC[2 * i] + oC[2 * i + 1]) / 2), sC = [0, 1].map(i => (qC[2 * i] + qC[2 * i + 1]) / 2);
+    const oct = [0, 1, 2, 3].map(i => tie("o" + (base + i))), qf = [0, 1].map(i => tie("q" + (base / 2 + i))), sf = tie(sd === "L" ? "s0" : "s1");
+    const rounds = [
+      { c: oC, teams: oct.flatMap(t => [[t.h, t], [t.a, t]]) },
+      { c: qC, teams: qf.flatMap((t, i) => [[oct[2 * i].w, t], [oct[2 * i + 1].w, t]]) },
+      { c: sC, teams: [[qf[0].w, sf], [qf[1].w, sf]] },
+    ];
+    const fp = finPos(sd), fr = G.FSZ * 0.6 + 4;
+    rounds.forEach((r, k) => {
+      const half = G.SZ[k] * 0.6 + 4, nx = k < 2 ? X[k + 1] - dir * (G.SZ[k + 1] * 0.6 + 4) : (V ? fp.y : fp.x) - dir * fr, mid = (X[k] + dir * half + nx) / 2;
+      for (let i = 0; i < r.c.length; i += 2) {
+        const ca = r.c[i], cb = r.c[i + 1], cm = k < 2 || !V ? (ca + cb) / 2 : fp.x;
+        out.lines.push([P(X[k] + dir * half, ca), P(mid, ca), P(mid, cb), P(X[k] + dir * half, cb)], [P(mid, cm), P(nx, cm)]);
+      }
+      r.teams.forEach(([id, t], i) => {
+        const [x, y] = P(X[k], r.c[i]), rad = G.SZ[k] * 0.6;
+        // marcador: horizontal, debajo del escudo; vertical, por fuera en octavos y a la derecha en el resto (nunca sobre las líneas)
+        const sp = !V ? { x, y: y + rad + 11, a: "middle" } : k === 0 ? { x, y: y - dir * (rad + 18), a: "middle" } : { x: x + rad + 10, y, a: "start" };
+        push(id, t, x, y, G.SZ[k], sp);
+      });
+    });
+    if (!V) out.labels.push(...["OCTAVOS", "CUARTOS", "SEMIS"].map((n, k) => ({ t: n, x: X[k], y: G.c0 - 34 })));
+  }
+  for (const sd of ["L", "R"]) {
+    const id = tie(sd === "L" ? "s0" : "s1").w, p = finPos(sd), rad = G.FSZ * 0.6;
+    push(id, fin, p.x, p.y, G.FSZ, V ? { x: p.x + rad + 12, y: p.y, a: "start" } : { x: p.x, y: p.y + rad + 14, a: "middle" });
+  }
+  if (V) {
+    out.vs = { x: W / 2, y: 700 }; out.trophy = { cx: 290, top: 555, h: 290 };
+    out.champ = fin && fin.w ? { id: fin.w, x: 800, y: 730, size: 120, lx: 800, ly: 625 } : null;
+  } else {
+    out.labels.push({ t: "FINAL", x: W / 2, y: G.c0 - 34 });
+    out.vs = { x: W / 2, y: fC }; out.trophy = { cx: W / 2, top: fC - 375, h: 300 };
+    out.champ = fin && fin.w ? { id: fin.w, x: W / 2, y: fC + 228, size: 110, lx: W / 2, ly: fC + 128 } : null;
+  }
+  return out;
+}
+
+// Cuadro en pantalla (SVG). interactive: tocar un escudo hace avanzar a ese equipo (como en la lista).
+let bkSeq = 0;
+function bracketSVG(br, vertical, interactive, cups) {
+  const L = bracketLayout(br, vertical), u = "bk" + (++bkSeq), f = n => +n.toFixed(1);
+  const href = id => logoUrl(id) || crestDataUrl(id);
+  const lines = L.lines.map(pts => `M${pts.map(p => f(p[0]) + " " + f(p[1])).join("L")}`).join("");
+  const slot = (s, champ) => {
+    const r = s.size * 0.6, t = s.t;
+    if (!s.id) return `<g class="bk-s"><circle class="bk-tbd" cx="${f(s.x)}" cy="${f(s.y)}" r="${f(r * 0.8)}"/><text class="bk-q" x="${f(s.x)}" y="${f(s.y)}" style="font-size:${Math.round(s.size * 0.45)}px">?</text></g>`;
+    const real = !!logoUrl(s.id), sz = s.size * 0.9, bw = real ? sz : sz * 0.75, bh = real ? sz : sz * 0.88;
+    const other = t && (t.h === s.id ? t.a : t.h), click = interactive && !champ && t && t.h && t.a && !(poScores[t.id] && poScores[t.id].official);
+    const p = t && t.h && t.a && !champ ? (s.id === t.h ? advanceProb(t.h, t.a, t.neutral, cups) : 1 - advanceProb(t.h, t.a, t.neutral, cups)) : null;
+    const tip = esc(T(s.id).n) + (champ ? " · campeón" : p != null ? ` · ${pct(p)} de pasar ante ${esc(T(other).n)}` : "");
+    return `<g class="bk-s ${champ ? "win" : s.state}${click ? " bk-click" : ""}"${click ? ` data-tie="${t.id}" data-team="${s.id}" role="button" tabindex="0" aria-label="${tip}"` : ""}><title>${tip}</title>
+      ${champ || s.state === "win" ? `<circle class="bk-disc" cx="${f(s.x)}" cy="${f(s.y)}" r="${f(r)}" fill="url(#${u}-disc)"/>` : `<circle cx="${f(s.x)}" cy="${f(s.y)}" r="${f(r)}" fill="transparent"/>`}
+      <image href="${href(s.id)}" x="${f(s.x - bw / 2)}" y="${f(s.y - bh / 2)}" width="${f(bw)}" height="${f(bh)}"/></g>`;
+  };
+  const score = s => !s.sc ? "" : `<text class="bk-sc${s.state === "win" ? " w" : ""}" x="${f(s.sp.x)}" y="${f(s.sp.y)}" text-anchor="${s.sp.a}" style="font-size:${L.fs[0]}px">${s.sc.g}${s.sc.p != null ? `<tspan class="bk-pen" style="font-size:${L.fs[1]}px"> (${s.sc.p})</tspan>` : ""}</text>`;
+  const tr = L.trophy, h = tr.h, w = h * 0.62, cx = tr.cx, top = tr.top, cupH = h * 0.5, cupBot = top + cupH, mr = cupH * 0.36, my = top + cupH * 0.43;
+  const trophy = `<g class="bk-trophy">
+    ${[-1, 1].map(sg => `<ellipse cx="${f(cx + sg * w * 0.52)}" cy="${f(top + cupH * 0.33)}" rx="${f(w * 0.17)}" ry="${f(cupH * 0.24)}" fill="none" stroke="#c99a2e" stroke-width="${f(h * 0.045)}"/>`).join("")}
+    <path fill="url(#${u}-gold)" d="M${f(cx - w / 2)} ${f(top)}L${f(cx + w / 2)} ${f(top)}C${f(cx + w / 2)} ${f(top + cupH * 0.85)} ${f(cx + w * 0.2)} ${f(cupBot)} ${f(cx + w * 0.08)} ${f(cupBot + h * 0.04)}L${f(cx - w * 0.08)} ${f(cupBot + h * 0.04)}C${f(cx - w * 0.2)} ${f(cupBot)} ${f(cx - w / 2)} ${f(top + cupH * 0.85)} ${f(cx - w / 2)} ${f(top)}Z"/>
+    <rect x="${f(cx - w / 2)}" y="${f(top)}" width="${f(w)}" height="${f(h * 0.025)}" fill="#fff6cf" opacity=".55"/>
+    <rect x="${f(cx - w * 0.07)}" y="${f(cupBot + h * 0.04)}" width="${f(w * 0.14)}" height="${f(h * 0.17)}" fill="url(#${u}-gold)"/>
+    <rect x="${f(cx - w * 0.3)}" y="${f(cupBot + h * 0.2)}" width="${f(w * 0.6)}" height="${f(h * 0.07)}" rx="4" fill="url(#${u}-gold)"/>
+    <rect x="${f(cx - w * 0.38)}" y="${f(cupBot + h * 0.27)}" width="${f(w * 0.76)}" height="${f(h * 0.23)}" rx="8" fill="url(#${u}-base)"/>
+    <text x="${f(cx)}" y="${f(cupBot + h * 0.385)}" class="bk-cup-t" style="font-size:${Math.round(h * 0.065)}px">CLAUSURA 2026</text>
+    <circle cx="${f(cx)}" cy="${f(my)}" r="${f(mr)}" fill="#fffaf0" stroke="#b8862a" stroke-width="${f(h * 0.012)}"/>
+    <image href="logo-lpf.png" x="${f(cx - mr * 0.72)}" y="${f(my - mr * 0.72)}" width="${f(mr * 1.44)}" height="${f(mr * 1.44)}"/></g>`;
+  const ch = L.champ;
+  return `<svg class="bk-svg ${vertical ? "bk-v" : "bk-h"}" viewBox="0 0 ${L.w} ${L.h}" role="img" aria-label="Cuadro de playoffs${ch ? ", campeón " + esc(T(ch.id).n) : ""}">
+    <defs>
+      <linearGradient id="${u}-gold" gradientUnits="userSpaceOnUse" x1="${f(cx - w / 2)}" y1="0" x2="${f(cx + w / 2)}" y2="0"><stop offset="0" stop-color="#9c6b12"/><stop offset=".3" stop-color="#f3cf5a"/><stop offset=".55" stop-color="#fff1b0"/><stop offset=".75" stop-color="#e4b53c"/><stop offset="1" stop-color="#8a5c0c"/></linearGradient>
+      <linearGradient id="${u}-base" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a2a17"/><stop offset="1" stop-color="#1c140b"/></linearGradient>
+      <radialGradient id="${u}-disc"><stop offset=".2" class="bk-d0"/><stop offset="1" class="bk-d1"/></radialGradient>
+    </defs>
+    ${L.labels.map(l => `<text class="bk-lbl" x="${l.x}" y="${l.y}">${l.t}</text>`).join("")}
+    <path class="bk-ln" d="${lines}"/>
+    ${trophy}
+    <text class="bk-vs" x="${L.vs.x}" y="${L.vs.y}">VS</text>
+    ${L.slots.map(s => slot(s)).join("")}${L.slots.map(score).join("")}
+    ${ch ? `<text class="bk-champ" x="${ch.lx}" y="${ch.ly}">CAMPEÓN</text>${slot({ ...ch, state: "win" }, true)}` : ""}
+  </svg>`;
+}
+// Las dos orientaciones van en el DOM y el CSS muestra la que corresponde al ancho de pantalla.
+const bracketView = (br, interactive, cups) => `<div class="bk-wrap">${bracketSVG(br, false, interactive, cups)}${bracketSVG(br, true, interactive, cups)}</div>`;
+
 async function exportBracketImage(_, btn) {
   btn.disabled = true;
   try {
     const { C, dark } = expTheme(); await expFonts();
     const lpf = await loadImg("logo-lpf.png", false);
-    const st = standings(results), br = currentBracket(st), tie = id => br.ties.find(t => t.id === id);
+    const st = standings(results), br = currentBracket(st), L = bracketLayout(br, false);
     const filled = MATCHES.filter(m => results[m.id]).length;
-    // marcador de un equipo en una llave (goles y penales), si está cargado
-    const scoreOf = (t, id) => {
-      const sc = t && poScores[t.id]; if (!sc || !t.h || sc.h !== t.h || sc.a !== t.a || !isSet(sc.g[0]) || !isSet(sc.g[1])) return null;
-      const k = id === t.h ? 0 : 1; return { g: sc.g[k], p: sc.p && isSet(sc.p[k]) ? sc.p[k] : null };
-    };
     const ids = new Set(); br.ties.forEach(t => { if (t.h) ids.add(t.h); if (t.a) ids.add(t.a); });
-    const W = 1080, H = 1350, y0 = 300, y1 = 1262, FX = 100; // FX: distancia de cada finalista al centro
-    // columnas: centros x por ronda y lado
-    const XS = { L: [66, 194, 320], R: [1014, 886, 760] }, SZ = [74, 80, 86];
+    const W = 1080, H = 1350, OY = 240; // el cuadro arranca debajo del encabezado
     const draw = imgs => {
       const S = 2, cv = document.createElement("canvas"); cv.width = W * S; cv.height = H * S;
       const x = cv.getContext("2d"); x.scale(S, S);
-      const rr = (X, Y, w, h, r) => { x.beginPath(); x.roundRect ? x.roundRect(X, Y, w, h, r) : x.rect(X, Y, w, h); };
       x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
       const g = x.createRadialGradient(W / 2, 760, 0, W / 2, 760, 700); g.addColorStop(0, mixHex(C.accent, dark ? .2 : .12, C.bg)); g.addColorStop(1, C.bg);
       x.fillStyle = g; x.fillRect(0, 0, W, H);
@@ -2359,11 +2484,10 @@ async function exportBracketImage(_, btn) {
       x.fillStyle = C.ink; x.font = `700 64px ${EXP_DF}`; x.fillText("PLAYOFFS", 28, 122);
       x.font = `400 21px ${EXP_BF}`; x.fillStyle = C.muted;
       x.fillText(filled < MATCHES.length ? `Proyección con ${filled}/${MATCHES.length} partidos de las fechas 14 a 16` : "Con la fase regular completa", 30, 168);
+      x.save(); x.translate(0, OY);
       // nombres de ronda
       x.font = `700 20px ${EXP_DF}`; x.fillStyle = C.muted; x.textAlign = "center"; x.textBaseline = "middle";
-      ["OCTAVOS", "CUARTOS", "SEMIS"].forEach((n, k) => { x.fillText(n, XS.L[k], y0 - 34); x.fillText(n, XS.R[k], y0 - 34); });
-      x.fillText("FINAL", W / 2, y0 - 34);
-      // slot con escudo
+      L.labels.forEach(l => x.fillText(l.t, l.x, l.y));
       // escudo suelto (sin tarjeta): el ganador lleva un disco de color detrás; el eliminado queda en gris y tenue
       const slot = (id, cx, cy, size, state) => {
         const r = size * 0.6, im = id && imgs[id];
@@ -2382,62 +2506,28 @@ async function exportBracketImage(_, btn) {
           const bw = real ? sz : sz * 0.75, bh = real ? sz : sz * 0.88; x.drawImage(im, cx - bw / 2, cy - bh / 2, bw, bh);
         }
         x.restore();
-        return r * 2;
       };
       // marcador centrado debajo del escudo (así nunca pisa las líneas): goles y, más chicos, los penales
-      const scoreTxt = (sc, cx, cy, win) => {
-        if (!sc) return;
+      const scoreTxt = s => {
+        if (!s.sc) return;
         x.save(); x.textBaseline = "middle"; x.textAlign = "left";
-        const g3 = String(sc.g), p3 = sc.p != null ? ` (${sc.p})` : "";
-        x.font = `700 23px ${EXP_DF}`; const wg = x.measureText(g3).width;
-        x.font = `700 17px ${EXP_DF}`; const wp = x.measureText(p3).width, x0 = cx - (wg + wp) / 2;
-        x.font = `700 23px ${EXP_DF}`; x.fillStyle = win ? C.ink : C.muted; x.fillText(g3, x0, cy);
-        if (p3) { x.font = `700 17px ${EXP_DF}`; x.fillStyle = C.muted; x.fillText(p3, x0 + wg, cy + 1); }
+        const g3 = String(s.sc.g), p3 = s.sc.p != null ? ` (${s.sc.p})` : "";
+        x.font = `700 ${L.fs[0]}px ${EXP_DF}`; const wg = x.measureText(g3).width;
+        x.font = `700 ${L.fs[1]}px ${EXP_DF}`; const wp = x.measureText(p3).width, x0 = s.sp.x - (wg + wp) / 2;
+        x.font = `700 ${L.fs[0]}px ${EXP_DF}`; x.fillStyle = s.state === "win" ? C.ink : C.muted; x.fillText(g3, x0, s.sp.y);
+        if (p3) { x.font = `700 ${L.fs[1]}px ${EXP_DF}`; x.fillStyle = C.muted; x.fillText(p3, x0 + wg, s.sp.y + 1); }
         x.restore();
       };
-      const line = pts => { x.beginPath(); x.moveTo(pts[0][0], pts[0][1]); for (const p of pts.slice(1)) x.lineTo(p[0], p[1]); x.stroke(); };
       x.strokeStyle = mixHex(C.muted, .55, C.bg); x.lineWidth = 2.5; x.lineJoin = "round";
-      // cada lado: octavos (4 llaves), cuartos (2), semi (1)
-      const side = (sd, octIds, qfIds, sfId) => {
-        const X = XS[sd], dir = sd === "L" ? 1 : -1, span = (y1 - y0) / 8;
-        const oY = [...Array(8)].map((_, i) => y0 + span * (i + 0.5));
-        const qY = [0, 1, 2, 3].map(i => (oY[2 * i] + oY[2 * i + 1]) / 2), sY = [0, 1].map(i => (qY[2 * i] + qY[2 * i + 1]) / 2);
-        const fY = (sY[0] + sY[1]) / 2;
-        const rounds = [
-          { y: oY, teams: octIds.flatMap(id => { const t = tie(id); return [[t.h, t], [t.a, t]]; }) },
-          { y: qY, teams: qfIds.flatMap((id, i) => { const t = tie(id); return [[tie(octIds[2 * i]).w, t], [tie(octIds[2 * i + 1]).w, t]]; }) },
-          { y: sY, teams: (() => { const t = tie(sfId); return [[tie(qfIds[0]).w, t], [tie(qfIds[1]).w, t]]; })() },
-        ];
-        // conectores
-        rounds.forEach((r, k) => {
-          const half = SZ[k] * 0.6 + 4, nx = k < 2 ? X[k + 1] - dir * (SZ[k + 1] * 0.6 + 4) : W / 2 - dir * (FX + 80 * 0.6 + 4), mid = (X[k] + dir * half + nx) / 2;
-          for (let i = 0; i < r.y.length; i += 2) {
-            const ya = r.y[i], yb = r.y[i + 1], ym = (ya + yb) / 2;
-            line([[X[k] + dir * half, ya], [mid, ya], [mid, yb], [X[k] + dir * half, yb]]);
-            line([[mid, ym], [nx, ym]]);
-          }
-        });
-        rounds.forEach((r, k) => r.teams.forEach(([id, t], i) => {
-          const state = t && t.w ? (t.w === id ? "win" : "lose") : "";
-          const s2 = slot(id, X[k], r.y[i], SZ[k], id ? state : "");
-          scoreTxt(id && scoreOf(t, id), X[k], r.y[i] + s2 / 2 + 11, state === "win");
-        }));
-        return fY;
-      };
-      const fY = side("L", ["o0", "o1", "o2", "o3"], ["q0", "q1"], "s0");
-      side("R", ["o4", "o5", "o6", "o7"], ["q2", "q3"], "s1");
-      // final: los dos finalistas en el centro del cuadro, la copa arriba y el campeón abajo
-      const fin = tie("f"), s0 = tie("s0"), s1 = tie("s1"), fl = s0.w, fr = s1.w;
-      const champ = fin && fin.w;
-      drawTrophy(x, W / 2, fY - 375, 300, C, lpf || imgs.__logo);
-      const fs = (id, cx) => { const st2 = fin && fin.w ? (fin.w === id ? "win" : "lose") : ""; return slot(id, cx, fY, 80, id ? st2 : ""); };
-      const sL = fs(fl, W / 2 - FX); fs(fr, W / 2 + FX);
-      for (const [id, cx] of [[fl, W / 2 - FX], [fr, W / 2 + FX]]) scoreTxt(id && scoreOf(fin, id), cx, fY + sL / 2 + 14, fin && fin.w === id);
-      x.font = `700 22px ${EXP_DF}`; x.fillStyle = C.muted; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("VS", W / 2, fY);
-      if (champ) {
-        x.font = `700 22px ${EXP_DF}`; x.fillStyle = C.accent; x.fillText("CAMPEÓN", W / 2, fY + 128);
-        slot(champ, W / 2, fY + 228, 110, "win");
+      for (const pts of L.lines) { x.beginPath(); x.moveTo(pts[0][0], pts[0][1]); for (const p of pts.slice(1)) x.lineTo(p[0], p[1]); x.stroke(); }
+      drawTrophy(x, L.trophy.cx, L.trophy.top, L.trophy.h, C, lpf || imgs.__logo);
+      L.slots.forEach(s => { slot(s.id, s.x, s.y, s.size, s.state); scoreTxt(s); });
+      x.font = `700 22px ${EXP_DF}`; x.fillStyle = C.muted; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("VS", L.vs.x, L.vs.y);
+      if (L.champ) {
+        x.font = `700 22px ${EXP_DF}`; x.fillStyle = C.accent; x.fillText("CAMPEÓN", L.champ.lx, L.champ.ly);
+        slot(L.champ.id, L.champ.x, L.champ.y, L.champ.size, "win");
       }
+      x.restore();
       drawWatermark(x, W, H, C);
       x.textAlign = "left"; x.textBaseline = "alphabetic"; x.font = `400 17px ${EXP_BF}`; x.fillStyle = C.muted;
       x.fillText(`Partido único, local el mejor ubicado · final en cancha neutral · datos de promiedos al ${dataAsOf(true)}`, 30, H - 22);
@@ -3128,6 +3218,11 @@ function fillRandom() {
   toast("Simulación al azar según las probabilidades");
 }
 
+// los escudos del cuadro (SVG) se activan también con Enter o espacio
+document.addEventListener("keydown", e => {
+  const g = (e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest(".bk-click");
+  if (g) { e.preventDefault(); g.dispatchEvent(new MouseEvent("click", { bubbles: true })); }
+});
 document.addEventListener("click", e => {
   const tab = e.target.closest(".tab"); if (tab) return showTab(tab.dataset.tab);
   const py = e.target.closest("[data-prom]");
@@ -3142,7 +3237,7 @@ document.addEventListener("click", e => {
     delete aiCupPicks[id];
     projection = null; save(); renderTables(); return;
   }
-  const tieBtn = e.target.closest("button[data-tie]");
+  const tieBtn = e.target.closest("button[data-tie], .bk-click[data-tie]");
   if (tieBtn) {
     const id = tieBtn.dataset.tie;
     if (poScores[id] && poScores[id].official) return; // llave ya jugada
