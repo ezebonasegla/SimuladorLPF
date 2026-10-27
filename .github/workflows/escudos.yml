@@ -41,29 +41,39 @@ jobs:
         run: |
           mkdir -p escudos/nacional
           python3 - <<'PY'
-          import json, urllib.request, urllib.parse, io
+          import json, os, time, urllib.request, urllib.parse, io
           from PIL import Image
           UA = {"User-Agent": "SimuladorLPF/1.0 (github.com/ezebonasegla/simuladorlpf)"}
+          # título exacto del artículo de es.wikipedia; los que ya están bajados se saltean
           LISTA = {
               "fer": "Club Ferro Carril Oeste", "gcr": "Club Deportivo Godoy Cruz Antonio Tomba",
               "tsu": "Club Social y Deportivo Tristán Suárez", "atl": "Club Atlético Atlanta",
               "tem": "Club Atlético Temperley", "aca": "Club Atlético Acassuso",
-              "alm": "Club Atlético Almirante Brown", "mai": "Club Deportivo Maipú",
-              "mid": "Club Social y Deportivo Midland", "gue": "Club Atlético Güemes",
+              "alm": "Club Almirante Brown", "mai": "Club Deportivo Maipú",
+              "mid": "Club Atlético Midland", "gue": "Club Atlético Güemes",
           }
-          for id_, q in LISTA.items():
+          def get(url):
+              for i in range(4):
+                  try: return urllib.request.urlopen(urllib.request.Request(url, headers=UA)).read()
+                  except urllib.error.HTTPError as e:
+                      if e.code != 429: raise
+                      time.sleep(5 * (i + 1))
+              raise RuntimeError("429")
+          for id_, title in LISTA.items():
+              out = f"escudos/nacional/{id_}.png"
+              if os.path.exists(out): continue
               try:
-                  u = "https://es.wikipedia.org/w/api.php?" + urllib.parse.urlencode({"action": "query", "format": "json", "generator": "search",
-                      "gsrsearch": q, "gsrlimit": 1, "prop": "pageimages", "piprop": "original"})
-                  pages = json.load(urllib.request.urlopen(urllib.request.Request(u, headers=UA)))["query"]["pages"]
-                  pg = next(iter(pages.values())); src = pg["original"]["source"]
-                  if src.endswith(".svg"):
-                      fn = src.rsplit("/", 1)[1]; src = "https://commons.wikimedia.org/wiki/Special:FilePath/" + fn + "?width=512"
-                  data = urllib.request.urlopen(urllib.request.Request(src, headers=UA)).read()
-                  im = Image.open(io.BytesIO(data)).convert("RGBA"); im = im.crop(im.getbbox()); im.thumbnail((256, 256), Image.LANCZOS)
-                  im.save(f"escudos/nacional/{id_}.png", optimize=True); print(id_, pg["title"], src)
+                  u = "https://es.wikipedia.org/w/api.php?" + urllib.parse.urlencode({"action": "query", "format": "json", "titles": title,
+                      "redirects": 1, "prop": "pageimages", "piprop": "original|thumbnail", "pithumbsize": 512})
+                  pg = next(iter(json.loads(get(u))["query"]["pages"].values()))
+                  src = (pg.get("original") or pg.get("thumbnail"))["source"].split("?")[0]
+                  if src.lower().endswith(".svg"):
+                      src = "https://commons.wikimedia.org/wiki/Special:FilePath/" + src.rsplit("/", 1)[1] + "?width=512"
+                  im = Image.open(io.BytesIO(get(src))).convert("RGBA"); im = im.crop(im.getbbox()); im.thumbnail((256, 256), Image.LANCZOS)
+                  im.save(out, optimize=True); print(id_, pg.get("title"), src)
               except Exception as e:
-                  print("no se pudo bajar", id_, q, e)
+                  print("no se pudo bajar", id_, title, repr(e))
+              time.sleep(3)
           PY
           ls -la escudos/nacional
       - name: Descargar y achicar
