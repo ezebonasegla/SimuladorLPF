@@ -1904,7 +1904,7 @@ function renderProjection() {
           <button type="button" data-proj="compact" aria-pressed="${projCompact}">Resumida</button>
           <button type="button" data-proj="full" aria-pressed="${!projCompact}">Completa</button>
         </div>
-        <button class="btn ghost" type="button" id="btn-proj-img" title="Descargar la tabla resumida como imagen Full HD">
+        <button class="btn ghost" type="button" id="btn-proj-img" title="Descargar las probabilidades como imagen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Exportar imagen
         </button>
         <button class="btn ghost icon" type="button" id="btn-proj" title="Volver a simular" aria-label="Volver a simular">
@@ -1976,7 +1976,7 @@ function scheduleProjection() {
 }
 
 /* ===================== EXPORTAR IMAGEN ===================== */
-// Dibuja la tabla resumida en un canvas de 1920×1080 (a doble resolución) y la descarga como PNG.
+// Dibuja las probabilidades en formato celular (1080 de ancho, a doble resolución) y las descarga como PNG.
 // Usa los colores del tema activo. Los escudos salen de escudos/; si alguno falta, va la insignia dibujada.
 function loadImg(src, cors) {
   return new Promise(res => {
@@ -2064,75 +2064,71 @@ async function exportProjImage(btn) {
       ["Campeón|Clausura", t => acc[t].champ, v("--champ")], ["Campeón|de Liga", t => acc[t].liga, v("--liga")]];
     const filled = MATCHES.filter(m => results[m.id]).length;
 
+    // Formato celular: una sola lista de 30, 1080 de ancho y letra grande.
+    const W = 1080, P = 30, rh = 56, hh = 74, top = 214, rkw = 46, CR = 38, pw = 102, H = top + hh + rh * 30 + 130;
     const draw = imgs => {
-      const W = 1920, H = 1080, S = 2, cv = document.createElement("canvas");
+      const S = 2, cv = document.createElement("canvas");
       cv.width = W * S; cv.height = H * S;
       const x = cv.getContext("2d"); x.scale(S, S);
       const sp = em => { if ("letterSpacing" in x) x.letterSpacing = em; };
       const rr = (X, Y, w, h, r) => { x.beginPath(); x.roundRect ? x.roundRect(X, Y, w, h, r) : x.rect(X, Y, w, h); };
-      // fondo
       x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
-      const g = x.createRadialGradient(0, 0, 0, 0, 0, 1100); g.addColorStop(0, mixHex(C.accent, dark ? .12 : .08, C.bg)); g.addColorStop(1, C.bg);
+      const g = x.createRadialGradient(0, 0, 0, 0, 0, 900); g.addColorStop(0, mixHex(C.accent, dark ? .12 : .08, C.bg)); g.addColorStop(1, C.bg);
       x.fillStyle = g; x.fillRect(0, 0, W, H);
       // encabezado
+      drawBrand(x, W - P, 34, C, imgs.__logo, 84);
       x.textBaseline = "alphabetic"; x.textAlign = "left";
-      x.fillStyle = C.accent; x.font = `700 18px ${DF}`; sp("2.9px"); x.fillText("SIMULADOR LPF · CLAUSURA 2026", 52, 56);
-      x.fillStyle = C.ink; x.font = `700 58px ${DF}`; sp("0.6px"); x.fillText("PROBABILIDADES", 50, 112); sp("0px");
-      drawBrand(x, W - 52, 36, C, imgs.__logo, 84);
-      // tablas
-      const top = 138, gap = 26, tw = (W - 104 - gap) / 2, hh = 62, rh = 55, pw = 98, rkw = 44;
-      for (let half = 0; half < 2; half++) {
-        const X = 52 + half * (tw + gap), th = hh + rh * 15;
-        x.save(); x.shadowColor = "rgba(0,0,0,.10)"; x.shadowBlur = 12; x.shadowOffsetY = 2;
-        x.fillStyle = C.card; rr(X, top, tw, th, 14); x.fill(); x.restore();
-        x.save(); rr(X, top, tw, th, 14); x.clip();
-        x.fillStyle = C.head; x.fillRect(X, top, tw, hh);
-        x.fillStyle = C.line; x.fillRect(X, top + hh - 2, tw, 2);
-        // cabeceras
-        x.font = `600 11.5px ${BF}`; x.fillStyle = C.muted; sp("0.3px");
-        x.textAlign = "left"; x.fillText("EQUIPO", X + rkw + 8, top + hh - 13);
-        const px0 = X + tw - pw * COLS.length;
+      x.fillStyle = C.accent; x.font = `700 21px ${DF}`; sp("2.4px"); x.fillText("SIMULADOR LPF · CLAUSURA 2026", P, 58);
+      x.fillStyle = C.ink; x.font = `700 64px ${DF}`; sp("0.5px"); x.fillText("PROBABILIDADES", P - 2, 122); sp("0px");
+      x.font = `400 21px ${BF}`; x.fillStyle = C.muted;
+      x.fillText(`${N.toLocaleString("es-AR")} simulaciones · ${filled}/${MATCHES.length} partidos cargados · promiedos al ${dataAsOf()}`, P, 168);
+      // tabla
+      const tw = W - 2 * P, th = hh + rh * 30;
+      x.save(); x.shadowColor = "rgba(0,0,0,.10)"; x.shadowBlur = 12; x.shadowOffsetY = 2;
+      x.fillStyle = C.card; rr(P, top, tw, th, 16); x.fill(); x.restore();
+      x.save(); rr(P, top, tw, th, 16); x.clip();
+      x.fillStyle = C.head; x.fillRect(P, top, tw, hh);
+      x.fillStyle = C.line; x.fillRect(P, top + hh - 2, tw, 2);
+      x.font = `600 14px ${BF}`; x.fillStyle = C.muted; sp("0.3px");
+      x.textAlign = "left"; x.fillText("EQUIPO", P + rkw + 8, top + hh - 16);
+      const px0 = P + tw - 8 - pw * COLS.length;
+      COLS.forEach((c, k) => {
+        const cx = px0 + pw * k + pw / 2, lines = c[0].replace("Libertadores", "Lib.").replace("Sudamericana", "Sudam.").toUpperCase().split("|");
+        x.fillStyle = c[2]; rr(cx - 13, top + 12, 26, 5, 2); x.fill();
+        x.fillStyle = C.muted; x.textAlign = "center";
+        lines.forEach((l, li) => x.fillText(l, cx, top + hh - 16 - (lines.length - 1 - li) * 17));
+      });
+      sp("0px");
+      order.forEach((t, i) => {
+        const y = top + hh + i * rh, cy = y + rh / 2;
+        if (i) { x.fillStyle = C.line; x.globalAlpha = .55; x.fillRect(P, y, tw, 1); x.globalAlpha = 1; }
+        x.textBaseline = "middle"; x.textAlign = "center"; x.fillStyle = C.muted; x.font = `700 24px ${DF}`;
+        x.fillText(String(i + 1), P + rkw / 2 + 2, cy + 1);
+        const im = imgs[t.id];
+        if (im) { const real = !im.src.startsWith("data:"), bw = real ? CR : 28, bh = real ? CR : 33; x.drawImage(im, P + rkw + 4 + (CR - bw) / 2, cy - bh / 2, bw, bh); }
+        x.textAlign = "left"; x.fillStyle = C.ink; x.font = `600 23px ${BF}`;
+        const nx = P + rkw + CR + 14, maxw = px0 - nx - 10;
+        let name = t.n; while (x.measureText(name).width > maxw && name.length > 3) name = name.slice(0, -2) + "…";
+        x.fillText(name, nx, cy + 1);
         COLS.forEach((c, k) => {
-          const cx = px0 + pw * k + pw / 2, lines = c[0].toUpperCase().split("|");
-          x.fillStyle = c[2]; rr(cx - 11, top + 12, 22, 4, 2); x.fill();
-          x.fillStyle = C.muted; x.textAlign = "center";
-          lines.forEach((l, li) => x.fillText(l, cx, top + hh - 13 - (lines.length - 1 - li) * 14));
+          const val = c[1](t.id), bx = px0 + pw * k + 4, bwid = pw - 8;
+          x.font = `700 26px ${DF}`; x.textAlign = "center";
+          if (val <= 1e-9) { x.fillStyle = C.line; x.font = `500 26px ${DF}`; x.fillText("—", bx + bwid / 2, cy + 1); return; }
+          const a = heatAlpha(val);
+          x.fillStyle = mixHex(c[2], a / 100, C.card); rr(bx, cy - 22, bwid, 44, 10); x.fill();
+          x.fillStyle = a >= 74 ? C.hi : C.ink; x.fillText(pctP(val), bx + bwid / 2, cy + 1);
         });
-        sp("0px");
-        // filas
-        order.slice(half * 15, half * 15 + 15).forEach((t, i) => {
-          const y = top + hh + i * rh, cy = y + rh / 2;
-          if (i) { x.fillStyle = C.line; x.globalAlpha = .55; x.fillRect(X, y, tw, 1); x.globalAlpha = 1; }
-          x.textBaseline = "middle"; x.textAlign = "center"; x.fillStyle = C.muted; x.font = `700 18px ${DF}`;
-          x.fillText(String(half * 15 + i + 1), X + rkw / 2, cy + 1);
-          const im = imgs[t.id];
-          if (im) { const real = !im.src.startsWith("data:"), bw = real ? 32 : 22, bh = real ? 32 : 26; x.drawImage(im, X + rkw + 8 + (28 - bw) / 2, cy - bh / 2, bw, bh); }
-          x.textAlign = "left"; x.fillStyle = C.ink; x.font = `600 18px ${BF}`;
-          const nx = X + rkw + 44, maxw = px0 - nx - 40;
-          let name = t.n; while (x.measureText(name).width > maxw && name.length > 3) name = name.slice(0, -2) + "…";
-          x.fillText(name, nx, cy + 1);
-          const zx = nx + x.measureText(name).width + 9;
-          x.font = `700 11px ${BF}`; x.strokeStyle = C.line; x.lineWidth = 1; rr(zx, cy - 9, 18, 18, 4); x.stroke();
-          x.fillStyle = C.muted; x.textAlign = "center"; x.fillText(t.z, zx + 9, cy + 1);
-          COLS.forEach((c, k) => {
-            const val = c[1](t.id), bx = px0 + pw * k + 5, bwid = pw - 10;
-            x.font = `700 22px ${DF}`; x.textAlign = "center";
-            if (val <= 1e-9) { x.fillStyle = C.line; x.font = `500 22px ${DF}`; x.fillText("—", bx + bwid / 2, cy + 1); return; }
-            const a = heatAlpha(val);
-            x.fillStyle = mixHex(c[2], a / 100, C.card); rr(bx, cy - 20, bwid, 40, 9); x.fill();
-            x.fillStyle = a >= 74 ? C.hi : C.ink; x.fillText(pctP(val), bx + bwid / 2, cy + 1);
-          });
-          x.textBaseline = "alphabetic";
-        });
-        x.restore();
-      }
-      x.textAlign = "left"; x.font = `400 14px ${BF}`; x.fillStyle = C.muted;
-      x.fillText("Cuanto más fuerte el color, más probable · Lib. directo = fase de grupos · fase previa = último clasificado por la Anual · Campeón de Liga = 1° de la Anual · «—» no pasó en ninguna simulación", 52, H - 30);
-      x.textAlign = "right"; x.fillText(`${N.toLocaleString("es-AR")} simulaciones · ${filled}/${MATCHES.length} partidos cargados · datos de promiedos al ${dataAsOf(true)}`, W - 52, H - 30);
+        x.textBaseline = "alphabetic";
+      });
+      x.restore();
+      x.textAlign = "left"; x.font = `400 17px ${BF}`; x.fillStyle = C.muted;
+      x.fillText("Cuanto más fuerte el color, más probable · «—» no pasó en ninguna simulación", P, top + th + 38);
+      x.fillText("Lib. directo = fase de grupos · fase previa = último que entra por la Anual · Campeón de Liga = 1° de la Anual", P, top + th + 64);
+      x.fillText(`Datos de promiedos al ${dataAsOf(true)}`, P, H - 30);
       drawWatermark(x, W, H, C);
       return cv;
     };
-    await saveCanvas(draw, order.map(t => t.id), `probabilidades-lpf-${dataAsOf().replace(/\//g, "-")}.png`, "Imagen descargada (1920×1080 en alta resolución)");
+    await saveCanvas(draw, order.map(t => t.id), `probabilidades-lpf-${dataAsOf().replace(/\//g, "-")}.png`, "Imagen descargada");
   } catch (err) {
     console.error(err); toast("No se pudo generar la imagen");
   } finally { btn.disabled = false; }
@@ -2148,26 +2144,27 @@ function tableSpec(kind, st) {
   const sub = `Fechas 14 a 16: ${offN} ${offN === 1 ? "jugado" : "jugados"}${simN ? ` · ${simN} simulados` : ""} · datos de promiedos`;
   const ptsCell = r => ({ v: String(r.pts), bold: true, delta: r.add ? "+" + r.add : "" });
   const stat = r => ({ pj: r.pj, g: r.w, e: r.d, p: r.l, gf: r.gf, gc: r.gc, dg: dgs(r.dg) });
-  const statCols = [["PJ", "pj"], ["G", "g"], ["E", "e"], ["P", "p"], ["GF", "gf"], ["GC", "gc"], ["DG", "dg"]].map(([h, key]) => ({ h, key, w: 56 }));
+  // Imagen en formato celular: sin GF/GC (queda la diferencia de gol)
+  const statCols = [["PJ", "pj", 56], ["G", "g", 50], ["E", "e", 50], ["P", "p", 50], ["DG", "dg", 66]].map(([h, key, w]) => ({ h, key, w }));
   if (kind === "zona-A" || kind === "zona-B") {
     const z = kind.slice(-1), other = z === "A" ? "B" : "A", rows = z === "A" ? st.A : st.B, pl = poList(st, z), po = poList(st, other), order = baseOrder(z);
     return { title: `Clausura · Zona ${z}`, sub, file: `zona-${z.toLowerCase()}`,
-      cols: [{ h: "Pts", key: "pts", w: 84 }, ...statCols, { h: "Octavos", key: "oct", w: 250, align: "left" }],
+      cols: [{ h: "Pts", key: "pts", w: 92 }, ...statCols, { h: "8vos", key: "oct", w: 104, align: "left" }],
       rows: rows.map((r, i) => {
         const k = pl.findIndex(x => x.id === r.id), seed = k >= 0 && k < 8 ? k + 1 : 0, out = i < 8 && !seed, tags = [];
         if (r.id === APERTURA_CHAMP) tags.push({ c: L, ring: true });
         if (out) tags.push({ c: D }); if (seed && seed !== i + 1) tags.push({ c: A });
         const old = order.indexOf(r.id) + 1, d = old - (i + 1);
         return { id: r.id, band: seed ? A : null, cut: i === 7, tags, mv: d,
-          cells: { pts: ptsCell(r), ...stat(r), oct: { v: seed ? `vs ${9 - seed}° ${other} · ${po[8 - seed].n}` : "", muted: true } } };
+          cells: { pts: ptsCell(r), ...stat(r), oct: seed ? { img: po[8 - seed].id, v: `${9 - seed}${other}`, muted: true } : "" } };
       }),
-      legend: [[A, "Clasifica a playoffs (1° a 8°)"], [L, "Campeón Apertura", "ring"], [A, "Entra en otro puesto (el de arriba está en descenso)", "dot"], [D, "No juega playoffs: zona de descenso", "dot"]] };
+      legend: [[A, "Playoffs (1° a 8°)"], [L, "Campeón Apertura", "ring"], [A, "Entra en otro puesto", "dot"], [D, "No juega playoffs (descenso)", "dot"]] };
   }
   if (kind === "anual") {
     const an = st.AN.map(r => r.id), c = cupos(an, currentBracket(st).champ, userCups()), rel = new Set(relegated(st)), order = baseOrder("an");
     const lib = new Set(c.lib), sud = new Set(c.sud), held = new Set(c.holders.filter(h => !h[2]).map(h => h[0]));
     return { title: "Tabla Anual 2026", sub, file: "tabla-anual",
-      cols: [{ h: "Pts", key: "pts", w: 84 }, { h: "Z", key: "z", w: 40 }, ...statCols, { h: "Prom.", key: "prom", w: 80 }],
+      cols: [{ h: "Pts", key: "pts", w: 92 }, { h: "Z", key: "z", w: 40 }, ...statCols],
       rows: st.AN.map((r, i) => {
         const tags = [], id = r.id;
         if (i === 0) tags.push({ c: A });
@@ -2177,7 +2174,7 @@ function tableSpec(kind, st) {
         return { id, band, tags, mv: order.indexOf(id) + 1 - (i + 1),
           cells: { pts: ptsCell(r), z: r.z, ...stat(r), prom: promedio(r).toFixed(3).replace(".", ",") } };
       }),
-      legend: [[A, "Campeón de Liga", "dot"], [L, "Clasificado por título", "ring"], [L, "Libertadores (grupos)"], [PR, "Libertadores fase previa"], [S, "Sudamericana"], [D, "Descenso"]] };
+      legend: [[A, "Campeón de Liga", "dot"], [L, "Por título", "ring"], [L, "Libertadores"], [PR, "Lib. fase previa"], [S, "Sudamericana"], [D, "Descenso"]] };
   }
   // Promedios (la vista elegida: 2026 o 2027)
   const next = promYear === "2027", rel = new Set(relegated(st)), prom = next ? promedio2027 : promedio;
@@ -2185,9 +2182,9 @@ function tableSpec(kind, st) {
   const pos26 = Object.fromEntries(st.AN.slice().sort((a, b) => promedio(b) - promedio(a) || b.pts - a.pts).map((r, i) => [r.id, i + 1]));
   const list = next ? rows.filter(r => !rel.has(r.id)).concat(rows.filter(r => rel.has(r.id))) : rows;
   const base = next ? null : baseOrderProm();
-  return { title: next ? "Promedios 2027 (2025 + 2026)" : "Promedios 2026", sub, file: next ? "promedios-2027" : "promedios",
-    cols: next ? [{ h: "vs 2026", key: "vs", w: 130 }, { h: "Prom.", key: "prom", w: 90 }, { h: "Pts", key: "pts", w: 64 }, { h: "PJ", key: "pj", w: 56 }, { h: "2025", key: "y25", w: 64 }, { h: "2026", key: "y26", w: 76 }]
-      : [{ h: "Prom.", key: "prom", w: 90 }, { h: "Pts", key: "pts", w: 64 }, { h: "PJ", key: "pj", w: 56 }, { h: "2024", key: "y24", w: 64 }, { h: "2025", key: "y25", w: 64 }, { h: "2026", key: "y26", w: 76 }],
+  return { title: next ? "Promedios 2027" : "Promedios 2026", sub: next ? "Temporadas 2025 + 2026 · " + sub : sub, file: next ? "promedios-2027" : "promedios",
+    cols: next ? [{ h: "vs 2026", key: "vs", w: 150 }, { h: "Prom.", key: "prom", w: 100 }, { h: "Pts", key: "pts", w: 66 }, { h: "PJ", key: "pj", w: 56 }]
+      : [{ h: "Prom.", key: "prom", w: 100 }, { h: "Pts", key: "pts", w: 66 }, { h: "PJ", key: "pj", w: 60 }, { h: "2026", key: "y26", w: 96 }],
     rows: list.map((r, i) => {
       const t = T(r.id), pr = t.pr || [0, 0], py = t.py || ["–", "–"], gone = next && rel.has(r.id), pj25 = pj2025(t);
       const d = next ? pos26[r.id] - (i + 1) : base.indexOf(r.id) - i;
@@ -2203,81 +2200,93 @@ async function exportTableImage(kind, btn) {
   try {
     const { C, dark } = expTheme(); await expFonts();
     const sp = tableSpec(kind, standings(results));
-    const W = 1200, P = 48, rh = 46, hh = 44, top = 150, rkw = 44;
-    const legendH = 34, H = top + hh + rh * sp.rows.length + 24 + legendH + 56;
+    // Formato celular: 1080 de ancho y letra grande, para verla en el teléfono sin hacer zoom.
+    const W = 1080, P = 30, rh = sp.rows.length > 20 ? 56 : 62, hh = 56, top = 214, rkw = 50, CR = 40;
+    // La leyenda se acomoda en renglones; se mide antes para saber el alto.
+    const mx = document.createElement("canvas").getContext("2d"); mx.font = `500 19px ${EXP_BF}`;
+    const legendRows = []; { let row = [], w = 0; for (const it of sp.legend) { const iw = 26 + mx.measureText(it[1]).width + 26; if (w + iw > W - 2 * P && row.length) { legendRows.push(row); row = []; w = 0; } row.push(it); w += iw; } if (row.length) legendRows.push(row); }
+    const th = hh + rh * sp.rows.length, H = top + th + 26 + legendRows.length * 34 + 90;
     const draw = imgs => {
       const S = 2, cv = document.createElement("canvas"); cv.width = W * S; cv.height = H * S;
       const x = cv.getContext("2d"); x.scale(S, S);
       const ls = em => { if ("letterSpacing" in x) x.letterSpacing = em; };
       const rr = (X, Y, w, h, r) => { x.beginPath(); x.roundRect ? x.roundRect(X, Y, w, h, r) : x.rect(X, Y, w, h); };
+      const fit = (txt, max) => { let t = txt; while (x.measureText(t).width > max && t.length > 3) t = t.slice(0, -2) + "…"; return t; };
       x.fillStyle = C.bg; x.fillRect(0, 0, W, H);
       const g = x.createRadialGradient(0, 0, 0, 0, 0, 900); g.addColorStop(0, mixHex(C.accent, dark ? .12 : .08, C.bg)); g.addColorStop(1, C.bg);
       x.fillStyle = g; x.fillRect(0, 0, W, H);
-      // encabezado
+      // encabezado: título a la izquierda, firma a la derecha
+      drawBrand(x, W - P, 34, C, imgs.__logo, 84);
       x.textBaseline = "alphabetic"; x.textAlign = "left";
-      x.fillStyle = C.accent; x.font = `700 16px ${EXP_DF}`; ls("2.6px"); x.fillText("SIMULADOR LPF · CLAUSURA 2026", P, 56);
-      x.fillStyle = C.ink; x.font = `700 48px ${EXP_DF}`; ls("0.5px"); x.fillText(sp.title.toUpperCase(), P - 2, 104); ls("0px");
-      x.font = `400 16px ${EXP_BF}`; x.fillStyle = C.muted; x.fillText(sp.sub, P, 132);
-      drawBrand(x, W - P, 40, C, imgs.__logo, 80);
+      x.fillStyle = C.accent; x.font = `700 21px ${EXP_DF}`; ls("2.4px"); x.fillText("SIMULADOR LPF · CLAUSURA 2026", P, 58); ls("0px");
+      let ts = 64; x.font = `700 ${ts}px ${EXP_DF}`; while (x.measureText(sp.title.toUpperCase()).width > W - 2 * P - 400 && ts > 40) { ts -= 2; x.font = `700 ${ts}px ${EXP_DF}`; }
+      x.fillStyle = C.ink; x.fillText(sp.title.toUpperCase(), P - 2, 122);
+      x.font = `400 21px ${EXP_BF}`; x.fillStyle = C.muted; x.fillText(fit(sp.sub, W - 2 * P), P, 168);
       // tarjeta
-      const tw = W - 2 * P, th = hh + rh * sp.rows.length;
-      x.save(); x.shadowColor = "rgba(0,0,0,.10)"; x.shadowBlur = 12; x.shadowOffsetY = 2; x.fillStyle = C.card; rr(P, top, tw, th, 14); x.fill(); x.restore();
-      x.save(); rr(P, top, tw, th, 14); x.clip();
+      const tw = W - 2 * P;
+      x.save(); x.shadowColor = "rgba(0,0,0,.10)"; x.shadowBlur = 12; x.shadowOffsetY = 2; x.fillStyle = C.card; rr(P, top, tw, th, 16); x.fill(); x.restore();
+      x.save(); rr(P, top, tw, th, 16); x.clip();
       x.fillStyle = C.head; x.fillRect(P, top, tw, hh); x.fillStyle = C.line; x.fillRect(P, top + hh - 2, tw, 2);
-      // columnas (de derecha a izquierda)
       let cx = P + tw - 14; const colX = [];
       for (const c of sp.cols.slice().reverse()) { colX.unshift({ ...c, x0: cx - c.w, x1: cx }); cx -= c.w; }
-      const teamMax = colX[0].x0 - (P + rkw + 50) - 16;
-      x.font = `600 12px ${EXP_BF}`; ls("0.6px"); x.fillStyle = C.muted; x.textBaseline = "middle";
-      x.textAlign = "left"; x.fillText("EQUIPO", P + rkw + 10, top + hh / 2);
-      for (const c of colX) { x.textAlign = c.align === "left" ? "left" : "right"; x.fillText(c.h.toUpperCase(), c.align === "left" ? c.x0 + 8 : c.x1 - 6, top + hh / 2); }
+      const nx = P + rkw + CR + 18, teamMax = colX[0].x0 - nx - 12;
+      x.font = `600 16px ${EXP_BF}`; ls("0.5px"); x.fillStyle = C.muted; x.textBaseline = "middle";
+      x.textAlign = "left"; x.fillText("EQUIPO", P + rkw + 8, top + hh / 2);
+      for (const c of colX) { x.textAlign = c.align === "left" ? "left" : "right"; x.fillText(c.h.toUpperCase(), c.align === "left" ? c.x0 + 16 : c.x1 - 4, top + hh / 2); }
       ls("0px");
       sp.rows.forEach((r, i) => {
         const y = top + hh + i * rh, cy = y + rh / 2;
         if (i) { x.fillStyle = C.line; x.globalAlpha = .55; x.fillRect(P, y, tw, 1); x.globalAlpha = 1; }
-        if (r.band) { x.fillStyle = r.band; x.fillRect(P, y, 5, rh); }
+        if (r.band) { x.fillStyle = r.band; x.fillRect(P, y, 6, rh); }
         x.globalAlpha = r.gone ? 0.55 : 1;
-        x.textAlign = "center"; x.fillStyle = r.band && !r.gone ? r.band : C.muted; x.font = `700 19px ${EXP_DF}`;
-        x.fillText(r.gone ? "–" : String(i + 1), P + rkw / 2 + 4, cy + 1);
-        const im = imgs[r.id]; if (im) { const real = !im.src.startsWith("data:"), bw = real ? 30 : 22, bh = real ? 30 : 26; x.drawImage(im, P + rkw + 10 + (30 - bw) / 2, cy - bh / 2, bw, bh); }
-        x.textAlign = "left"; x.fillStyle = C.ink; x.font = `600 18px ${EXP_BF}`;
-        let nm = T(r.id).n; const nx = P + rkw + 50; while (x.measureText(nm).width > teamMax - 70 && nm.length > 3) nm = nm.slice(0, -2) + "…";
+        x.textAlign = "center"; x.fillStyle = r.band && !r.gone ? r.band : C.muted; x.font = `700 26px ${EXP_DF}`;
+        x.fillText(r.gone ? "–" : String(i + 1), P + rkw / 2 + 5, cy + 1);
+        const im = imgs[r.id]; if (im) { const real = !im.src.startsWith("data:"), bw = real ? CR : 30, bh = real ? CR : 35; x.drawImage(im, P + rkw + 6 + (CR - bw) / 2, cy - bh / 2, bw, bh); }
+        // nombre, movimiento y puntos de color; si no entra, se acorta el nombre
+        x.font = `700 15px ${EXP_BF}`; const mvT = r.mv ? (r.mv > 0 ? "▲" : "▼") + Math.abs(r.mv) : "", mvW = mvT ? x.measureText(mvT).width + 8 : 0;
+        const tagsW = r.tags.reduce((a, t) => a + (t.ring ? 26 : 22), 0);
+        x.textAlign = "left"; x.fillStyle = C.ink; x.font = `600 25px ${EXP_BF}`;
+        const nm = fit(T(r.id).n, teamMax - mvW - tagsW - 10);
         x.fillText(nm, nx, cy + 1); let ex = nx + x.measureText(nm).width + 8;
-        if (r.mv) { x.font = `700 13px ${EXP_BF}`; x.fillStyle = r.mv > 0 ? C.sud : C.danger; const t = (r.mv > 0 ? "▲" : "▼") + Math.abs(r.mv); x.fillText(t, ex, cy + 1); ex += x.measureText(t).width + 8; }
+        if (mvT) { x.font = `700 15px ${EXP_BF}`; x.fillStyle = r.mv > 0 ? C.sud : C.danger; x.fillText(mvT, ex, cy + 1); ex += mvW; }
         for (const tg of r.tags) {
-          x.beginPath(); x.arc(ex + 6, cy, 6, 0, 2 * Math.PI); x.fillStyle = tg.c; x.fill();
-          if (tg.ring) { x.beginPath(); x.arc(ex + 6, cy, 9, 0, 2 * Math.PI); x.strokeStyle = tg.c; x.lineWidth = 1.5; x.stroke(); ex += 4; }
-          ex += 18;
+          if (tg.ring) { x.beginPath(); x.arc(ex + 10, cy, 11, 0, 2 * Math.PI); x.strokeStyle = tg.c; x.lineWidth = 2; x.stroke(); }
+          x.beginPath(); x.arc(ex + (tg.ring ? 10 : 8), cy, 7.5, 0, 2 * Math.PI); x.fillStyle = tg.c; x.fill();
+          ex += tg.ring ? 26 : 22;
         }
         for (const c of colX) {
           let cell = r.cells[c.key]; if (cell == null) cell = ""; if (typeof cell !== "object") cell = { v: String(cell) };
-          const right = c.align !== "left", tx = right ? c.x1 - 6 : c.x0 + 8;
+          const right = c.align !== "left", tx = right ? c.x1 - 4 : c.x0 + 16;
           x.textAlign = right ? "right" : "left";
-          let dw = 0;
-          if (cell.delta) { x.font = `700 12px ${EXP_BF}`; x.fillStyle = C.sud; if (right) { x.fillText(cell.delta, tx, cy + 2); dw = x.measureText(cell.delta).width + 4; } }
-          x.font = cell.bold ? `700 23px ${EXP_DF}` : `500 17px ${EXP_BF}`;
+          let dw = 0, lx2 = tx;
+          if (cell.img && imgs[cell.img]) { x.drawImage(imgs[cell.img], lx2, cy - 15, 30, 30); lx2 += 36; }
+          if (cell.delta) { x.font = `700 16px ${EXP_BF}`; x.fillStyle = C.sud; if (right) { x.fillText(cell.delta, tx, cy + 3); dw = x.measureText(cell.delta).width + 5; } }
+          x.font = cell.bold ? `700 34px ${EXP_DF}` : `500 24px ${EXP_BF}`;
           x.fillStyle = cell.color || (cell.muted ? C.muted : C.ink);
-          let val = String(cell.v); if (!right) { const mw = c.w - 12; while (x.measureText(val).width > mw && val.length > 3) val = val.slice(0, -2) + "…"; }
-          x.fillText(val, tx - dw, cy + 1);
-          if (cell.delta && !right) { const vw = x.measureText(val).width; x.font = `700 12px ${EXP_BF}`; x.fillStyle = C.sud; x.textAlign = "left"; x.fillText(cell.delta, tx + vw + 4, cy + 2); }
+          x.fillText(right ? String(cell.v) : fit(String(cell.v), c.w - (lx2 - tx) - 8), right ? tx - dw : lx2, cy + 1);
         }
         x.globalAlpha = 1;
-        if (r.cut) { x.fillStyle = C.accent; x.fillRect(P, y + rh - 1, tw, 2.5); }
+        if (r.cut) { x.fillStyle = C.accent; x.fillRect(P, y + rh - 1, tw, 3); }
       });
       x.restore();
       // leyenda
-      let lx = P, ly = top + th + 28; x.textBaseline = "middle"; x.textAlign = "left"; x.font = `500 14px ${EXP_BF}`;
-      for (const [c, t, kind2] of sp.legend) {
-        if (kind2) { x.beginPath(); x.arc(lx + 6, ly, 6, 0, 2 * Math.PI); x.fillStyle = c; x.fill(); if (kind2 === "ring") { x.beginPath(); x.arc(lx + 6, ly, 9, 0, 2 * Math.PI); x.strokeStyle = c; x.lineWidth = 1.5; x.stroke(); } }
-        else { x.fillStyle = c; rr(lx, ly - 6, 12, 12, 2); x.fill(); }
-        x.fillStyle = C.muted; x.fillText(t, lx + 20, ly); lx += 20 + x.measureText(t).width + 22;
-      }
+      x.textBaseline = "middle"; x.textAlign = "left"; x.font = `500 19px ${EXP_BF}`;
+      legendRows.forEach((row, li) => {
+        let lx = P; const ly = top + th + 30 + li * 34;
+        for (const [c, t, k2] of row) {
+          if (k2) { if (k2 === "ring") { x.beginPath(); x.arc(lx + 9, ly, 11, 0, 2 * Math.PI); x.strokeStyle = c; x.lineWidth = 2; x.stroke(); } x.beginPath(); x.arc(lx + 9, ly, 7.5, 0, 2 * Math.PI); x.fillStyle = c; x.fill(); }
+          else { x.fillStyle = c; rr(lx + 1, ly - 8, 16, 16, 3); x.fill(); }
+          x.fillStyle = C.muted; x.fillText(t, lx + 26, ly); lx += 26 + x.measureText(t).width + 26;
+        }
+      });
       x.textBaseline = "alphabetic";
       drawWatermark(x, W, H, C);
-      x.textAlign = "left"; x.font = `400 13px ${EXP_BF}`; x.fillStyle = C.muted; x.fillText(`Datos de promiedos al ${dataAsOf(true)} · ▲▼ respecto de la tabla actual · +N lo que suma en lo simulado`, P, H - 26);
+      x.textAlign = "left"; x.font = `400 17px ${EXP_BF}`; x.fillStyle = C.muted;
+      x.fillText(`Datos de promiedos al ${dataAsOf(true)} · ▲▼ respecto de la tabla actual · +N lo simulado`, P, H - 30);
       return cv;
     };
-    await saveCanvas(draw, sp.rows.map(r => r.id), `${sp.file}-lpf.png`, "Imagen descargada");
+    const ids = [...new Set(sp.rows.flatMap(r => [r.id, ...Object.values(r.cells).filter(c => c && c.img).map(c => c.img)]))];
+    await saveCanvas(draw, ids, `${sp.file}-lpf.png`, "Imagen descargada");
   } catch (err) {
     console.error(err); toast("No se pudo generar la imagen");
   } finally { btn.disabled = false; }
