@@ -13,6 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pip install pillow
+      - name: Logo de la Liga Profesional (va en la copa del cuadro de playoffs)
+        continue-on-error: true
+        run: |
+          curl -fsSL --retry 3 -A "SimuladorLPF/1.0 (github.com/ezebonasegla/simuladorlpf)" \
+            "https://commons.wikimedia.org/wiki/Special:FilePath/Logo_de_la_Liga_Profesional_de_F%C3%BAtbol_de_Argentina.svg?width=600" -o /tmp/lpf.png
+          python3 -c "from PIL import Image; im=Image.open('/tmp/lpf.png').convert('RGBA'); im=im.crop(im.getbbox()); im.thumbnail((400,400), Image.LANCZOS); im.save('logo-lpf.png', optimize=True); print(im.size)"
       - name: Descargar y achicar
         run: |
           mkdir -p escudos
@@ -63,6 +69,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add escudos
+          git add escudos logo-lpf.png 2>/dev/null || git add escudos
           git diff --cached --quiet || git commit -m "Escudos de los clubes (football-logos.cc)"
           git push
