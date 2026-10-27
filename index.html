@@ -2320,13 +2320,20 @@ function drawTrophy(x, cx, top, h, C, logo) {
   x.fillStyle = bg; x.beginPath(); x.roundRect ? x.roundRect(cx - w * 0.38, cupBot + h * 0.27, w * 0.76, h * 0.23, 8) : x.rect(cx - w * 0.38, cupBot + h * 0.27, w * 0.76, h * 0.23); x.fill();
   x.fillStyle = "#f3cf5a"; x.font = `700 ${Math.round(h * 0.065)}px ${EXP_DF}`; x.textAlign = "center"; x.textBaseline = "middle";
   x.fillText("CLAUSURA 2026", cx, cupBot + h * 0.385);
-  if (logo) { const ls = cupH * 0.62; x.drawImage(logo, cx - ls / 2, cupTop + cupH * 0.1, ls, ls); }
+  if (logo) { // medallón claro para que el logo se lea sobre el dorado
+    const r = cupH * 0.36, my = cupTop + cupH * 0.43;
+    x.fillStyle = "#fffaf0"; x.beginPath(); x.arc(cx, my, r, 0, 2 * Math.PI); x.fill();
+    x.lineWidth = h * 0.012; x.strokeStyle = "#b8862a"; x.stroke();
+    const k = (r * 1.45) / Math.max(logo.width, logo.height), lw = logo.width * k, lh = logo.height * k;
+    x.drawImage(logo, cx - lw / 2, my - lh / 2, lw, lh);
+  }
   x.restore();
 }
 async function exportBracketImage(_, btn) {
   btn.disabled = true;
   try {
     const { C, dark } = expTheme(); await expFonts();
+    const lpf = await loadImg("logo-lpf.png", false);
     const st = standings(results), br = currentBracket(st), tie = id => br.ties.find(t => t.id === id);
     const filled = MATCHES.filter(m => results[m.id]).length;
     // marcador de un equipo en una llave (goles y penales), si está cargado
@@ -2335,7 +2342,7 @@ async function exportBracketImage(_, btn) {
       const k = id === t.h ? 0 : 1; return { g: sc.g[k], p: sc.p && isSet(sc.p[k]) ? sc.p[k] : null };
     };
     const ids = new Set(); br.ties.forEach(t => { if (t.h) ids.add(t.h); if (t.a) ids.add(t.a); });
-    const W = 1080, H = 1350, y0 = 300, y1 = 1300;
+    const W = 1080, H = 1350, y0 = 300, y1 = 1262;
     // columnas: centros x por ronda y lado
     const XS = { L: [74, 196, 312], R: [1006, 884, 768] }, SZ = [62, 68, 74];
     const draw = imgs => {
@@ -2357,24 +2364,35 @@ async function exportBracketImage(_, btn) {
       ["OCTAVOS", "CUARTOS", "SEMIS"].forEach((n, k) => { x.fillText(n, XS.L[k], y0 - 34); x.fillText(n, XS.R[k], y0 - 34); });
       x.fillText("FINAL", W / 2, y0 - 34);
       // slot con escudo
-      const slot = (id, cx, cy, size, state, score) => {
-        const pad = 8, s2 = size + pad * 2;
-        x.save(); x.globalAlpha = state === "lose" ? 0.42 : 1;
-        x.shadowColor = "rgba(0,0,0,.12)"; x.shadowBlur = 8; x.shadowOffsetY = 2;
-        x.fillStyle = C.card; rr(cx - s2 / 2, cy - s2 / 2, s2, s2, 14); x.fill(); x.shadowColor = "transparent";
-        if (state === "win") { x.strokeStyle = C.accent; x.lineWidth = 3; rr(cx - s2 / 2, cy - s2 / 2, s2, s2, 14); x.stroke(); }
-        const im = id && imgs[id];
-        if (im) { const real = !im.src.startsWith("data:"); const bw = real ? size : size * 0.75, bh = real ? size : size * 0.88; x.drawImage(im, cx - bw / 2, cy - bh / 2, bw, bh); }
-        else { x.fillStyle = C.line; x.font = `700 ${Math.round(size * 0.5)}px ${EXP_DF}`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("?", cx, cy + 2); }
+      // escudo suelto (sin tarjeta): el ganador lleva un disco de color detrás; el eliminado queda en gris y tenue
+      const slot = (id, cx, cy, size, state) => {
+        const r = size * 0.66, im = id && imgs[id];
+        x.save();
+        if (state === "win") {
+          const g2 = x.createRadialGradient(cx, cy, r * 0.2, cx, cy, r);
+          g2.addColorStop(0, mixHex(C.accent, dark ? .5 : .28, C.bg)); g2.addColorStop(1, mixHex(C.accent, dark ? .3 : .14, C.bg));
+          x.fillStyle = g2; x.beginPath(); x.arc(cx, cy, r, 0, 2 * Math.PI); x.fill();
+        }
+        if (!im) {
+          x.setLineDash([5, 5]); x.strokeStyle = C.line; x.lineWidth = 2; x.beginPath(); x.arc(cx, cy, r * 0.8, 0, 2 * Math.PI); x.stroke(); x.setLineDash([]);
+          x.fillStyle = C.muted; x.font = `700 ${Math.round(size * 0.45)}px ${EXP_DF}`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("?", cx, cy + 2);
+        } else {
+          if (state === "lose") { x.globalAlpha = 0.38; if ("filter" in x) x.filter = "grayscale(1)"; }
+          const real = !im.src.startsWith("data:"), sz = state === "win" ? size * 0.86 : size * 0.9;
+          const bw = real ? sz : sz * 0.75, bh = real ? sz : sz * 0.88; x.drawImage(im, cx - bw / 2, cy - bh / 2, bw, bh);
+        }
         x.restore();
-        return s2;
+        return r * 2;
       };
-      const scoreTxt = (sc, cx, cy, side) => {
+      // marcador centrado debajo del escudo (así nunca pisa las líneas): goles y, más chicos, los penales
+      const scoreTxt = (sc, cx, cy, win) => {
         if (!sc) return;
-        x.save(); x.textBaseline = "middle"; x.textAlign = side === "L" ? "left" : "right";
-        x.font = `700 24px ${EXP_DF}`; x.fillStyle = C.ink;
-        x.fillText(String(sc.g), cx, cy + 6); // goles y, debajo, los penales (para que entren en el hueco entre columnas)
-        if (sc.p != null) { x.font = `700 16px ${EXP_DF}`; x.fillStyle = C.muted; x.fillText(`(${sc.p})`, cx, cy + 26); }
+        x.save(); x.textBaseline = "middle"; x.textAlign = "left";
+        const g3 = String(sc.g), p3 = sc.p != null ? ` (${sc.p})` : "";
+        x.font = `700 23px ${EXP_DF}`; const wg = x.measureText(g3).width;
+        x.font = `700 17px ${EXP_DF}`; const wp = x.measureText(p3).width, x0 = cx - (wg + wp) / 2;
+        x.font = `700 23px ${EXP_DF}`; x.fillStyle = win ? C.ink : C.muted; x.fillText(g3, x0, cy);
+        if (p3) { x.font = `700 17px ${EXP_DF}`; x.fillStyle = C.muted; x.fillText(p3, x0 + wg, cy + 1); }
         x.restore();
       };
       const line = pts => { x.beginPath(); x.moveTo(pts[0][0], pts[0][1]); for (const p of pts.slice(1)) x.lineTo(p[0], p[1]); x.stroke(); };
@@ -2392,7 +2410,7 @@ async function exportBracketImage(_, btn) {
         ];
         // conectores
         rounds.forEach((r, k) => {
-          const half = (SZ[k] + 16) / 2, nx = k < 2 ? X[k + 1] - dir * (SZ[k + 1] + 16) / 2 : W / 2 - dir * 155, mid = (X[k] + dir * half + nx) / 2;
+          const half = SZ[k] * 0.66 + 4, nx = k < 2 ? X[k + 1] - dir * (SZ[k + 1] * 0.66 + 4) : W / 2 - dir * (110 + 74 * 0.66 + 4), mid = (X[k] + dir * half + nx) / 2;
           for (let i = 0; i < r.y.length; i += 2) {
             const ya = r.y[i], yb = r.y[i + 1], ym = (ya + yb) / 2;
             line([[X[k] + dir * half, ya], [mid, ya], [mid, yb], [X[k] + dir * half, yb]]);
@@ -2402,7 +2420,7 @@ async function exportBracketImage(_, btn) {
         rounds.forEach((r, k) => r.teams.forEach(([id, t], i) => {
           const state = t && t.w ? (t.w === id ? "win" : "lose") : "";
           const s2 = slot(id, X[k], r.y[i], SZ[k], id ? state : "");
-          scoreTxt(id && scoreOf(t, id), X[k] + dir * (s2 / 2 + 6), r.y[i] - s2 / 2 + 2, sd);
+          scoreTxt(id && scoreOf(t, id), X[k], r.y[i] + s2 / 2 + 12, state === "win");
         }));
         return fY;
       };
@@ -2411,14 +2429,10 @@ async function exportBracketImage(_, btn) {
       // final: los dos finalistas en el centro del cuadro, la copa arriba y el campeón abajo
       const fin = tie("f"), s0 = tie("s0"), s1 = tie("s1"), fl = s0.w, fr = s1.w;
       const champ = fin && fin.w;
-      drawTrophy(x, W / 2, fY - 375, 300, C, imgs.__logo);
+      drawTrophy(x, W / 2, fY - 375, 300, C, lpf || imgs.__logo);
       const fs = (id, cx) => { const st2 = fin && fin.w ? (fin.w === id ? "win" : "lose") : ""; return slot(id, cx, fY, 74, id ? st2 : ""); };
       const sL = fs(fl, W / 2 - 110); fs(fr, W / 2 + 110);
-      for (const [id, cx] of [[fl, W / 2 - 110], [fr, W / 2 + 110]]) { // marcador debajo de cada finalista
-        const sc = id && scoreOf(fin, id); if (!sc) continue;
-        x.save(); x.font = `700 24px ${EXP_DF}`; x.fillStyle = C.ink; x.textAlign = "center"; x.textBaseline = "middle";
-        x.fillText(String(sc.g) + (sc.p != null ? ` (${sc.p})` : ""), cx, fY + sL / 2 + 22); x.restore();
-      }
+      for (const [id, cx] of [[fl, W / 2 - 110], [fr, W / 2 + 110]]) scoreTxt(id && scoreOf(fin, id), cx, fY + sL / 2 + 14, fin && fin.w === id);
       x.font = `700 22px ${EXP_DF}`; x.fillStyle = C.muted; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("VS", W / 2, fY);
       if (champ) {
         x.font = `700 22px ${EXP_DF}`; x.fillStyle = C.accent; x.fillText("CAMPEÓN", W / 2, fY + 128);

@@ -13,12 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pip install pillow
-      - name: Logo de la Liga Profesional (va en la copa del cuadro de playoffs)
+      - name: Escudo de la Liga Profesional (sin el texto; va en la copa del cuadro de playoffs)
         continue-on-error: true
         run: |
           curl -fsSL --retry 3 -A "SimuladorLPF/1.0 (github.com/ezebonasegla/simuladorlpf)" \
             "https://commons.wikimedia.org/wiki/Special:FilePath/Logo_de_la_Liga_Profesional_de_F%C3%BAtbol_de_Argentina.svg?width=600" -o /tmp/lpf.png
-          python3 -c "from PIL import Image; im=Image.open('/tmp/lpf.png').convert('RGBA'); im=im.crop(im.getbbox()); im.thumbnail((400,400), Image.LANCZOS); im.save('logo-lpf.png', optimize=True); print(im.size)"
+          python3 -c "from PIL import Image; im=Image.open('/tmp/lpf.png').convert('RGBA'); im=im.crop(im.getbbox()); im=im.crop((0, 0, round(im.width * 0.385), im.height)); im=im.crop(im.getbbox()); im.thumbnail((300,300), Image.LANCZOS); im.save('logo-lpf.png', optimize=True); print(im.size)"
       - name: Descargar y achicar
         run: |
           mkdir -p escudos
