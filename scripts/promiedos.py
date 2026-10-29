@@ -55,6 +55,15 @@ def ints(v):
     return [int(x) for x in v] if v else None
 
 
+def single_winner(g):
+    """1 o 2 según quién ganó un partido único (goles y, si empatan, penales); None si no se sabe."""
+    for k in ("scores", "penalties"):
+        v = ints(g.get(k))
+        if v and len(v) == 2 and v[0] != v[1]:
+            return 1 if v[0] > v[1] else 2
+    return None
+
+
 def team_ids(g):
     return [TEAMS.get(t["id"]) for t in g["teams"]]
 
@@ -117,6 +126,9 @@ def main(out_path):
                 if g.get("status", {}).get("enum") != 3:
                     continue
                 q = g.get("to_qualify") or (g.get("winner") if f["name"] == "Final" else None)
+                if q not in (1, 2) and (cup == "ca" or f["name"] == "Final"):
+                    q = single_winner(g)  # partido único: lo define el marcador o, si empatan, los penales
+                print(cup, f["name"], g.get("url_name"), g.get("scores"), g.get("penalties"), "to_qualify", g.get("to_qualify"), "winner", g.get("winner"), "->", q)
                 if q not in (1, 2):
                     continue
                 h, a = team_ids(g)
