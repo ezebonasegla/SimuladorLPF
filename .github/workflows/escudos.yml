@@ -58,7 +58,7 @@ jobs:
               "cle": "Club Atlético Colegiales (Munro)", "cbo": "Club Ciudad de Bolívar",
           }
           EXTRA = {"fer": "Ferro Carril Oeste", "mid": "Midland", "gyt": "Gimnasia y Tiro", "gjj": "Gimnasia y Esgrima de Jujuy", "eba": "Estudiantes de Buenos Aires", "dma": "Deportivo Madryn", "col": "Colón de Santa Fe", "mor": "Deportivo Morón", "cle": "Colegiales Munro", "cbo": "Club Ciudad de Bolívar fútbol"}  # búsqueda en Commons si el artículo no tiene imagen
-          SOLO_COMMONS = {"cbo"}  # la imagen del artículo es el escudo de la ciudad, no el del club
+          SOLO_COMMONS = {"cbo"}  # el de alta quedó guardado (seeklogo, sin fondo); acá solo se busca si falta  # la imagen del artículo es el escudo de la ciudad, no el del club
           def get(url):
               for i in range(4):
                   try: return urllib.request.urlopen(urllib.request.Request(url, headers=UA)).read()
@@ -89,25 +89,6 @@ jobs:
               time.sleep(3)
           PY
           ls -la escudos/nacional
-      - name: Escudo de Ciudad de Bolívar en alta (seeklogo; si falla, queda el recortado)
-        continue-on-error: true
-        run: |
-          python3 - <<'PY'
-          import re, io, urllib.request
-          from PIL import Image
-          UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36", "Accept-Language": "es-AR,es;q=0.9"}
-          get = lambda u: urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=30).read()
-          html = get("https://seeklogo.com/vector-logo/612734/club-ciudad-de-bolivar").decode("utf8", "ignore")
-          urls = re.findall(r'https://images\.seeklogo\.com/logo-png/[^"\' ]+?\.png', html)
-          print(urls[:5])
-          for u in urls:
-              try:
-                  im = Image.open(io.BytesIO(get(u))).convert("RGBA")
-              except Exception as e:
-                  print("no", u, e); continue
-              if im.width < 300: continue
-              im = im.crop(im.getbbox()); im.thumbnail((256, 256), Image.LANCZOS); im.save("escudos/nacional/cbo.png", optimize=True); print("ok", u, im.size); break
-          PY
       - name: Descargar y achicar
         run: |
           mkdir -p escudos
