@@ -85,6 +85,9 @@ button { cursor: pointer; }
 .hero-act .btn.primary { background: var(--accent); color: var(--accent-ink); }
 .hero-act .btn.primary:hover { background: var(--accent); filter: brightness(1.08); }
 .hero-act .btn svg { width: 18px; height: 18px; }
+/* Exportar resultados: dorado, para que se note como la acción de compartir */
+.hero-act .btn.exp { background: linear-gradient(135deg, #f6d36b, #d9a514); color: #2a1f05; border-color: #c9960f; box-shadow: 0 3px 12px rgba(217,165,20,.35); }
+.hero-act .btn.exp:hover { background: linear-gradient(135deg, #f8dc82, #e2ae1c); border-color: #c9960f; filter: none; box-shadow: 0 4px 16px rgba(217,165,20,.5); }
 /* Club enfocado: franja con sus datos arriba del contenido (vacía, no se muestra) */
 .focus-info:empty { display: none; }
 #focus-info { margin-bottom: 16px; padding: 10px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
@@ -766,7 +769,7 @@ html.dlg-open, html.dlg-open body { overflow: hidden; }
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.2" fill="currentColor"/></svg>
         Simular al azar
       </button>
-      <button class="btn" id="btn-po-img" type="button" title="Descargar la imagen del cuadro de playoffs">
+      <button class="btn exp" id="btn-po-img" type="button" title="Descargar la imagen del cuadro de playoffs">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
         Exportar resultados
       </button>
