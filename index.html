@@ -174,8 +174,6 @@ button { cursor: pointer; }
 /* La columna del equipo se ajusta al nombre y el resto se reparte entre los números */
 #pane-zona-a td.team, #pane-zona-b td.team, #pane-anual td.team, #pane-promedios td.team { width: 1%; white-space: nowrap; padding-right: 20px; }
 /* Partidos: en pantallas anchas, los partidos de cada grupo en grilla */
-.mgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 400px), 1fr)); gap: 6px 10px; }
-.mgrid .match { margin-bottom: 0; }
 
 .panel-h { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
 .panel-h h2 { font: 700 22px/1.1 var(--font-display); text-transform: uppercase; letter-spacing: .03em; margin: 0; }
@@ -193,14 +191,45 @@ button { cursor: pointer; }
   margin: 6px 0 8px;
 }
 .fecha-h::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-.day-l { font: 700 14px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 14px 0 8px; }
+/* Partidos: lista minimalista, una fila por partido, agrupados por día */
+.day-l { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font: 700 15px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 18px 0 8px; }
+.day-l span { font: 500 12.5px var(--font-body); letter-spacing: 0; text-transform: none; color: var(--muted); }
+.mlist { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.match { position: relative; display: grid; grid-template-columns: 62px minmax(0, 1fr) auto minmax(0, 1fr) 132px 96px; align-items: center; gap: 12px; padding: 9px 14px; border-top: 1px solid var(--line); }
+.match:first-child { border-top: 0; }
+.mr-when { font: 700 17px/1 var(--font-display); letter-spacing: .02em; display: flex; flex-direction: column; gap: 3px; }
+.mr-when small { font: 600 10.5px/1 var(--font-body); color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.mr-when .m-st { align-self: flex-start; padding: 3px 6px; }
+.mr-tv { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.mr-tv .none { color: var(--muted); font-size: 12px; }
+.mr-prob .bar { height: 6px; }
+.mr-prob .pl { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--muted); margin-top: 3px; }
+.mr-prob .pl b { color: var(--ink); }
+.match.is-live { background: color-mix(in srgb, var(--danger) 7%, var(--surface)); }
+.match.focus-m { background: var(--accent-soft); }
+/* "Logos" de los canales: insignias con los colores de cada señal */
+.tvl { display: inline-flex; align-items: baseline; gap: 3px; padding: 4px 7px; border-radius: 5px; line-height: 1; white-space: nowrap; font-family: var(--font-body); }
+.tvl b { font-size: 13px; font-weight: 800; letter-spacing: -.01em; }
+.tvl small { font-size: 8.5px; font-weight: 700; letter-spacing: .06em; }
+.tvl.espn { background: #111; color: #fff; } .tvl.espn b { color: #ff1f2d; font-style: italic; }
+.tvl.tnt { background: #000; color: #fff; } .tvl.tnt small { color: #ff4646; }
+.tvl.tyc { background: #0a4fa6; color: #fff; }
+.tvl.tvp { background: #009fe3; color: #fff; }
+.tvl.disney { background: #0e1e5b; color: #fff; }
+.tvl.fox { background: #111; color: #fff; }
+.tvl.dsports { background: #1c3faa; color: #fff; }
+.tvl.other { background: var(--surface-2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+.tvl.other b { font-size: 11px; font-weight: 700; }
+@media (max-width: 640px) {
+  .match { grid-template-columns: 44px minmax(0, 1fr) auto minmax(0, 1fr) 54px; gap: 6px; padding: 8px 8px; }
+  .mr-prob { display: none; }
+  .mr-when { font-size: 15px; }
+  .mr-tv { flex-direction: column; align-items: center; }
+  .tvl { padding: 3px 4px; flex-direction: column; align-items: center; gap: 1px; }
+  .tvl b { font-size: 11px; } .tvl small { font-size: 7px; }
+}
 .fecha-h .sub { font: 500 13px var(--font-body); color: var(--muted); text-transform: none; letter-spacing: 0; }
-.match { display: flex; flex-direction: column; gap: 8px; }
-.m-top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 12px; color: var(--muted); }
-.m-when { font: 700 16px/1 var(--font-display); color: var(--ink); letter-spacing: .02em; }
-.m-tv { font-weight: 600; color: var(--ink); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--line); border-radius: 4px; padding: 2px 6px; font-size: 11px; }
-.m-zone { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
-.m-st { margin-left: auto; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-radius: 4px; padding: 2px 7px; }
+.m-st { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-radius: 4px; padding: 2px 7px; }
 .m-st.fin { color: var(--sud); background: var(--sud-soft); }
 .m-st.wait { color: var(--muted); background: var(--surface-2); }
 .m-st.live { color: var(--danger); background: var(--danger-soft); display: inline-flex; align-items: center; gap: 5px; }
@@ -208,26 +237,12 @@ button { cursor: pointer; }
 .m-st.live i { width: 7px; height: 7px; border-radius: 50%; background: var(--danger); animation: livepulse 1.2s ease-in-out infinite; }
 @keyframes livepulse { 50% { opacity: .25; } }
 @media (prefers-reduced-motion: reduce) { .m-st.live i { animation: none; } }
-.m-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; }
-.m-more summary { cursor: pointer; font-size: 12.5px; color: var(--muted); list-style: none; }
-.m-more summary::-webkit-details-marker { display: none; }
-.m-more summary::before { content: "▸ "; color: var(--accent); }
-.m-more[open] summary::before { content: "▾ "; }
-.m-more summary b { color: var(--ink); }
-.m-more .verdict, .m-more .keys { margin-top: 6px; }
 .group-l { font-size: 11.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 10px 0 4px; }
 
-.match {
-  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 6px;
-}
-.match { position: relative; }
-.match.official { border-color: color-mix(in srgb, var(--sud) 55%, var(--line)); }
 .match.is-live .score input::placeholder { color: var(--danger); opacity: .7; }
-.match.is-live { border-color: var(--danger); box-shadow: 0 0 0 1px color-mix(in srgb, var(--danger) 35%, transparent); }
 .match.official .score input { background: var(--sud-soft); border-color: var(--sud); color: var(--ink); cursor: default; }
 .off-note { color: var(--sud); font-weight: 600; }
 .po-row input[readonly] { background: var(--sud-soft); border-color: var(--sud); }
-.match.done { border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
 .team-n { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .team-n.home { text-align: right; }
 .team-n .fav { color: var(--accent); }
@@ -1587,70 +1602,61 @@ function renderChips() {
     `<button class="chip" type="button" data-f="${v}" aria-pressed="${fechaFilter === v}">${l}</button>`).join("");
 }
 const hhmm = t => new Date(t).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+// Insignia del canal con los colores de cada señal (promiedos solo manda el nombre).
+function tvBadge(n) {
+  const s = n.toLowerCase(), prem = /premium/.test(s), t = esc(n);
+  if (/espn/.test(s)) return `<span class="tvl espn" title="${t}"><b>ESPN</b>${prem ? "<small>PREMIUM</small>" : ""}</span>`;
+  if (/tnt/.test(s)) return `<span class="tvl tnt" title="${t}"><b>TNT</b><small>${prem ? "PREMIUM" : "SPORTS"}</small></span>`;
+  if (/tyc/.test(s)) return `<span class="tvl tyc" title="${t}"><b>TyC</b><small>SPORTS</small></span>`;
+  if (/p[uú]blica/.test(s)) return `<span class="tvl tvp" title="${t}"><b>TV</b><small>PÚBLICA</small></span>`;
+  if (/disney/.test(s)) return `<span class="tvl disney" title="${t}"><b>Disney+</b>${prem ? "<small>PREMIUM</small>" : ""}</span>`;
+  if (/fox/.test(s)) return `<span class="tvl fox" title="${t}"><b>FOX</b><small>SPORTS</small></span>`;
+  if (/dsports|directv/.test(s)) return `<span class="tvl dsports" title="${t}"><b>DSPORTS</b></span>`;
+  return `<span class="tvl other" title="${t}"><b>${t}</b></span>`;
+}
+// Una fila por partido: horario (o estado), local, resultado, visitante, canal y chances.
 function matchHTML(m) {
   const mm = matchModel(m), r = results[m.id], H = T(m.h), A = T(m.a), ag = agenda[m.id];
-  const top = Math.max(mm.ph, mm.pd, mm.pa);
-  const fav = mm.ph >= mm.pa ? H : A, favP = Math.max(mm.ph, mm.pa);
-  const pick = aiPick(mm);
-  const label = isClose(mm) ? `Partido parejo: <b>empate</b> probable` : `Favorito: <b>${esc(fav.n)}</b> (${pct(favP)})`;
-  const cls = k => (k === top ? "top" : "");
+  const pick = aiPick(mm), fav = mm.ph >= mm.pa ? H : A;
   const off = official.liga[m.id], ro = off ? " readonly" : "", live = !off && ag && ag.st === 2;
-  // Estado: final oficial, en juego (con el resultado parcial) o el horario
-  const status = off ? '<span class="m-st fin">Final</span>'
-    : live ? `<span class="m-st live"><i></i>En vivo${ag.txt ? " · " + esc(ag.txt) : ""}${ag.g ? ` · <b>${ag.g[0]}-${ag.g[1]}</b>` : ""}</span>`
-    : ag && ag.t && Date.now() > ag.t + 110 * MIN && ag.st !== 3 ? '<span class="m-st wait">Esperando el final</span>' : "";
-  const zone = m.g === "I" ? "Interzonal" : "Zona " + m.g;
+  const when = off ? '<span class="m-st fin">Final</span>'
+    : live ? `<span class="m-st live"><i></i>${ag.txt ? esc(ag.txt) : "En vivo"}</span>`
+    : ag && ag.t && Date.now() > ag.t + 110 * MIN && ag.st !== 3 ? `${hhmm(ag.t)}<small>Terminando</small>`
+    : ag && ag.t ? hhmm(ag.t) : "<small>A conf.</small>";
+  const nm = t => `<span class="lg">${esc(t.n)}</span><span class="sm">${ABBR[t.id] || esc(t.n)}</span>`;
+  const inp = (side, t) => `<input id="${m.id}-${side ? "a" : "h"}" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(t.n)}" value="${r ? r[side] : ""}" class="${r && aiFilled[m.id] ? "ai" : ""}" data-side="${side}"${ro}${live && ag.g ? ` placeholder="${ag.g[side]}"` : ""}>`;
+  const tip = `${isClose(mm) ? "Partido parejo" : `Favorito: ${fav.n}`} · más probable ${pick[0]}-${pick[1]} · goles esperados ${mm.lh.toFixed(1)}–${mm.la.toFixed(1)}${m.g === "I" ? " · interzonal" : ""}`;
   return `<div class="match${r ? " done" : ""}${off ? " official" : ""}${live ? " is-live" : ""}" data-m="${m.id}">
-    <div class="m-top">
-      <span class="m-when">${ag && ag.t ? hhmm(ag.t) : "A conf."}</span>
-      ${ag && ag.tv.length ? `<span class="m-tv">${ag.tv.map(esc).join(" · ")}</span>` : ""}
-      <span class="m-zone">${zone}</span>${status}
+    <div class="mr-when">${when}</div>
+    <div class="team-n home" title="${esc(H.n)}">${nm(H)}${crest(H.id)}</div>
+    <div class="score">${inp(0, H)}<span>–</span>${inp(1, A)}</div>
+    <div class="team-n" title="${esc(A.n)}">${crest(A.id)}${nm(A)}</div>
+    <div class="mr-tv">${ag && ag.tv.length ? ag.tv.map(tvBadge).join("") : '<span class="none">—</span>'}</div>
+    <div class="mr-prob" title="${esc(tip)}">
+      <div class="bar" role="img" aria-label="Local ${pct(mm.ph)}, empate ${pct(mm.pd)}, visitante ${pct(mm.pa)}"><i class="h" style="width:${mm.ph * 100}%"></i><i class="d" style="width:${mm.pd * 100}%"></i><i class="a" style="width:${mm.pa * 100}%"></i></div>
+      <div class="pl"><span>L <b>${pct(mm.ph)}</b></span><span>E <b>${pct(mm.pd)}</b></span><span>V <b>${pct(mm.pa)}</b></span></div>
     </div>
-    <div class="m-row">
-      <div class="team-n home" title="${esc(H.n)}">${mm.ph > mm.pa ? '<span class="fav">●</span> ' : ""}${esc(H.n)}${crest(H.id)}</div>
-      <div class="score">
-        <input id="${m.id}-h" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(H.n)}" value="${r ? r[0] : ""}" class="${r && aiFilled[m.id] ? "ai" : ""}" data-side="0"${ro}${live && ag.g ? ` placeholder="${ag.g[0]}"` : ""}>
-        <span>–</span>
-        <input id="${m.id}-a" inputmode="numeric" maxlength="2" aria-label="Goles ${esc(A.n)}" value="${r ? r[1] : ""}" class="${r && aiFilled[m.id] ? "ai" : ""}" data-side="1"${ro}${live && ag.g ? ` placeholder="${ag.g[1]}"` : ""}>
-      </div>
-      <div class="team-n" title="${esc(A.n)}">${crest(A.id)}${esc(A.n)}${mm.pa > mm.ph ? ' <span class="fav">●</span>' : ""}</div>
-    </div>
-    <div class="probs">
-      <div class="bar" role="img" aria-label="Local ${pct(mm.ph)}, empate ${pct(mm.pd)}, visitante ${pct(mm.pa)}">
-        <i class="h" style="width:${mm.ph * 100}%"></i><i class="d" style="width:${mm.pd * 100}%"></i><i class="a" style="width:${mm.pa * 100}%"></i>
-      </div>
-      <div class="plabels"><span class="${cls(mm.ph)}">L <b>${pct(mm.ph)}</b></span><span class="${cls(mm.pd)}">E <b>${pct(mm.pd)}</b></span><span class="${cls(mm.pa)}">V <b>${pct(mm.pa)}</b></span></div>
-    </div>
-    <details class="m-more"><summary>${label} · más probable <b>${pick[0]}-${pick[1]}</b>${isUpset(mm, r) ? ' · <span class="k neg"><b>Batacazo</b></span>' : ""}</summary>
-      <div class="verdict">Goles esperados ${mm.lh.toFixed(1)}–${mm.la.toFixed(1)}</div>
-      ${mm.keys.length ? `<div class="keys">${mm.keys.map(k => `<span class="k ${k.c}">${k.t}</span>`).join("")}</div>` : ""}
-    </details>
   </div>`;
 }
-// Partidos agrupados por fecha y por día, ordenados por horario (los que no tienen horario van al final).
+// Partidos agrupados por día y ordenados por horario; los que todavía no tienen horario van al final, por fecha.
 function renderFixture() {
-  const out = [];
   const dayKey = t => { const d = new Date(t); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
   const dayName = t => { const s = new Date(t).toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); return s.charAt(0).toUpperCase() + s.slice(1); };
-  for (const f of FECHAS) {
-    if (fechaFilter !== "all" && fechaFilter !== String(f)) continue;
-    const ms = MATCHES.filter(m => m.f === f && (!focusTeam || m.h === focusTeam || m.a === focusTeam));
-    if (!ms.length) continue;
-    const done = ms.filter(m => results[m.id]).length, offN = ms.filter(m => official.liga[m.id]).length;
-    out.push(`<div class="fecha"><div class="fecha-h">Fecha ${f} <span class="sub">${offN ? `${offN} jugados · ` : ""}${done}/${ms.length} cargados</span></div>`);
-    const tOf = m => (agenda[m.id] && agenda[m.id].t) || Infinity;
-    const sorted = ms.slice().sort((a, b) => tOf(a) - tOf(b) || a.g.localeCompare(b.g));
-    const groups = [];
-    for (const m of sorted) {
-      const t = tOf(m), k = t === Infinity ? "x" : dayKey(t);
-      let g = groups[groups.length - 1];
-      if (!g || g.k !== k) groups.push(g = { k, label: t === Infinity ? "Horario a confirmar" : dayName(t), ms: [] });
-      g.ms.push(m);
-    }
-    for (const g of groups) out.push(`<div class="day-l">${g.label}</div><div class="mgrid">${g.ms.map(matchHTML).join("")}</div>`);
-    out.push(`</div>`);
+  const tOf = m => (agenda[m.id] && agenda[m.id].t) || Infinity;
+  const ms = MATCHES.filter(m => (fechaFilter === "all" || fechaFilter === String(m.f)) && (!focusTeam || m.h === focusTeam || m.a === focusTeam))
+    .sort((a, b) => tOf(a) - tOf(b) || a.f - b.f || a.g.localeCompare(b.g));
+  const groups = [];
+  for (const m of ms) {
+    const t = tOf(m), k = t === Infinity ? "x" + m.f : dayKey(t);
+    let g = groups[groups.length - 1];
+    if (!g || g.k !== k) groups.push(g = { k, label: t === Infinity ? "Horario a confirmar" : dayName(t), fs: new Set(), ms: [] });
+    g.ms.push(m); g.fs.add(m.f);
   }
-  document.getElementById("fixture").innerHTML = out.join("");
+  document.getElementById("fixture").innerHTML = groups.map(g => {
+    const done = g.ms.filter(m => results[m.id]).length;
+    return `<div class="day-l">${g.label}<span>Fecha ${[...g.fs].join(" y ")} · ${g.ms.length} ${g.ms.length === 1 ? "partido" : "partidos"}${done ? ` · ${done} con resultado` : ""}</span></div>
+    <div class="mlist">${g.ms.map(matchHTML).join("")}</div>`;
+  }).join("") || '<p class="rule">No hay partidos para mostrar.</p>';
 }
 
 /* ===================== RENDER: TABLAS ===================== */
