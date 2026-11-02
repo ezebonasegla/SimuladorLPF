@@ -54,19 +54,12 @@ button, input { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.wrap {
-  max-width: 1360px; margin: 0 auto;
-  padding-block: 20px 48px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
+/* App: contenido a la izquierda y menú en columna a la derecha; en celular, barra arriba y menú desplegable. */
+.app {
+  max-width: 1500px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) 256px; gap: 28px; align-items: start;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
-header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; }
-.brand h1 {
-  font: 700 clamp(28px, 4vw, 40px)/1 var(--font-display); letter-spacing: .01em; margin: 0; text-transform: uppercase;
-  text-wrap: balance;
-}
-.brand p { margin: 6px 0 0; color: var(--muted); max-width: 62ch; }
-.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.main { min-width: 0; padding-block: 20px 48px; }
 .btn {
   border: 1px solid var(--line); background: var(--surface); padding: 9px 14px; border-radius: var(--r);
   font-weight: 600; display: inline-flex; align-items: center; gap: 8px;
@@ -77,36 +70,91 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .btn.ghost { background: transparent; }
 .btn svg { width: 16px; height: 16px; }
 
-.note {
-  margin-top: 16px; padding: 10px 14px; border-radius: var(--r); background: var(--surface-2);
-  border: 1px dashed var(--line); color: var(--muted); font-size: 13.5px;
-}
-.note b { color: var(--ink); font-weight: 600; }
 
-/* Pestañas: barra fija arriba con botones bien marcados */
-body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
-.tabs {
-  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 25;
-  display: flex; gap: 6px; margin: 18px 0 16px; padding: 6px; overflow-x: auto; scrollbar-width: none;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
-  box-shadow: 0 2px 10px color-mix(in srgb, var(--ink) 8%, transparent);
+/* Encabezado: título y las acciones principales juntas */
+.hero { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 20px; margin-bottom: 18px; }
+.hero .kick { display: block; font: 700 13px/1 var(--font-display); letter-spacing: .16em; text-transform: uppercase; color: var(--accent); }
+.hero h1 { font: 700 clamp(30px, 3.6vw, 42px)/1 var(--font-display); letter-spacing: .01em; margin: 6px 0 0; text-transform: uppercase; }
+.hero-act {
+  display: flex; gap: 6px; padding: 6px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line);
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--ink) 8%, transparent);
 }
-.tabs::-webkit-scrollbar { display: none; }
+.hero-act .btn { border-radius: 10px; padding: 10px 16px; border-color: transparent; background: transparent; }
+.hero-act .btn:hover { background: var(--surface-2); border-color: var(--line); }
+.hero-act .btn.primary { background: var(--accent); color: var(--accent-ink); }
+.hero-act .btn.primary:hover { background: var(--accent); filter: brightness(1.08); }
+.hero-act .btn svg { width: 18px; height: 18px; }
+/* Club enfocado: franja con sus datos arriba del contenido (vacía, no se muestra) */
+.focus-info:empty { display: none; }
+#focus-info { margin-bottom: 16px; padding: 10px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* Menú en columna (derecha) */
+.side {
+  position: sticky; top: 0; height: 100vh; height: 100dvh; overflow-y: auto; scrollbar-width: thin;
+  display: flex; flex-direction: column; gap: 14px; padding: 20px 0 20px 20px; border-left: 1px solid var(--line);
+}
+.side-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.side-h b { font: 700 18px/1 var(--font-display); letter-spacing: .06em; text-transform: uppercase; }
+.side-x { display: none; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; width: 36px; height: 36px; align-items: center; justify-content: center; padding: 0; }
+.side-x svg, .ab-menu svg { width: 20px; height: 20px; }
+.side-lbl { font: 700 12px/1 var(--font-display); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 4px 0 -6px 4px; }
+.tabs { display: flex; flex-direction: column; gap: 3px; }
 .tab {
-  display: inline-flex; align-items: center; gap: 7px; flex: none;
-  background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 13px;
-  font: 600 15px/1 var(--font-display); text-transform: uppercase; letter-spacing: .05em; color: var(--ink); white-space: nowrap;
-  transition: background .15s, color .15s, border-color .15s;
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  background: transparent; border: 1px solid transparent; border-radius: 10px; padding: 10px 12px;
+  font: 600 16px/1 var(--font-display); text-transform: uppercase; letter-spacing: .05em; color: var(--ink); white-space: nowrap;
+  transition: background .15s, color .15s;
 }
-.tab svg { width: 16px; height: 16px; flex: none; opacity: .8; }
-.tab:hover { border-color: var(--accent); color: var(--accent); }
-.tab[aria-selected="true"] {
-  background: var(--accent); border-color: var(--accent); color: var(--accent-ink);
-  box-shadow: 0 3px 8px color-mix(in srgb, var(--accent) 35%, transparent);
-}
+.tab svg { width: 18px; height: 18px; flex: none; opacity: .7; }
+.tab:hover { background: var(--surface); border-color: var(--line); }
+.tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); box-shadow: 0 3px 10px color-mix(in srgb, var(--accent) 35%, transparent); }
 .tab[aria-selected="true"] svg { opacity: 1; }
-.tab.feat:not([aria-selected="true"]) { border-color: color-mix(in srgb, var(--lib) 60%, var(--line)); background: var(--lib-soft); }
+.tab.feat:not([aria-selected="true"]) { background: var(--lib-soft); border-color: color-mix(in srgb, var(--lib) 45%, transparent); }
 @media (prefers-reduced-motion: reduce) { .tab { transition: none; } }
+.side-tools { display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 1px solid var(--line); }
+.side-btn {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 10px; text-align: left;
+  border: 1px solid var(--line); background: var(--surface); font-weight: 600; font-size: 14px;
+}
+.side-btn:hover { border-color: var(--accent); }
+.side-btn svg { width: 17px; height: 17px; flex: none; }
+.side-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+.side-note { margin-top: auto; font-size: 12.5px; line-height: 1.45; color: var(--muted); padding: 10px 12px; border-radius: 10px; background: var(--surface-2); }
+.side-note b { color: var(--ink); font-weight: 600; }
+.appbar, .nav-backdrop { display: none; }
+
+/* Celular y tablet: barra fija arriba con el menú desplegable */
+@media (max-width: 960px) {
+  .app { display: block; }
+  .main { padding-top: 14px; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 40; background: var(--bg); }
+  .appbar {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 35; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    margin: 0 calc(-1 * max(16px, env(safe-area-inset-left, 0px))) 0 calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+    padding: 10px max(16px, env(safe-area-inset-right, 0px)) 10px max(16px, env(safe-area-inset-left, 0px));
+    background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .ab-brand { display: flex; flex-direction: column; min-width: 0; }
+  .ab-brand b { font: 700 13px/1 var(--font-display); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  .ab-brand span { font: 700 22px/1.1 var(--font-display); text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ab-menu { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 8px 12px; font: 600 15px/1 var(--font-display); text-transform: uppercase; letter-spacing: .05em; }
+  .side {
+    position: fixed; z-index: 50; top: 0; right: 0; bottom: 0; height: auto; width: min(320px, 86vw);
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(16px + env(safe-area-inset-bottom, 0px)); border-left: 1px solid var(--line);
+    background: var(--bg); box-shadow: -12px 0 32px rgba(0,0,0,.25); transform: translateX(105%); transition: transform .22s ease; visibility: hidden;
+  }
+  .side-x { display: inline-flex; }
+  body.nav-open .side { transform: none; visibility: visible; }
+  .nav-backdrop { display: block; position: fixed; inset: 0; z-index: 45; background: rgba(0,0,0,.4); opacity: 0; pointer-events: none; transition: opacity .2s; }
+  body.nav-open .nav-backdrop { opacity: 1; pointer-events: auto; }
+  body.nav-open { overflow: hidden; }
+  .hero .hero-t { display: none; }
+  .hero { margin-bottom: 14px; }
+  .hero-act { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .hero-act .btn { flex-direction: column; justify-content: center; gap: 4px; padding: 9px 4px; font-size: 12.5px; text-align: center; line-height: 1.15; }
+}
+@media (prefers-reduced-motion: reduce) { .side, .nav-backdrop { transition: none; } }
 
 .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
 /* Tablas a un ancho cómodo de leer, centradas */
@@ -208,10 +256,11 @@ td.team { font-weight: 600; min-width: 140px; }
 .delta.zero { color: var(--muted); font-weight: 600; }
 
 /* Modo enfoque */
-.focus-bar { margin-top: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 14px; border-radius: var(--r); background: var(--surface); border: 1px solid var(--line); }
-.focus-bar label { font: 700 15px/1 var(--font-display); text-transform: uppercase; letter-spacing: .06em; }
-.focus-bar select { font: inherit; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); max-width: 100%; }
+.focus-bar { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
+.focus-bar label { font: 700 13px/1 var(--font-display); text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+.focus-bar select { font: inherit; font-size: 14px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); width: 100%; }
 .focus-bar.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.focus-bar.on label { color: var(--accent); }
 .focus-info { font-size: 13.5px; color: var(--muted); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
 .focus-info b { color: var(--ink); }
 @keyframes glow { 0%, 100% { background: color-mix(in srgb, var(--accent) 14%, var(--surface)); } 50% { background: color-mix(in srgb, var(--accent) 30%, var(--surface)); } }
@@ -674,47 +723,31 @@ html.dlg-open, html.dlg-open body { overflow: hidden; }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <div class="brand">
-      <h1>Simulador LPF · Clausura 2026</h1>
-      <p>Fechas 14, 15 y 16, playoffs y semifinales de Libertadores, Sudamericana y Copa Argentina. Las probabilidades tienen en cuenta el presente, el cansancio por las copas, el historial y lo que se juega cada equipo.</p>
-    </div>
-    <div class="actions">
+<div class="app">
+<header class="appbar">
+  <div class="ab-brand"><b>Simulador LPF · Clausura 2026</b><span id="cur-tab">Resumen</span></div>
+  <button class="ab-menu" id="btn-menu" type="button" aria-label="Abrir el menú" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menú</button>
+</header>
+<div class="nav-backdrop" id="nav-backdrop"></div>
+<main class="main">
+  <section class="hero">
+    <div class="hero-t"><span class="kick">Liga Profesional · Clausura 2026</span><h1>Simulador LPF</h1></div>
+    <div class="hero-act">
       <button class="btn primary" id="btn-ia" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2-2.2-.8 2.2-.8z"/></svg>
-        Completar todo con IA
+        Completar con IA
       </button>
-      <button class="btn" id="btn-rand" type="button">Simular al azar</button>
-      <button class="btn ghost" id="btn-clear" type="button">Limpiar resultados</button>
-      <button class="btn ghost" id="btn-theme" type="button" aria-label="Cambiar entre modo claro y oscuro">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-        <span id="theme-label">Modo claro</span>
+      <button class="btn" id="btn-rand" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.2" fill="currentColor"/></svg>
+        Simular al azar
+      </button>
+      <button class="btn" id="btn-po-img" type="button" title="Descargar la imagen del cuadro de playoffs">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+        Exportar resultados
       </button>
     </div>
-  </header>
-
-  <div class="note" id="data-note"></div>
-  <div class="focus-bar" id="focus-bar">
-    <label for="focus-sel">Modo enfoque</label>
-    <select id="focus-sel" aria-label="Elegir un club para enfocar"></select>
-    <div class="focus-info" id="focus-info">Elegí un club para ver solo sus partidos y resaltarlo en todas las tablas.</div>
-  </div>
-
-  <nav class="tabs" role="tablist" aria-label="Secciones">
-    <button class="tab feat" role="tab" data-tab="objetivo" id="tab-objetivo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>¿Qué tiene que pasar?</button>
-    <button class="tab" role="tab" data-tab="resumen" id="tab-resumen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Resumen</button>
-    <button class="tab" role="tab" data-tab="partidos" id="tab-partidos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Partidos</button>
-    <button class="tab" role="tab" data-tab="zona-a" id="tab-zona-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Zona A</button>
-    <button class="tab" role="tab" data-tab="zona-b" id="tab-zona-b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Zona B</button>
-    <button class="tab" role="tab" data-tab="anual" id="tab-anual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Tabla Anual</button>
-    <button class="tab" role="tab" data-tab="promedios" id="tab-promedios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Promedios</button>
-    <button class="tab" role="tab" data-tab="playoffs" id="tab-playoffs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h5v6H3M3 13h5v6H3M8 8h4v8H8M12 12h5M17 9h4v6h-4z"/></svg>Playoffs</button>
-    <button class="tab" role="tab" data-tab="copas" id="tab-copas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 21h8"/></svg>Copas</button>
-    <button class="tab" role="tab" data-tab="proyeccion" id="tab-proyeccion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></svg>Probabilidades</button>
-    <button class="tab" role="tab" data-tab="datos" id="tab-datos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Datos</button>
-  </nav>
-
+  </section>
+  <div class="focus-info" id="focus-info"></div>
   <div class="layout">
     <section id="pane-partidos" class="pane" data-pane="partidos">
       <div class="panel-h">
@@ -736,6 +769,39 @@ html.dlg-open, html.dlg-open body { overflow: hidden; }
       <section class="pane" data-pane="datos" id="pane-datos"></section>
     </div>
   </div>
+</main>
+<aside class="side" id="side" aria-label="Menú">
+  <div class="side-h"><b>Simulador LPF</b><button class="side-x" id="btn-menu-x" type="button" aria-label="Cerrar el menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="side-lbl">Secciones</div>
+  <nav class="tabs" role="tablist" aria-label="Secciones">
+    <button class="tab feat" role="tab" data-tab="objetivo" id="tab-objetivo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>¿Qué tiene que pasar?</button>
+    <button class="tab" role="tab" data-tab="resumen" id="tab-resumen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Resumen</button>
+    <button class="tab" role="tab" data-tab="partidos" id="tab-partidos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Partidos</button>
+    <button class="tab" role="tab" data-tab="zona-a" id="tab-zona-a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Zona A</button>
+    <button class="tab" role="tab" data-tab="zona-b" id="tab-zona-b"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Zona B</button>
+    <button class="tab" role="tab" data-tab="anual" id="tab-anual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Tabla Anual</button>
+    <button class="tab" role="tab" data-tab="promedios" id="tab-promedios"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Promedios</button>
+    <button class="tab" role="tab" data-tab="playoffs" id="tab-playoffs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h5v6H3M3 13h5v6H3M8 8h4v8H8M12 12h5M17 9h4v6h-4z"/></svg>Playoffs</button>
+    <button class="tab" role="tab" data-tab="copas" id="tab-copas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4h10v5a5 5 0 0 1-10 0V4zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 21h8"/></svg>Copas</button>
+    <button class="tab" role="tab" data-tab="proyeccion" id="tab-proyeccion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></svg>Probabilidades</button>
+    <button class="tab" role="tab" data-tab="datos" id="tab-datos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Datos</button>
+  </nav>
+  <div class="side-tools">
+    <div class="focus-bar" id="focus-bar">
+      <label for="focus-sel">Modo enfoque</label>
+      <select id="focus-sel" aria-label="Elegir un club para enfocar"></select>
+    </div>
+    <button class="side-btn" id="btn-theme" type="button" aria-label="Cambiar entre modo claro y oscuro">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <span id="theme-label">Modo oscuro</span>
+    </button>
+    <button class="side-btn danger" id="btn-clear" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+      Limpiar resultados
+    </button>
+  </div>
+  <div class="side-note" id="data-note"></div>
+</aside>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><clipPath id="crest-shield"><path d="M2 2h20v11.5c0 7-5 11.3-10 13.5C7 24.8 2 20.5 2 13.5z"/></clipPath></defs></svg>
@@ -2468,10 +2534,9 @@ async function exportBracketImage(_, btn) {
     await expFonts();
     const lpf = await loadImg("logo-lpf.png", false);
     const st = standings(results), br = currentBracket(st), L = bracketLayout(br, false);
-    const filled = MATCHES.filter(m => results[m.id]).length, done = MATCHES.every(m => official.liga[m.id]); // "quedaron" solo con todo oficial
     const ids = new Set(); br.ties.forEach(t => { if (t.h) ids.add(t.h); if (t.a) ids.add(t.a); });
     // Estilo "noche de estadio": siempre oscuro, sin importar el tema de la página.
-    const W = 1080, H = 1440, K = 0.9, OX = (W - L.w * K) / 2, OY = 250; // el cuadro va escalado y centrado
+    const W = 1080, H = 1260, K = 0.9, OX = (W - L.w * K) / 2, OY = 64; // el cuadro va escalado y centrado
     const INK = "#f2f6ff", MUTED = "rgba(214,226,255,.62)", LINE = "rgba(196,214,255,.5)", GOLD = "#f3cf5a";
     const draw = imgs => {
       const S = 2, cv = document.createElement("canvas"); cv.width = W * S; cv.height = H * S;
@@ -2482,23 +2547,13 @@ async function exportBracketImage(_, btn) {
       const glow = (cx, cy, r, col) => { const g = x.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, col); g.addColorStop(1, "rgba(0,0,0,0)"); x.fillStyle = g; x.fillRect(0, 0, W, H); };
       glow(W / 2, OY + 470 * K, 520, "rgba(47,110,255,.38)");
       glow(W / 2, OY + 300 * K, 260, "rgba(120,170,255,.22)");
-      for (const sx of [30, W - 30]) { glow(sx, 200, 260, "rgba(170,205,255,.14)"); glow(sx, 200, 46, "rgba(235,244,255,.4)"); }
+      for (const sx of [30, W - 30]) { glow(sx, 40, 260, "rgba(170,205,255,.14)"); glow(sx, 40, 46, "rgba(235,244,255,.4)"); }
       // líneas de cancha tenues abajo
       x.save(); x.strokeStyle = "rgba(150,185,255,.10)"; x.lineWidth = 2;
-      x.beginPath(); x.ellipse(W / 2, 1300, 420, 70, 0, 0, 2 * Math.PI); x.stroke();
-      x.beginPath(); x.moveTo(0, 1300); x.lineTo(W, 1300); x.stroke(); x.restore();
+      x.beginPath(); x.ellipse(W / 2, 1130, 420, 70, 0, 0, 2 * Math.PI); x.stroke();
+      x.beginPath(); x.moveTo(0, 1130); x.lineTo(W, 1130); x.stroke(); x.restore();
       const vg = x.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, H * .8); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.55)");
       x.fillStyle = vg; x.fillRect(0, 0, W, H);
-      // título
-      x.textAlign = "center"; x.textBaseline = "alphabetic"; x.fillStyle = INK;
-      const t1 = done ? "Así quedaron los " : "Así quedarían hoy los ", t2 = "playoffs", t3 = " del Clausura";
-      x.font = `400 50px ${EXP_BF}`; const w1 = x.measureText(t1).width, w3 = x.measureText(t3).width;
-      x.font = `700 50px ${EXP_BF}`; const w2 = x.measureText(t2).width, x0 = (W - w1 - w2 - w3) / 2;
-      x.textAlign = "left"; x.font = `400 50px ${EXP_BF}`; x.fillText(t1, x0, 112);
-      x.font = `700 50px ${EXP_BF}`; x.fillText(t2, x0 + w1, 112);
-      x.font = `400 50px ${EXP_BF}`; x.fillText(t3, x0 + w1 + w2, 112);
-      x.textAlign = "center"; x.font = `500 19px ${EXP_BF}`; x.fillStyle = MUTED;
-      x.fillText("Liga Profesional 2026 · " + (done ? "con la fase regular completa" : filled === MATCHES.length ? "con los resultados simulados de las fechas 14 a 16" : `proyección con ${filled}/${MATCHES.length} partidos de las fechas 14 a 16`), W / 2, 152);
       x.save(); x.translate(OX, OY); x.scale(K, K);
       // nombres de ronda, espaciados
       x.font = `600 19px ${EXP_BF}`; x.fillStyle = MUTED; x.textBaseline = "middle"; if ("letterSpacing" in x) x.letterSpacing = "4px";
@@ -2554,11 +2609,11 @@ async function exportBracketImage(_, btn) {
       x.restore();
       // pie: logo de Footy TicTacToe centrado, la cuenta y la página
       const lg = imgs.__logo, ls = 78;
-      if (lg) x.drawImage(lg, W / 2 - ls / 2, 1250, ls, ls);
+      if (lg) x.drawImage(lg, W / 2 - ls / 2, 1078, ls, ls);
       x.textAlign = "center"; x.textBaseline = "alphabetic";
-      x.font = `700 22px ${EXP_BF}`; x.fillStyle = INK; x.fillText(`${TWITTER}  ·  ${SITE_URL}`, W / 2, 1362);
+      x.font = `700 22px ${EXP_BF}`; x.fillStyle = INK; x.fillText(`${TWITTER}  ·  ${SITE_URL}`, W / 2, 1190);
       x.font = `400 15px ${EXP_BF}`; x.fillStyle = MUTED;
-      x.fillText(`Partido único, local el mejor ubicado · final en cancha neutral · datos de promiedos al ${dataAsOf(true)}`, W / 2, 1400);
+      x.fillText(`Partido único, local el mejor ubicado · final en cancha neutral · datos de promiedos al ${dataAsOf(true)}`, W / 2, 1228);
       return cv;
     };
     await saveCanvas(draw, [...ids], "playoffs-lpf.png", "Imagen descargada");
@@ -3114,7 +3169,7 @@ function applyFocus(st) {
   document.querySelectorAll(".focus-m").forEach(el => el.classList.remove("focus-m"));
   const bar = document.getElementById("focus-bar"), info = document.getElementById("focus-info");
   bar.classList.toggle("on", !!focusTeam);
-  if (!focusTeam) { info.textContent = "Elegí un club para ver solo sus partidos y resaltarlo en todas las tablas."; return; }
+  if (!focusTeam) { info.textContent = ""; return; }
   document.querySelectorAll(`.tn[data-t="${focusTeam}"]`).forEach(el => {
     const host = el.closest("tr, .tie button, li"); if (host) host.classList.add("focus");
   });
@@ -3160,13 +3215,14 @@ function renderAll() {
 function renderNote() {
   const done = MATCHES.filter(m => results[m.id]).length;
   document.getElementById("data-note").innerHTML =
-    `<b>Datos de promiedos al ${dataAsOf(true)}</b>.${official.n ? ` <span class="off-note">Resultados oficiales: ${official.n} ${official.n === 1 ? "partido jugado" : "partidos jugados"} de las fechas 14 a 16.</span>` : ""} Correcciones en la pestaña <b>Datos</b>. Cargados: <b>${done}/${MATCHES.length}</b> partidos.`;
+    `Datos de promiedos al <b>${dataAsOf(true)}</b>.${official.n ? `<br><span class="off-note">${official.n} ${official.n === 1 ? "resultado oficial" : "resultados oficiales"} de las fechas 14 a 16.</span>` : ""}<br>Cargados: <b>${done}/${MATCHES.length}</b> partidos · correcciones en <b>Datos</b>.`;
 }
 function invalidate() { projection = null; cache.clear(); mcache.clear(); advCache.clear(); stakesCache = null; }
 function showTab(tab) {
   activeTab = tab;
   document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
   document.querySelectorAll(".pane").forEach(p => p.hidden = p.dataset.pane !== tab);
+  const cur = document.getElementById("tab-" + tab); if (cur) document.getElementById("cur-tab").textContent = cur.textContent.trim();
   if (tab === "proyeccion") { renderProjection(); applyFocus(); }
   if (tab === "objetivo") { if (focusTeam && !goalRes) goalTeam = focusTeam; renderGoal(); }
   save();
@@ -3246,13 +3302,23 @@ function fillRandom() {
   toast("Simulación al azar según las probabilidades");
 }
 
+// Menú desplegable del celular (en la compu es una columna fija y esto no cambia nada)
+function setNav(open) {
+  document.body.classList.toggle("nav-open", open);
+  document.getElementById("btn-menu").setAttribute("aria-expanded", String(open));
+  if (open) document.querySelector("#side .tab[aria-selected=true]")?.focus();
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape" && document.body.classList.contains("nav-open")) { setNav(false); document.getElementById("btn-menu").focus(); } });
 // los escudos del cuadro (SVG) se activan también con Enter o espacio
 document.addEventListener("keydown", e => {
   const g = (e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest(".bk-click");
   if (g) { e.preventDefault(); g.dispatchEvent(new MouseEvent("click", { bubbles: true })); }
 });
 document.addEventListener("click", e => {
-  const tab = e.target.closest(".tab"); if (tab) return showTab(tab.dataset.tab);
+  const tab = e.target.closest(".tab"); if (tab) { setNav(false); showTab(tab.dataset.tab); window.scrollTo(0, 0); return; }
+  if (e.target.closest("#btn-menu")) return setNav(!document.body.classList.contains("nav-open"));
+  if (e.target.closest("#btn-menu-x, #nav-backdrop")) return setNav(false);
+  const pob = e.target.closest("#btn-po-img"); if (pob) return exportBracketImage(null, pob);
   const py = e.target.closest("[data-prom]");
   if (py) { promYear = py.dataset.prom; renderPromedios(standings(results)); applyFocus(); return; }
   const pc = e.target.closest("[data-proj]");
