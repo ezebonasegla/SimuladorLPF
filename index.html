@@ -2545,8 +2545,17 @@ async function exportBracketImage(_, btn) {
     const lpf = await loadImg("logo-lpf.png", false);
     const st = standings(results), br = currentBracket(st), L = bracketLayout(br, false);
     const ids = new Set(); br.ties.forEach(t => { if (t.h) ids.add(t.h); if (t.a) ids.add(t.a); });
+    // Clasificados a las copas 2027 y el motivo (igual que en la Tabla Anual)
+    const an = st.AN.map(r => r.id), c = cupos(an, br.champ, userCups()), pos = id => an.indexOf(id) + 1;
+    const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
+    const libRows = [...c.holders.filter(h => !h[2]).map(([id, why]) => [id, cap(why.replace(/ \(1° de la Anual\)/, ""))]),
+      ...c.lib.map(id => [id, `${pos(id)}° Tabla Anual${id === c.pre ? " · fase previa" : ""}`])];
+    const sudRows = c.sud.map(id => [id, `${pos(id)}° Tabla Anual`]);
+    [...libRows, ...sudRows].forEach(([id]) => ids.add(id));
     // Estilo "noche de estadio": siempre oscuro, sin importar el tema de la página.
-    const W = 1080, H = 1350, K = 0.9, OX = (W - L.w * K) / 2, OY = 150; // el cuadro va escalado y centrado
+    const W = 1080, K = 0.9, OX = (W - L.w * K) / 2, OY = 150; // el cuadro va escalado y centrado
+    // debajo del cuadro: la tablita de clasificados y después el pie con el logo
+    const RH = 27, PY = 1100, PB = PY + 48 + Math.max(libRows.length, sudRows.length) * RH + 10, LY = PB + 34, H = LY + 64 + 112;
     const INK = "#f2f6ff", MUTED = "rgba(214,226,255,.62)", LINE = "rgba(196,214,255,.5)", GOLD = "#f3cf5a";
     const draw = imgs => {
       const S = 2, cv = document.createElement("canvas"); cv.width = W * S; cv.height = H * S;
@@ -2560,8 +2569,8 @@ async function exportBracketImage(_, btn) {
       for (const sx of [30, W - 30]) { glow(sx, 40, 260, "rgba(170,205,255,.14)"); glow(sx, 40, 46, "rgba(235,244,255,.4)"); }
       // líneas de cancha tenues abajo
       x.save(); x.strokeStyle = "rgba(150,185,255,.10)"; x.lineWidth = 2;
-      x.beginPath(); x.ellipse(W / 2, 1220, 420, 70, 0, 0, 2 * Math.PI); x.stroke();
-      x.beginPath(); x.moveTo(0, 1220); x.lineTo(W, 1220); x.stroke(); x.restore();
+      x.beginPath(); x.ellipse(W / 2, LY + 40, 420, 70, 0, 0, 2 * Math.PI); x.stroke();
+      x.beginPath(); x.moveTo(0, LY + 40); x.lineTo(W, LY + 40); x.stroke(); x.restore();
       const vg = x.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, H * .8); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.55)");
       x.fillStyle = vg; x.fillRect(0, 0, W, H);
       // título: PLAYOFFS · CLAUSURA 2026 (el año en dorado)
@@ -2624,13 +2633,29 @@ async function exportBracketImage(_, btn) {
         slot(L.champ.id, L.champ.x, L.champ.y, L.champ.size, "");
       }
       x.restore();
+      // clasificados a las copas: dos columnas sutiles, escudo, nombre y motivo
+      x.save();
+      x.fillStyle = "rgba(255,255,255,.04)"; x.strokeStyle = "rgba(196,214,255,.16)"; x.lineWidth = 1.5;
+      x.beginPath(); x.roundRect ? x.roundRect(40, PY, W - 80, PB - PY, 16) : x.rect(40, PY, W - 80, PB - PY); x.fill(); x.stroke();
+      [[libRows, "COPA LIBERTADORES 2027", GOLD, 64], [sudRows, "COPA SUDAMERICANA 2027", "#7fd8a6", W / 2 + 20]].forEach(([rows, ttl, col, cx0]) => {
+        const cw = W / 2 - 84;
+        x.font = `700 15px ${EXP_BF}`; x.fillStyle = col; x.textAlign = "left"; x.textBaseline = "middle"; if ("letterSpacing" in x) x.letterSpacing = "3px";
+        x.fillText(ttl, cx0, PY + 26); if ("letterSpacing" in x) x.letterSpacing = "0px";
+        rows.forEach(([id, why], i) => {
+          const y = PY + 50 + i * RH + RH / 2, im = imgs[id];
+          if (im) { const real = !im.src.startsWith("data:"); x.drawImage(im, cx0 + (real ? 0 : 2), y - 11, real ? 22 : 18, 22); }
+          x.textAlign = "left"; x.font = `600 16px ${EXP_BF}`; x.fillStyle = INK; x.fillText(T(id).n, cx0 + 32, y);
+          x.textAlign = "right"; x.font = `400 14px ${EXP_BF}`; x.fillStyle = MUTED; x.fillText(why, cx0 + cw, y);
+        });
+      });
+      x.restore();
       // pie: logo de Footy TicTacToe centrado, la cuenta y la página
-      const lg = imgs.__logo, ls = 78;
-      if (lg) x.drawImage(lg, W / 2 - ls / 2, 1168, ls, ls);
+      const lg = imgs.__logo, ls = 64;
+      if (lg) x.drawImage(lg, W / 2 - ls / 2, LY, ls, ls);
       x.textAlign = "center"; x.textBaseline = "alphabetic";
-      x.font = `700 22px ${EXP_BF}`; x.fillStyle = INK; x.fillText(`${TWITTER}  ·  ${SITE_URL}`, W / 2, 1280);
+      x.font = `700 22px ${EXP_BF}`; x.fillStyle = INK; x.fillText(`${TWITTER}  ·  ${SITE_URL}`, W / 2, LY + 64 + 36);
       x.font = `400 15px ${EXP_BF}`; x.fillStyle = MUTED;
-      x.fillText(`Partido único, local el mejor ubicado · final en cancha neutral · datos de promiedos al ${dataAsOf(true)}`, W / 2, 1318);
+      x.fillText(`Partido único, local el mejor ubicado · final en cancha neutral · datos de promiedos al ${dataAsOf(true)}`, W / 2, LY + 64 + 70);
       return cv;
     };
     await saveCanvas(draw, [...ids], "playoffs-lpf.png", "Imagen descargada");
