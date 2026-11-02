@@ -51,8 +51,13 @@ jobs:
               "tem": "Club Atlético Temperley", "aca": "Club Atlético Acassuso",
               "alm": "Club Almirante Brown", "mai": "Club Deportivo Maipú",
               "mid": "Club Atlético Midland", "gue": "Club Atlético Güemes",
+              # reducido por el segundo ascenso
+              "gyt": "Club de Gimnasia y Tiro", "gjj": "Club Atlético Gimnasia y Esgrima (Jujuy)",
+              "eba": "Club Atlético Estudiantes", "dma": "Club Social y Deportivo Madryn",
+              "col": "Club Atlético Colón", "mor": "Club Deportivo Morón",
+              "cle": "Club Atlético Colegiales (Munro)", "cbo": "Club Ciudad de Bolívar",
           }
-          EXTRA = {"fer": "Ferro Carril Oeste", "mid": "Midland"}  # búsqueda en Commons si el artículo no tiene imagen
+          EXTRA = {"fer": "Ferro Carril Oeste", "mid": "Midland", "gyt": "Gimnasia y Tiro", "gjj": "Gimnasia y Esgrima de Jujuy", "eba": "Estudiantes de Buenos Aires", "dma": "Deportivo Madryn", "col": "Colón de Santa Fe", "mor": "Deportivo Morón", "cle": "Colegiales Munro", "cbo": "Ciudad de Bolívar"}  # búsqueda en Commons si el artículo no tiene imagen
           def get(url):
               for i in range(4):
                   try: return urllib.request.urlopen(urllib.request.Request(url, headers=UA)).read()
