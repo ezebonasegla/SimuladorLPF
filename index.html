@@ -1421,10 +1421,10 @@ function relegated(st) {
    - ARG 1 campeón Apertura (Belgrano) · ARG 2 campeón Clausura · ARG 3 campeón Copa Argentina (inalterable).
    - ARG 4, 5 y 6: los mejores de la Tabla General excluidos los anteriores.
    - Si el campeón del Apertura gana el Clausura, ARG 2 pasa al siguiente de la Tabla General.
-   - Si el campeón de la Copa Argentina ya ocupa la plaza de Apertura/Clausura (o gana Libertadores o Sudamericana),
-     ARG 3 pasa al siguiente mejor ubicado en la Copa Argentina (subcampeón; después semifinalistas por Tabla General).
-   - Campeón argentino de Libertadores o Sudamericana: plaza adicional; si ya tenía otra plaza, esa pasa al siguiente
-     de la Tabla General (o al siguiente de la Copa Argentina si era ARG 3).
+   - Si el campeón de la Copa Argentina ya ocupa la plaza de Apertura/Clausura, ARG 3 pasa al siguiente mejor
+     ubicado en la Copa Argentina (subcampeón; después semifinalistas por Tabla General).
+   - Campeón argentino de Libertadores o Sudamericana: plaza adicional; si ya tenía otra plaza (incluida la de la
+     Copa Argentina), esa pasa al siguiente mejor ubicado de la Tabla General.
    Sudamericana 2027: los 6 mejores de la Tabla General que no hayan entrado a la Libertadores.
    Fase previa: el último clasificado a la Libertadores por la Tabla General; los demás van directo a la fase de grupos. */
 function cupos(an, clausuraChamp, cups) {
@@ -1453,8 +1453,8 @@ function cupos(an, clausuraChamp, cups) {
     // Ya tenía plaza: entra por su copa y libera la otra.
     const prev = seat[id]; seat[id] = k;
     const old = holders.find(h => h[0] === id && !h[2]); if (old) old[1] = why;
-    if (prev === "ca") passCA(id, "campeón Copa Argentina");
-    else holders.push([id, prev === "cla" ? "campeón Clausura" : prev === "ape" ? "campeón Apertura" : `campeón Copa ${prev === "lib" ? "Libertadores" : "Sudamericana"}`, "anual"]), extra++;
+    // La plaza que libera (aunque sea la de la Copa Argentina) pasa al siguiente de la Tabla General.
+    holders.push([id, prev === "cla" ? "campeón Clausura" : prev === "ape" ? "campeón Apertura" : prev === "ca" ? "campeón Copa Argentina" : `campeón Copa ${prev === "lib" ? "Libertadores" : "Sudamericana"}`, "anual"]); extra++;
   }
   const pool = an.filter(id => !Q.has(id)), libN = 3 + extra;
   const lib = pool.slice(0, libN);
@@ -1739,7 +1739,7 @@ function renderAnnual(st, br, cups) {
   if (!cups.champ.sud) pending.push("Sudamericana (¿Boca?)");
   document.getElementById("pane-anual").innerHTML = `
     <div class="panel-h"><h2>Tabla Anual 2026</h2><span class="sub">Apertura + Clausura · suman las fechas que faltan, no los playoffs</span><button class="btn ghost btn-exp" type="button" data-export="anual" title="Descargar la tabla como imagen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>Imagen</button></div>
-    <p class="rule">Según el reglamento LPF 2026: ARG 1 campeón del Apertura (Belgrano), ARG 2 campeón del Clausura, ARG 3 campeón de la Copa Argentina, y ARG 4 a 6 los 3 mejores de la Anual sin contar a esos campeones. Si Belgrano gana el Clausura, su plaza pasa al siguiente de la Anual. Si el campeón de la Copa Argentina ya tenía plaza por Apertura, Clausura, Libertadores o Sudamericana, la suya pasa al subcampeón de la Copa Argentina. Un campeón argentino de Libertadores o Sudamericana suma una plaza extra. Sudamericana: los 6 siguientes de la Anual. A diferencia de promiedos, acá Belgrano sí libera su lugar.</p>
+    <p class="rule">Según el reglamento LPF 2026: ARG 1 campeón del Apertura (Belgrano), ARG 2 campeón del Clausura, ARG 3 campeón de la Copa Argentina, y ARG 4 a 6 los 3 mejores de la Anual sin contar a esos campeones. Si Belgrano gana el Clausura, su plaza pasa al siguiente de la Anual. Si el campeón de la Copa Argentina ya tenía plaza por Apertura o Clausura, la suya pasa al subcampeón de la Copa Argentina. Un campeón argentino de Libertadores o Sudamericana suma una plaza extra; si ya estaba clasificado (también por la Copa Argentina), la plaza que deja pasa al siguiente de la Anual. Sudamericana: los 6 siguientes de la Anual. A diferencia de promiedos, acá Belgrano sí libera su lugar.</p>
     <div class="cupos">
       <div class="cupo-box lib"><h3>Copa Libertadores</h3><ol>
         ${holderLis}
