@@ -204,6 +204,9 @@ button { cursor: pointer; }
 .mr-when { font: 700 17px/1 var(--font-display); letter-spacing: .02em; display: flex; flex-direction: column; gap: 3px; }
 .mr-when small { font: 600 10.5px/1 var(--font-body); color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
 .mr-when .m-st { align-self: flex-start; padding: 3px 6px; }
+.po-pens { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; font-size: 11px; color: var(--muted); }
+.po-pens input { width: 30px; height: 28px; font-size: 13px; border-style: dashed; }
+@media (max-width: 640px) { .po-m .score { display: grid; grid-template-columns: auto auto auto; align-items: center; justify-items: center; gap: 4px; } .po-pens { grid-column: 1 / -1; margin: 0; } .po-pens input { width: 26px; height: 24px; } }
 .mr-tv { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
 .mr-tv .none { color: var(--muted); font-size: 12px; }
 .mr-prob .bar { height: 6px; }
@@ -1031,7 +1034,10 @@ let poWinners = {}; // tieId -> teamId
 let poScores = {};  // tieId -> { h, a, g: [gl, gv], p: [pen l, pen v] | null, ai } marcador de la llave de playoffs
 let cupPicks = {};  // tieId de copa -> teamId
 let aiCupPicks = {}; // llaves de copa que eligió la IA (se vuelven a pensar)
-let fechaFilter = "all";
+let fechaFilter = "auto"; // "auto": la ronda que se está jugando o la próxima (fecha de liga o ronda de playoffs)
+// Agenda de los playoffs (día, hora, canal y estado), por cruce: la trae resultados.json y la refresca la lista del día de promiedos.
+let poAg = {};
+const pairKey = (h, a) => [h, a].sort().join("|");
 let focusTeam = "";
 let projCompact = false;
 let activeTab = "resumen";
@@ -1479,6 +1485,10 @@ function applyOfficial(d) {
     else if (r.fase === "Final") { c.finWon = r; delete cupPicks[c.fin]; delete aiCupPicks[c.fin]; }
   }
   official.n += official.po.length;
+  for (const r of d.agenda_po || []) {
+    const k = pairKey(r.h, r.a), cur = poAg[k];
+    if (!cur || !cur.live) poAg[k] = { ...(cur || {}), h: r.h, a: r.a, fase: r.fase, t: pdTime(r.t), tv: (cur && cur.tv) || [] };
+  }
 }
 // Resultado oficial de una llave de playoffs, orientado como la llave del cuadro.
 function officialPO(t) {
@@ -1546,14 +1556,30 @@ async function fetchLive() {
     const pad = n => String(n).padStart(2, "0"), dstr = t => { const d = new Date(t); return `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()}`; };
     const today = dstr(Date.now());
     const days = new Set(MATCHES.filter(m => agenda[m.id] && agenda[m.id].t && !official.liga[m.id]).map(m => dstr(agenda[m.id].t)));
+    // La hora de resultados.json puede venir en otra zona horaria: se mira también el día anterior y el siguiente.
+    for (const x of Object.values(poAg)) if (x.t && x.st !== 3) for (const k of x.live ? [0] : [-1, 0, 1]) days.add(dstr(x.t + k * 24 * 60 * MIN));
+    let poFinal = false;
     for (const day of days) {
       if (day !== today && tvAsked[day] && Date.now() - tvAsked[day] < 6 * 60 * MIN) continue;
-      if (day !== today && MATCHES.every(m => !agenda[m.id] || dstr(agenda[m.id].t || 0) !== day || agenda[m.id].tv.length)) continue;
+      if (day !== today && MATCHES.every(m => !agenda[m.id] || dstr(agenda[m.id].t || 0) !== day || agenda[m.id].tv.length)
+        && Object.values(poAg).every(x => !x.t || x.live || ![-1, 0, 1].some(k => dstr(x.t + k * 24 * 60 * MIN) === day))) continue;
       tvAsked[day] = Date.now();
       const r = await fetch(`https://api.promiedos.com.ar/games/${day}`, PD_OPTS).catch(() => null);
       if (!r || !r.ok) continue;
       for (const l of (await r.json()).leagues || []) if (l.id === "hc") for (const g of l.games || []) {
         const h = PD_TEAMS[g.teams[0].id], a = PD_TEAMS[g.teams[1].id];
+        if (h && a && /Octavos|Cuartos|Semifinal|Final/.test(g.stage_round_name || "")) { // playoffs del Clausura
+          const st = g.status && g.status.enum, sc = g.scores ? g.scores.map(Number) : null, pen = g.penalties ? g.penalties.map(Number) : null;
+          poAg[pairKey(h, a)] = { h, a, fase: g.stage_round_name, live: true, t: pdTime(g.start_time), st, g: sc,
+            tv: (g.tv_networks || []).map(x => x.name.replace(/\s*\(.*\)$/, "")), txt: g.game_time_to_display || g.game_time_status_to_display || "" };
+          const won = sc && (sc[0] !== sc[1] || (pen && pen[0] !== pen[1]));
+          if (st === 3 && won && !official.po.some(x => samePair(x, h, a))) {
+            const d = official.data || (official.data = { liga: [], playoffs: [], copas: [] });
+            d.playoffs = (d.playoffs || []).concat([{ h, a, g: sc, fase: g.stage_round_name, ...(pen ? { p: pen } : {}) }]);
+            poFinal = true;
+          }
+          continue;
+        }
         const m = h && a && MATCHES.find(x => samePair({ h, a }, x.h, x.a)), ag = m && agenda[m.id];
         if (!ag) continue;
         ag.tv = (g.tv_networks || []).map(x => x.name.replace(/\s*\(.*\)$/, ""));
@@ -1565,12 +1591,12 @@ async function fetchLive() {
     }
     try { localStorage.setItem(AGENDA_KEY, JSON.stringify(agenda)); } catch (e) {}
     lastSync = Date.now();
-    if (finals.length) {
+    if (finals.length || poFinal) {
       const d = official.data || { liga: [], playoffs: [], copas: [] };
       d.liga = (d.liga || []).filter(x => !finals.some(y => samePair(x, y.h, y.a))).concat(finals);
       d.actualizado = new Date().toISOString();
       applyOfficial(d); invalidate(); goalRes = null; save(); renderAll();
-      toast(finals.map(x => `Final: ${T(x.h).n} ${x.g[0]}-${x.g[1]} ${T(x.a).n}`).join(" · "));
+      if (finals.length) toast(finals.map(x => `Final: ${T(x.h).n} ${x.g[0]}-${x.g[1]} ${T(x.a).n}`).join(" · "));
     } else { renderFixture(); renderNote(); }
   } catch (e) {} // sin conexión o bloqueado: se sigue con lo que había
   liveBusy = false;
@@ -1580,8 +1606,9 @@ async function fetchLive() {
 function scheduleLive() {
   clearTimeout(liveTimer);
   const now = Date.now(); let next = now + 30 * MIN;
-  for (const m of MATCHES) {
-    const a = agenda[m.id]; if (!a || official.liga[m.id] || !a.t) continue;
+  const pend = [...MATCHES.filter(m => !official.liga[m.id]).map(m => agenda[m.id]), ...Object.values(poAg).filter(x => x.st !== 3)];
+  for (const a of pend) {
+    if (!a || !a.t) continue;
     const end = a.t + 110 * MIN;
     if (a.st === 2 || (now >= end && now < a.t + 4 * 60 * MIN)) next = Math.min(next, now + 2 * MIN);
     else if (end > now) next = Math.min(next, end);
@@ -1597,10 +1624,28 @@ const pct = x => Math.round(x * 100) + "%";
 const pctP = v => v <= 1e-9 ? "0%" : v >= 1 - 1e-9 ? "100%" : v < 0.001 ? "<0,1%" : v > 0.999 ? ">99,9%"
   : v < 0.095 || v > 0.995 ? (v * 100).toFixed(1).replace(".", ",") + "%" : Math.round(v * 100) + "%";
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+// Rondas de playoffs que ya tienen sus cruces definidos (octavos, una vez terminada la fase regular).
+const PO_ROUNDS = ["Octavos", "Cuartos", "Semis", "Final"];
+function poRoundsKnown(br) {
+  if (!MATCHES.every(m => official.liga[m.id])) return [];
+  const out = [];
+  for (let r = 0; r < 4; r++) { const ts = br.ties.filter(t => t.round === r); if (ts.length && ts.every(t => t.h && t.a)) out.push(r); else break; }
+  return out;
+}
+// Lo que muestra Partidos por defecto: la fecha que se está jugando o la próxima; terminada la fase regular, la ronda de playoffs actual.
+function autoRound(br) {
+  const f = FECHAS.find(f => MATCHES.some(m => m.f === f && !official.liga[m.id]));
+  if (f) return String(f);
+  const rs = poRoundsKnown(br); if (!rs.length) return String(FECHAS[FECHAS.length - 1]);
+  const open = rs.find(r => br.ties.some(t => t.round === r && !(poScores[t.id] && poScores[t.id].official)));
+  return "po" + (open ?? rs[rs.length - 1]);
+}
+const fechaSel = br => fechaFilter === "auto" ? autoRound(br) : fechaFilter;
 function renderChips() {
-  const opts = [["all", "Todas"], ["14", "Fecha 14"], ["15", "Fecha 15"], ["16", "Fecha 16"]];
+  const br = currentBracket(standings(results)), sel = fechaSel(br);
+  const opts = [["all", "Todas"], ...FECHAS.map(f => [String(f), "Fecha " + f]), ...poRoundsKnown(br).map(r => ["po" + r, PO_ROUNDS[r]])];
   document.getElementById("fecha-chips").innerHTML = opts.map(([v, l]) =>
-    `<button class="chip" type="button" data-f="${v}" aria-pressed="${fechaFilter === v}">${l}</button>`).join("");
+    `<button class="chip" type="button" data-f="${v}" aria-pressed="${sel === v}">${l}</button>`).join("");
 }
 const hhmm = t => new Date(t).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
 // Insignia del canal con los colores de cada señal (promiedos solo manda el nombre).
@@ -1640,23 +1685,58 @@ function matchHTML(m) {
   </div>`;
 }
 // Partidos agrupados por día y ordenados por horario; los que todavía no tienen horario van al final, por fecha.
+// Una fila de playoffs en Partidos: mismo formato que la de liga; el marcador se carga igual que en la pestaña Playoffs.
+function poMatchHTML(t, cups) {
+  const ag = poAg[pairKey(t.h, t.a)] || {}, sc = poScores[t.id] && poScores[t.id].h === t.h && poScores[t.id].a === t.a ? poScores[t.id] : null;
+  const off = sc && sc.official, ro = off ? " readonly" : "", live = !off && ag.st === 2;
+  const rev = ag.h && ag.h !== t.h, lg = ag.g ? (rev ? [ag.g[1], ag.g[0]] : ag.g) : null;
+  const when = off ? '<span class="m-st fin">Final</span>'
+    : live ? `<span class="m-st live"><i></i>${ag.txt ? esc(ag.txt) : "En vivo"}</span>`
+    : ag.t ? `${hhmm(ag.t)}<small>${PO_ROUNDS[t.round]}</small>` : `<small>${PO_ROUNDS[t.round]}</small>`;
+  const nm = id => `<span class="lg">${esc(T(id).n)}</span><span class="sm">${ABBR[id] || esc(T(id).n)}</span>`;
+  const tied = sc && isSet(sc.g[0]) && isSet(sc.g[1]) && +sc.g[0] === +sc.g[1];
+  const inp = (side, k) => `<input id="fx-po-${t.id}-${k}${side}" class="${k === "p" ? "po-p" : ""}${sc && sc.ai ? " ai" : ""}" inputmode="numeric" maxlength="2" aria-label="${k === "p" ? "Penales" : "Goles"} ${esc(T(side ? t.a : t.h).n)}"
+    value="${sc ? (k === "p" ? (sc.p ? sc.p[side] ?? "" : "") : sc.g[side] ?? "") : ""}" data-potie="${t.id}" data-side="${side}" data-k="${k}"${ro}${live && lg ? ` placeholder="${lg[side]}"` : ""}>`;
+  const ph = advanceProb(t.h, t.a, t.neutral, cups);
+  return `<div class="match po-m${off ? " official done" : sc ? " done" : ""}${live ? " is-live" : ""}">
+    <div class="mr-when">${when}</div>
+    <div class="team-n home" title="${esc(T(t.h).n)}">${nm(t.h)}${crest(t.h)}</div>
+    <div class="score">${inp(0, "g")}<span>–</span>${inp(1, "g")}${tied ? `<span class="po-pens">${inp(0, "p")}<span>pen</span>${inp(1, "p")}</span>` : ""}</div>
+    <div class="team-n" title="${esc(T(t.a).n)}">${crest(t.a)}${nm(t.a)}</div>
+    <div class="mr-tv">${ag.tv && ag.tv.length ? ag.tv.map(tvBadge).join("") : '<span class="none">—</span>'}</div>
+    <div class="mr-prob" title="Chance de pasar la llave${t.neutral ? " (cancha neutral)" : ` · local ${esc(T(t.h).n)}`}">
+      <div class="bar" role="img" aria-label="${esc(T(t.h).n)} ${pct(ph)}, ${esc(T(t.a).n)} ${pct(1 - ph)}"><i class="h" style="width:${ph * 100}%"></i><i class="a" style="width:${(1 - ph) * 100}%"></i></div>
+      <div class="pl"><span>L <b>${pct(ph)}</b></span><span>V <b>${pct(1 - ph)}</b></span></div>
+    </div>
+  </div>`;
+}
+// Partidos agrupados por día y ordenados por horario; los que todavía no tienen horario van al final.
 function renderFixture() {
   const dayKey = t => { const d = new Date(t); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
   const dayName = t => { const s = new Date(t).toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" }); return s.charAt(0).toUpperCase() + s.slice(1); };
-  const tOf = m => (agenda[m.id] && agenda[m.id].t) || Infinity;
-  const ms = MATCHES.filter(m => (fechaFilter === "all" || fechaFilter === String(m.f)) && (!focusTeam || m.h === focusTeam || m.a === focusTeam))
-    .sort((a, b) => tOf(a) - tOf(b) || a.f - b.f || a.g.localeCompare(b.g));
+  const br = currentBracket(standings(results)), sel = fechaSel(br), cups = userCups();
+  const has = (h, a) => !focusTeam || h === focusTeam || a === focusTeam;
+  // filas: { t: hora, k: orden, lbl: "Fecha 15" / "Octavos", html, done }
+  const rows = MATCHES.filter(m => (sel === "all" || sel === String(m.f)) && has(m.h, m.a)).map(m => ({ t: (agenda[m.id] && agenda[m.id].t) || Infinity,
+    k: "f" + m.f, lbl: "Fecha " + m.f, ord: m.f * 10 + "ABI".indexOf(m.g), done: !!results[m.id], m }));
+  for (const r of poRoundsKnown(br)) if (sel === "all" || sel === "po" + r)
+    for (const t of br.ties.filter(t => t.round === r && has(t.h, t.a))) {
+      const ag = poAg[pairKey(t.h, t.a)];
+      rows.push({ t: (ag && ag.t) || Infinity, k: "po" + r, lbl: PO_ROUNDS[r], ord: 1000 + r * 10, done: !!poScores[t.id], tie: t });
+    }
+  rows.sort((a, b) => a.t - b.t || a.ord - b.ord);
   const groups = [];
-  for (const m of ms) {
-    const t = tOf(m), k = t === Infinity ? "x" + m.f : dayKey(t);
+  for (const r of rows) {
+    const k = r.t === Infinity ? "x" + r.k : dayKey(r.t);
     let g = groups[groups.length - 1];
-    if (!g || g.k !== k) groups.push(g = { k, label: t === Infinity ? "Horario a confirmar" : dayName(t), fs: new Set(), ms: [] });
-    g.ms.push(m); g.fs.add(m.f);
+    if (!g || g.k !== k) groups.push(g = { k, label: r.t === Infinity ? "Horario a confirmar" : dayName(r.t), ls: new Set(), rows: [] });
+    g.rows.push(r); g.ls.add(r.lbl);
   }
   document.getElementById("fixture").innerHTML = groups.map(g => {
-    const done = g.ms.filter(m => results[m.id]).length;
-    return `<div class="day-l">${g.label}<span>Fecha ${[...g.fs].join(" y ")} · ${g.ms.length} ${g.ms.length === 1 ? "partido" : "partidos"}${done ? ` · ${done} con resultado` : ""}</span></div>
-    <div class="mlist">${g.ms.map(matchHTML).join("")}</div>`;
+    const done = g.rows.filter(r => r.done).length, ls = [...g.ls];
+    const lbl = ls.every(l => l.startsWith("Fecha")) ? "Fecha " + ls.map(l => l.slice(6)).join(" y ") : ls.join(" y ");
+    return `<div class="day-l">${g.label}<span>${lbl} · ${g.rows.length} ${g.rows.length === 1 ? "partido" : "partidos"}${done ? ` · ${done} con resultado` : ""}</span></div>
+    <div class="mlist">${g.rows.map(r => r.m ? matchHTML(r.m) : poMatchHTML(r.tie, cups)).join("")}</div>`;
   }).join("") || '<p class="rule">No hay partidos para mostrar.</p>';
 }
 
@@ -3253,6 +3333,7 @@ function renderTables() {
   for (const t of cups.ties) if (cupPicks[t.id] && cupPicks[t.id] !== t.h && cupPicks[t.id] !== t.a) delete cupPicks[t.id];
   renderZone("A", st); renderZone("B", st); renderAnnual(st, br, cups); renderPlayoffs(st, br, cups); renderCups(cups, st); renderSummary(st, br, cups); renderPromedios(st);
   if (activeTab === "proyeccion") renderProjection();
+  if (activeTab !== "partidos") { renderChips(); renderFixture(); } // la lista de Partidos también muestra los playoffs
   applyFocus(st);
   if (!projection) scheduleProjection();
   if (activeTab === "objetivo") renderGoal();
@@ -3273,6 +3354,7 @@ function showTab(tab) {
   document.querySelectorAll(".pane").forEach(p => p.hidden = p.dataset.pane !== tab);
   const cur = document.getElementById("tab-" + tab); if (cur) document.getElementById("cur-tab").textContent = cur.textContent.trim();
   if (tab === "proyeccion") { renderProjection(); applyFocus(); }
+  if (tab === "partidos") { renderChips(); renderFixture(); applyFocus(); }
   if (tab === "objetivo") { if (focusTeam && !goalRes) goalTeam = focusTeam; renderGoal(); }
   save();
 }
@@ -3433,8 +3515,10 @@ document.addEventListener("input", e => {
     if (w) poWinners[id] = w; else delete poWinners[id];
     if (!isSet(sc.g[0]) && !isSet(sc.g[1])) delete poScores[id];
     projection = null; save(); renderTables();
+    const pre = inp.id.startsWith("fx-") ? "fx-" : ""; // cargado desde Partidos
+    if (pre) renderFixture();
     // El cuadro se redibuja: se vuelve al mismo casillero (o al siguiente).
-    const next = side === 0 && inp.value !== "" ? `po-${id}-${k}1` : side === 1 && k === "g" && inp.value !== "" && poScores[id] && +poScores[id].g[0] === +poScores[id].g[1] ? `po-${id}-p0` : inp.id;
+    const next = side === 0 && inp.value !== "" ? `${pre}po-${id}-${k}1` : side === 1 && k === "g" && inp.value !== "" && poScores[id] && +poScores[id].g[0] === +poScores[id].g[1] ? `${pre}po-${id}-p0` : inp.id;
     const el = document.getElementById(next) || document.getElementById(inp.id);
     if (el) { el.focus(); if (el.id !== inp.id) el.select(); else el.setSelectionRange(el.value.length, el.value.length); }
     return;

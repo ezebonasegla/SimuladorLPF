@@ -1,6 +1,6 @@
 """Baja de promiedos los resultados finales y los guarda en resultados.json.
 
-Lo corre la VPS con cron (scripts/actualizar.sh, ver scripts/VPS.md) o la acción .github/workflows/resultados.yml.
+Lo corre la VPS con cron cada 3 minutos (scripts/actualizar.sh, ver scripts/VPS.md).
 La página lee ese archivo al abrirse y
 carga esos resultados como oficiales (no se pueden editar).
 
@@ -71,7 +71,7 @@ def team_ids(g):
 
 
 def main(out_path):
-    out = {"liga": [], "playoffs": [], "copas": [], "sin_mapear": []}
+    out = {"liga": [], "playoffs": [], "copas": [], "agenda_po": [], "sin_mapear": []}
 
     # --- Liga y playoffs del Clausura
     fl = filters("liga-profesional", "hc")
@@ -83,7 +83,14 @@ def main(out_path):
         if not ((m and int(m.group(1)) in FECHAS) or playoff):
             continue
         for g in games("hc", f["key"]):
-            if g.get("status", {}).get("enum") != 3 or not g.get("scores"):
+            st = g.get("status", {}).get("enum")
+            if playoff:  # agenda de los playoffs (día y hora tal como los da promiedos; la página los ajusta a su horario)
+                h, a = team_ids(g)
+                if h and a and g.get("start_time"):
+                    out["agenda_po"].append({"fase": f["name"], "h": h, "a": a, "t": g["start_time"]})
+            if st != 3 or not g.get("scores"):
+                if m:
+                    print("sin terminar:", f["name"], g.get("url_name"), "estado", st)
                 continue
             h, a = team_ids(g)
             if not h or not a:
@@ -150,7 +157,7 @@ def main(out_path):
             if not any({x["h"], x["a"]} == {r["h"], r["a"]} and x.get("copa") == r.get("copa") for x in out[k]):
                 out[k].append(r)
 
-    for k in ("liga", "playoffs", "copas"):
+    for k in ("liga", "playoffs", "copas", "agenda_po"):
         out[k].sort(key=lambda r: json.dumps(r, sort_keys=True))
     # Solo se reescribe si cambió algo (la fecha de actualización no cuenta).
     try:

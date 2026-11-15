@@ -1,6 +1,6 @@
 # Actualizar los resultados desde la VPS
 
-`scripts/actualizar.sh` hace lo mismo que la acción de GitHub: baja los resultados de promiedos y, si cambió algo,
+`scripts/actualizar.sh` baja los resultados de promiedos y, si cambió algo,
 sube `resultados.json` al repo. Netlify y Vercel se republican solos con cada push.
 
 Se configura una sola vez. Conectate por SSH a la VPS y seguí estos pasos.
