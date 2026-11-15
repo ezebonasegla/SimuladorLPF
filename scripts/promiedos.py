@@ -146,6 +146,17 @@ def main(out_path):
                     continue
                 out["copas"].append({"copa": cup, "fase": f["name"], "h": h, "a": a, "w": h if q == 1 else a})
 
+    # Un resultado final ya guardado no se borra: a veces promiedos devuelve la lista de una fecha incompleta.
+    try:
+        prev = json.load(open(out_path, encoding="utf8"))
+    except (OSError, ValueError):
+        prev = {}
+    same = lambda x, r: {x["h"], x["a"]} == {r["h"], r["a"]} and x.get("copa") == r.get("copa") and x.get("f") == r.get("f")
+    for k in ("liga", "playoffs", "copas"):
+        for r in prev.get(k, []):
+            if not any(same(x, r) for x in out[k]):
+                out[k].append(r)
+
     # Cargas manuales (scripts/manual.json): resultados que promiedos todavía no tiene o tiene mal.
     # Se agregan si promiedos no trae ese cruce; si lo trae, manda promiedos.
     try:
