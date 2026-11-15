@@ -451,6 +451,56 @@
    "w": "pla"
   }
  ],
+ "agenda_po": [
+  {
+   "fase": "Octavos de Final",
+   "h": "dyj",
+   "a": "bar",
+   "t": "21-11-2026 15:00"
+  },
+  {
+   "fase": "Octavos de Final",
+   "h": "vel",
+   "a": "bel",
+   "t": "20-11-2026 20:00"
+  },
+  {
+   "fase": "Octavos de Final",
+   "h": "cen",
+   "a": "gim",
+   "t": "22-11-2026 16:00"
+  },
+  {
+   "fase": "Octavos de Final",
+   "h": "ins",
+   "a": "hur",
+   "t": "22-11-2026 22:00"
+  },
+  {
+   "fase": "Octavos de Final",
+   "h": "arg",
+   "a": "ind",
+   "t": "21-11-2026 17:00"
+  },
+  {
+   "fase": "Octavos de Final",
+   "h": "boc",
+   "a": "irv",
+   "t": "25-11-2026 21:00"
+  },
+  {
+   "fase": "Octavos de Final",
+   "h": "riv",
+   "a": "lan",
+   "t": "22-11-2026 19:00"
+  },
+  {
+   "fase": "Octavos de Final",
+   "h": "glp",
+   "a": "new",
+   "t": "23-11-2026 17:00"
+  }
+ ],
  "sin_mapear": [],
- "actualizado": "2026-11-15T07:12+00:00"
+ "actualizado": "2026-11-15T07:18+00:00"
 }
