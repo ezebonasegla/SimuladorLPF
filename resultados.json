@@ -274,6 +274,13 @@
  "playoffs": [],
  "copas": [
   {
+   "copa": "ca",
+   "fase": "Semifinales",
+   "h": "boc",
+   "a": "ban",
+   "w": "boc"
+  },
+  {
    "copa": "sud",
    "fase": "Semifinales",
    "h": "vas",
@@ -310,5 +317,5 @@
   }
  ],
  "sin_mapear": [],
- "actualizado": "2026-11-03T03:56+00:00"
+ "actualizado": "2026-11-15T06:55+00:00"
 }
