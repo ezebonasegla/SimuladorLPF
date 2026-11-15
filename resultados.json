@@ -460,6 +460,12 @@
   },
   {
    "fase": "Octavos de Final",
+   "h": "vel",
+   "a": "bel",
+   "t": "20-11-2026 20:00"
+  },
+  {
+   "fase": "Octavos de Final",
    "h": "cen",
    "a": "gim",
    "t": "22-11-2026 16:00"
@@ -496,5 +502,5 @@
   }
  ],
  "sin_mapear": [],
- "actualizado": "2026-11-15T08:00+00:00"
+ "actualizado": "2026-11-15T08:09+00:00"
 }
