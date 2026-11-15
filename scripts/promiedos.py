@@ -1,6 +1,7 @@
 """Baja de promiedos los resultados finales y los guarda en resultados.json.
 
-Lo corre la acción .github/workflows/resultados.yml. La página lee ese archivo al abrirse y
+Lo corre la VPS con cron (scripts/actualizar.sh, ver scripts/VPS.md) o la acción .github/workflows/resultados.yml.
+La página lee ese archivo al abrirse y
 carga esos resultados como oficiales (no se pueden editar).
 
 - Liga: fechas 14 a 16 del Clausura.
