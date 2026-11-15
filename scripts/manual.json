@@ -1,0 +1,6 @@
+{
+ "_nota": "Resultados cargados a mano que promiedos no trae. Mismo formato que resultados.json.",
+ "copas": [
+  {"copa": "ca", "fase": "Semifinales", "h": "boc", "a": "ban", "w": "boc"}
+ ]
+}

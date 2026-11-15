@@ -400,6 +400,13 @@
  "playoffs": [],
  "copas": [
   {
+   "copa": "ca",
+   "fase": "Semifinales",
+   "h": "boc",
+   "a": "ban",
+   "w": "boc"
+  },
+  {
    "copa": "sud",
    "fase": "Semifinales",
    "h": "vas",

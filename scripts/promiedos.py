@@ -23,6 +23,7 @@ UA = {
 SITE = "https://www.promiedos.com.ar/league"
 API = "https://api.promiedos.com.ar/league/games"
 FECHAS = {14, 15, 16}
+MANUAL = __import__("os").path.join(__import__("os").path.dirname(__file__), "manual.json")
 
 # id de promiedos -> id de la página
 TEAMS = {
@@ -137,6 +138,17 @@ def main(out_path):
                     out["sin_mapear"].append(g.get("url_name"))
                     continue
                 out["copas"].append({"copa": cup, "fase": f["name"], "h": h, "a": a, "w": h if q == 1 else a})
+
+    # Cargas manuales (scripts/manual.json): resultados que promiedos todavía no tiene o tiene mal.
+    # Se agregan si promiedos no trae ese cruce; si lo trae, manda promiedos.
+    try:
+        manual = json.load(open(MANUAL, encoding="utf8"))
+    except (OSError, ValueError):
+        manual = {}
+    for k in ("liga", "playoffs", "copas"):
+        for r in manual.get(k, []):
+            if not any({x["h"], x["a"]} == {r["h"], r["a"]} and x.get("copa") == r.get("copa") for x in out[k]):
+                out[k].append(r)
 
     for k in ("liga", "playoffs", "copas"):
         out[k].sort(key=lambda r: json.dumps(r, sort_keys=True))
