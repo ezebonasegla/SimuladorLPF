@@ -406,7 +406,21 @@
    "f": 16
   }
  ],
- "playoffs": [],
+ "playoffs": [
+  {
+   "h": "vel",
+   "a": "bel",
+   "g": [
+    2,
+    2
+   ],
+   "fase": "Octavos de Final",
+   "p": [
+    3,
+    1
+   ]
+  }
+ ],
  "copas": [
   {
    "copa": "ca",
@@ -502,5 +516,5 @@
   }
  ],
  "sin_mapear": [],
- "actualizado": "2026-11-15T08:09+00:00"
+ "actualizado": "2026-11-21T01:51+00:00"
 }
