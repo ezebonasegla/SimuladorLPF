@@ -428,6 +428,15 @@
     3,
     1
    ]
+  },
+  {
+   "h": "arg",
+   "a": "ind",
+   "g": [
+    1,
+    2
+   ],
+   "fase": "Octavos de Final"
   }
  ],
  "copas": [
@@ -525,5 +534,5 @@
   }
  ],
  "sin_mapear": [],
- "actualizado": "2026-11-21T20:03+00:00"
+ "actualizado": "2026-11-21T21:57+00:00"
 }
