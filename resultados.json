@@ -408,6 +408,15 @@
  ],
  "playoffs": [
   {
+   "h": "dyj",
+   "a": "bar",
+   "g": [
+    0,
+    1
+   ],
+   "fase": "Octavos de Final"
+  },
+  {
    "h": "vel",
    "a": "bel",
    "g": [
@@ -516,5 +525,5 @@
   }
  ],
  "sin_mapear": [],
- "actualizado": "2026-11-21T01:51+00:00"
+ "actualizado": "2026-11-21T20:03+00:00"
 }
