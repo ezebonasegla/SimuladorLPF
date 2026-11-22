@@ -430,6 +430,15 @@
    ]
   },
   {
+   "h": "cen",
+   "a": "gim",
+   "g": [
+    3,
+    1
+   ],
+   "fase": "Octavos de Final"
+  },
+  {
    "h": "arg",
    "a": "ind",
    "g": [
@@ -547,5 +556,5 @@
   }
  ],
  "sin_mapear": [],
- "actualizado": "2026-11-22T20:54+00:00"
+ "actualizado": "2026-11-22T20:57+00:00"
 }
