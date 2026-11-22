@@ -501,6 +501,12 @@
  ],
  "agenda_po": [
   {
+   "fase": "Cuartos de Final",
+   "h": "cen",
+   "a": "bar",
+   "t": "29-11-2026 11:00"
+  },
+  {
    "fase": "Octavos de Final",
    "h": "dyj",
    "a": "bar",
@@ -556,5 +562,5 @@
   }
  ],
  "sin_mapear": [],
- "actualizado": "2026-11-22T20:57+00:00"
+ "actualizado": "2026-11-22T21:24+00:00"
 }
