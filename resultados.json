@@ -449,6 +449,13 @@
   },
   {
    "copa": "sud",
+   "fase": "Final",
+   "h": "cam",
+   "a": "boc",
+   "w": "boc"
+  },
+  {
+   "copa": "sud",
    "fase": "Semifinales",
    "h": "vas",
    "a": "boc",
@@ -534,5 +541,5 @@
   }
  ],
  "sin_mapear": [],
- "actualizado": "2026-11-21T21:57+00:00"
+ "actualizado": "2026-11-22T00:30+00:00"
 }
