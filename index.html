@@ -1347,7 +1347,12 @@ function applyResult(row, gf, gc, base) {
   if (gf > gc) row.w++; else if (gf === gc) row.d++; else row.l++;
   const p = gf > gc ? 3 : gf === gc ? 1 : 0; row.pts += p; if (!base) row.add += p;
 }
-const cmp = (a, b) => b.pts - a.pts || b.dg - a.dg || b.gf - a.gf || a.n.localeCompare(b.n, "es");
+// Tabla de Fair Play (más puntos = mejor). Desempata después de puntos, diferencia de gol y goles a favor.
+// Solo se cargan los equipos donde ya definió: Independiente 875 vs. Defensa y Justicia 865 (sanciones del
+// Tribunal de Disciplina a cuatro integrantes del cuerpo técnico de Defensa por el partido con Boca, nov. 2026).
+const FAIR_PLAY = { ind: 875, dyj: 865 };
+const fairPlay = (a, b) => (a.id in FAIR_PLAY && b.id in FAIR_PLAY) ? FAIR_PLAY[b.id] - FAIR_PLAY[a.id] : 0;
+const cmp = (a, b) => b.pts - a.pts || b.dg - a.dg || b.gf - a.gf || fairPlay(a, b) || a.n.localeCompare(b.n, "es");
 function standings(res) {
   const zone = {}, annual = {};
   for (const t of teams) { zone[t.id] = emptyRow(t, "cl"); annual[t.id] = emptyRow(t, "an"); }
