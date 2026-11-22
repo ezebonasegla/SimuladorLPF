@@ -2021,13 +2021,20 @@ function renderCups(cups) {
 
 /* ===================== PROYECCIÓN (Monte Carlo) ===================== */
 // Probabilidad exacta de campeón de cada equipo dado el cuadro de playoffs de una simulación.
-function bracketDist(st, cups) {
+// Llaves de playoffs ya jugadas (oficiales o con marcador cargado): pairKey -> ganador. Quedan fijas en las simulaciones.
+function playedPO() {
+  const won = {};
+  for (const r of official.po) { const w = scoreWinner(r); if (w) won[pairKey(r.h, r.a)] = w; }
+  for (const sc of Object.values(poScores)) { const w = sc && sc.h && sc.a && scoreWinner(sc); if (w) won[pairKey(sc.h, sc.a)] = w; }
+  return won;
+}
+function bracketDist(st, cups, played = playedPO()) {
   const s = seedInfo(st);
   const merge = (L, R, neutral) => {
     const out = new Map();
     for (const [x, px] of L) for (const [y, py] of R) {
       const [h, a] = neutral ? [x, y] : better(s, x, y);
-      const ph = advanceProb(h, a, neutral, cups), w = px * py;
+      const pw = played[pairKey(h, a)], ph = pw ? (pw === h ? 1 : 0) : advanceProb(h, a, neutral, cups), w = px * py;
       out.set(h, (out.get(h) || 0) + w * ph);
       out.set(a, (out.get(a) || 0) + w * (1 - ph));
     }
@@ -2048,6 +2055,7 @@ function projJob(N) {
   const pending = MATCHES.filter(m => !results[m.id]).map(m => [m, matchModel(m)]);
   const fixed = {};
   for (const m of MATCHES) if (results[m.id]) fixed[m.id] = results[m.id];
+  const played = playedPO();
   let done = 0;
   const step = k => { const end = Math.min(N, done + k); for (; done < end; done++) simOnce(); return done >= N; };
   const finish = () => {
@@ -2067,7 +2075,7 @@ function projJob(N) {
     for (const id of new Set(["lib", "sud", "ca"].map(k => cups.champ[k]))) if (id && acc[id]) acc[id].cupT = (acc[id].cupT || 0) + 1;
     const an = st.AN.map(r => r.id);
     // Playoffs calculados de forma exacta (no sorteados): así hasta un 8° tiene su chance real de campeón.
-    for (const [champ, pc] of bracketDist(st, cups)) {
+    for (const [champ, pc] of bracketDist(st, cups, played)) {
       acc[champ].champ += pc;
       const c = cupos(an, champ, cups);
       c.champs.forEach(id => acc[id].lib += pc); c.lib.forEach(id => acc[id].lib += pc); c.sud.forEach(id => acc[id].sud += pc);
