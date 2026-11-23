@@ -446,6 +446,15 @@
     2
    ],
    "fase": "Octavos de Final"
+  },
+  {
+   "h": "riv",
+   "a": "lan",
+   "g": [
+    3,
+    1
+   ],
+   "fase": "Octavos de Final"
   }
  ],
  "copas": [
@@ -562,5 +571,5 @@
   }
  ],
  "sin_mapear": [],
- "actualizado": "2026-11-22T22:24+00:00"
+ "actualizado": "2026-11-23T00:00+00:00"
 }
