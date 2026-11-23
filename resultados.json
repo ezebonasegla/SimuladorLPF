@@ -464,6 +464,15 @@
     1
    ],
    "fase": "Octavos de Final"
+  },
+  {
+   "h": "glp",
+   "a": "new",
+   "g": [
+    4,
+    2
+   ],
+   "fase": "Octavos de Final"
   }
  ],
  "copas": [
@@ -586,5 +595,5 @@
   }
  ],
  "sin_mapear": [],
- "actualizado": "2026-11-23T10:24+00:00"
+ "actualizado": "2026-11-23T22:42+00:00"
 }
