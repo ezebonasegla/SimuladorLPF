@@ -439,6 +439,15 @@
    "fase": "Octavos de Final"
   },
   {
+   "h": "ins",
+   "a": "hur",
+   "g": [
+    2,
+    1
+   ],
+   "fase": "Octavos de Final"
+  },
+  {
    "h": "arg",
    "a": "ind",
    "g": [
@@ -571,5 +580,5 @@
   }
  ],
  "sin_mapear": [],
- "actualizado": "2026-11-23T00:00+00:00"
+ "actualizado": "2026-11-23T03:00+00:00"
 }
