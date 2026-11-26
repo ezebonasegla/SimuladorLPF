@@ -457,6 +457,15 @@
    "fase": "Octavos de Final"
   },
   {
+   "h": "boc",
+   "a": "irv",
+   "g": [
+    2,
+    0
+   ],
+   "fase": "Octavos de Final"
+  },
+  {
    "h": "riv",
    "a": "lan",
    "g": [
@@ -595,5 +604,5 @@
   }
  ],
  "sin_mapear": [],
- "actualizado": "2026-11-23T22:42+00:00"
+ "actualizado": "2026-11-26T01:57+00:00"
 }
