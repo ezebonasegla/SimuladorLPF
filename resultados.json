@@ -540,7 +540,7 @@
    "fase": "Cuartos de Final",
    "h": "cen",
    "a": "bar",
-   "t": "29-11-2026 14:00"
+   "t": "29-11-2026 17:00"
   },
   {
    "fase": "Octavos de Final",
@@ -576,7 +576,7 @@
    "fase": "Cuartos de Final",
    "h": "vel",
    "a": "ind",
-   "t": "29-11-2026 14:00"
+   "t": "28-11-2026 20:00"
   },
   {
    "fase": "Octavos de Final",
@@ -606,9 +606,9 @@
    "fase": "Cuartos de Final",
    "h": "ins",
    "a": "riv",
-   "t": "29-11-2026 14:00"
+   "t": "28-11-2026 22:00"
   }
  ],
  "sin_mapear": [],
- "actualizado": "2026-11-26T11:21+00:00"
+ "actualizado": "2026-11-26T11:51+00:00"
 }
