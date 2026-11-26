@@ -561,6 +561,12 @@
    "t": "22-11-2026 16:00"
   },
   {
+   "fase": "Cuartos de Final",
+   "h": "boc",
+   "a": "glp",
+   "t": "29-11-2026 11:00"
+  },
+  {
    "fase": "Octavos de Final",
    "h": "ins",
    "a": "hur",
@@ -604,5 +610,5 @@
   }
  ],
  "sin_mapear": [],
- "actualizado": "2026-11-26T01:57+00:00"
+ "actualizado": "2026-11-26T09:57+00:00"
 }
